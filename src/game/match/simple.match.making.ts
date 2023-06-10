@@ -15,13 +15,13 @@ export class SimpleMatchMaking implements MatchMakingPolicy {
   }
 
   public isQueueReady(): boolean {
-    return this.readyQueue.length == 3;
+    return this.readyQueue.length >= 2;
   }
 
   public getAvailableUsers(): UserGameDto[] {
     let availableUsers: UserGameDto[];
 
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < 2; i++) {
       availableUsers.push(this.readyQueue.shift());
     }
 
