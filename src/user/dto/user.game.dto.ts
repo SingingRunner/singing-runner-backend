@@ -1,3 +1,4 @@
+import { Socket } from 'socket.io';
 import { userActiveStatus, userKeynoteStatus } from '../util/user.enum';
 
 export interface UserGameDto {
@@ -6,4 +7,5 @@ export interface UserGameDto {
   nickname: string;
   userActive: userActiveStatus;
   userKeynote: userKeynoteStatus;
+  socket: Socket;
 }
