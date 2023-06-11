@@ -14,13 +14,15 @@ export class GameRoomHandler {
     }
   }
 
-  public findEmptyRoom(): GameRoom {
+  public findRoomBySocket(user: Socket): GameRoom {
     for (const key of this.roomList.keys()) {
-      if (key.gameRoomStatus === GameRoomStatus.MATCHING) {
+      const foundUser = this.roomList
+        .get(key)
+        .find((userInRoom) => userInRoom.socket === user);
+      if (foundUser) {
         return key;
       }
     }
-    return this.createRoom();
   }
 
   public findUsersInRoom(user: Socket): Array<UserGameDto> {
@@ -38,6 +40,7 @@ export class GameRoomHandler {
     const gameRoom: GameRoom = {
       roomId: this.roomCount() + 1,
       gameRoomStatus: GameRoomStatus.MATCHING,
+      acceptCount: 0,
     };
     this.roomList.set(gameRoom, []);
     return gameRoom;
