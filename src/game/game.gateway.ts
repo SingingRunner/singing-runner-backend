@@ -11,6 +11,7 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { GameService } from './game.service';
+import { UsePipes, ValidationPipe } from '@nestjs/common';
 /**
  * webSocket 통신을 담당하는 Handler
  */

@@ -15,7 +15,8 @@ export class GameService {
   ) {}
 
   public matchMaking(user: Socket, userMatchDto: UserMatchDto) {
-    const userGameDto = this.initUserGameDto(user, userMatchDto);
+    const userGameDto: UserGameDto = new UserGameDto(user, userMatchDto);
+
     if (this.isMatchingAvailable()) {
       const userList: Array<UserGameDto> =
         this.matchMakingPolicy.getAvailableUsers();
@@ -23,7 +24,7 @@ export class GameService {
       userList.push(userGameDto);
       this.joinRoom(userList);
       for (const user of userList) {
-        user.socket.emit('match_making', true); //songTilte, singer DTO를 전송
+        user.getSocket().emit('match_making', true); //songTilte, singer DTO를 전송
       }
       return;
     }
@@ -40,7 +41,7 @@ export class GameService {
       }
       this.gameRoomHandler.deleteRoom(user);
       for (const user of userList) {
-        user.socket.emit('accept', false);
+        user.getSocket().emit('accept', false);
       }
       return;
     }
@@ -48,7 +49,7 @@ export class GameService {
     this.gameRoomHandler.increaseAcceptCount(user);
     if (this.gameRoomHandler.isGameRoomReady(gameRoom)) {
       for (const user of userList) {
-        user.socket.emit('accept', true);
+        user.getSocket().emit('accept', true);
       }
     }
   }
@@ -63,20 +64,5 @@ export class GameService {
   private joinRoom(userList: Array<UserGameDto>) {
     const gameRoom: GameRoom = this.gameRoomHandler.createRoom();
     this.gameRoomHandler.addUser(gameRoom, userList);
-  }
-
-  private initUserGameDto(
-    socket: Socket,
-    userMatchDto: UserMatchDto,
-  ): UserGameDto {
-    const userGameDto: UserGameDto = {
-      userName: userMatchDto.userName,
-      userMMR: userMatchDto.userMMR,
-      nickname: userMatchDto.userName,
-      userActive: userMatchDto.userActive,
-      userKeynote: userMatchDto.userKeynote,
-      socket: socket,
-    };
-    return userGameDto;
   }
 }
