@@ -23,7 +23,7 @@ jobs:
         if: ${{ failure() }}
         uses: actions/github-script@v4
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.GIT_TOKEN }}
           script: |
             const body = 'The test failed. Please check the code.';
             const { owner, repo, number } = context.issue;
