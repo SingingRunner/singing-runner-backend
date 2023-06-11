@@ -1,3 +1,4 @@
+import { GameSongDto } from 'src/song/dto/game-song.dto';
 import { UserGameDto } from 'src/user/dto/user.game.dto';
 import { Inject, Injectable } from '@nestjs/common';
 import { Socket } from 'socket.io';
@@ -20,11 +21,14 @@ export class MatchService {
     if (this.isMatchingAvailable()) {
       const userList: Array<UserGameDto> =
         this.matchMakingPolicy.getAvailableUsers();
-
       userList.push(userGameDto);
       this.joinRoom(userList);
+      const gameRoom: GameRoom = this.gameRoomHandler.findRoomBySocket(user);
+
       for (const user of userList) {
-        user.getSocket().emit('match_making', true); //songTilte, singer DTO를 전송
+        user
+          .getSocket()
+          .emit('match_making', this.gameRoomHandler.getSongInfo(gameRoom)); //songTilte, singer DTO를 전송
       }
       return;
     }
@@ -75,8 +79,8 @@ export class MatchService {
     return false;
   }
 
-  private joinRoom(userList: Array<UserGameDto>) {
-    const gameRoom: GameRoom = this.gameRoomHandler.createRoom();
+  private async joinRoom(userList: Array<UserGameDto>) {
+    const gameRoom: GameRoom = await this.gameRoomHandler.createRoom();
     this.gameRoomHandler.addUser(gameRoom, userList);
   }
 }
