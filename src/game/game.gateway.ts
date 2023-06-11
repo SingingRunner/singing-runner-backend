@@ -1,6 +1,7 @@
 import { UserMatchDto } from './../user/dto/user.match.dto';
 import {
   ConnectedSocket,
+  MessageBody,
   OnGatewayConnection,
   OnGatewayDisconnect,
   OnGatewayInit,
@@ -38,8 +39,12 @@ export class GameGateway
    * 같이 매칭된 user들(same GameRoom) 과 함께 songTilte, Singer 정보를 전송
    */
   @SubscribeMessage('match_making')
-  matchMakingData(@ConnectedSocket() user: Socket, UserMatchDto: UserMatchDto) {
-    this.gameService.matchMaking(user, UserMatchDto);
+  matchMakingData(
+    @ConnectedSocket() user: Socket,
+    @MessageBody() userMatchDto: UserMatchDto,
+  ) {
+    console.log('matchmaking connect');
+    this.gameService.matchMaking(user, userMatchDto);
   }
 
   /**
@@ -47,7 +52,10 @@ export class GameGateway
    * 한명이라도 거절시 Room 제거, 수락한 user는 readyQueue 에 우선순위가 높게 push
    */
   @SubscribeMessage('accept')
-  matchAcceptData(@ConnectedSocket() user: Socket, accept: boolean) {
+  matchAcceptData(
+    @ConnectedSocket() user: Socket,
+    @MessageBody() accept: boolean,
+  ) {
     this.gameService.matchAccept(user, accept);
   }
 }

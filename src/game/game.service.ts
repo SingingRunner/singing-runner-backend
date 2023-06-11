@@ -31,8 +31,9 @@ export class GameService {
   }
 
   public matchAccept(user: Socket, accept: boolean) {
+    const gameRoom: GameRoom = this.gameRoomHandler.findRoomBySocket(user);
     const userList: Array<UserGameDto> =
-      this.gameRoomHandler.findUsersInRoom(user);
+      this.gameRoomHandler.findUsersInRoom(gameRoom);
     if (!accept) {
       for (const user of userList) {
         this.matchMakingPolicy.joinQueueAtFront(user);
@@ -45,7 +46,7 @@ export class GameService {
     }
 
     this.gameRoomHandler.increaseAcceptCount(user);
-    if (this.gameRoomHandler.isGameRoomReady) {
+    if (this.gameRoomHandler.isGameRoomReady(gameRoom)) {
       for (const user of userList) {
         user.socket.emit('accept', true);
       }

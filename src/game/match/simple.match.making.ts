@@ -21,7 +21,7 @@ export class SimpleMatchMaking implements MatchMakingPolicy {
   }
 
   public getAvailableUsers(): UserGameDto[] {
-    let availableUsers: UserGameDto[];
+    const availableUsers: UserGameDto[] = [];
 
     for (let i = 0; i < 2; i++) {
       availableUsers.push(this.readyQueue.shift());
