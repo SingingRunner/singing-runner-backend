@@ -13,7 +13,7 @@ import { GameService } from './game.service';
 import { find } from 'rxjs';
 
 @WebSocketGateway()
-export class EventsGateway
+export class GameGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
   @WebSocketServer() server: Server;
