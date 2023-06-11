@@ -1,6 +1,3 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { UserMatchDto } from 'src/user/dto/user.match.dto';
-import { userKeynoteStatus } from 'src/user/util/user.enum';
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
@@ -61,10 +58,4 @@ export class Song {
 
   @Column()
   createdAt: Date;
-}
-
-@Entity()
-export class User extends PartialType(UserMatchDto) {
-  @PrimaryGeneratedColumn()
-  uerKeynote: userKeynoteStatus;
 }

@@ -8,4 +8,11 @@ export class MatchCompleteSongDto extends PartialType(GameSongDto) {
 
   @IsString()
   singer: string;
+
+  constructor(data?: Partial<MatchCompleteSongDto>) {
+    super();
+    if (data) {
+      Object.assign(this, data);
+    }
+  }
 }

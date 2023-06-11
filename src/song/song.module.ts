@@ -9,5 +9,6 @@ import { SongRepository } from './repository/song.repository';
   imports: [TypeOrmModule.forFeature([Song])],
   controllers: [SongController],
   providers: [SongService, SongRepository],
+  exports: [SongService],
 })
 export class SongModule {}
