@@ -75,10 +75,7 @@ export class GameGateway
   }
 
   @SubscribeMessage('game_ready')
-  gameReadyData(
-    @ConnectedSocket() user: Socket,
-    @MessageBody() gameReady: boolean,
-  ) {
-    this.gameService.loadData(user);
+  gameReadyData(@ConnectedSocket() user: Socket) {
+    this.gameService.gameReady(user);
   }
 }
