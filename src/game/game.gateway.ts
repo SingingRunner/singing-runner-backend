@@ -1,3 +1,5 @@
+import { UserMatchDto } from './../user/dto/user.match.dto';
+import { UserGameDto } from 'src/user/dto/user.game.dto';
 import { UserGameDto } from './../user/dto/user.game.dto';
 import {
   ConnectedSocket,
@@ -36,17 +38,19 @@ export class GameGateway
   }
 
   @SubscribeMessage('match_making')
-  matchMakingData(@ConnectedSocket() user: Socket, userGameDto: UserGameDto) {
+  matchMakingData(@ConnectedSocket() user: Socket, UserMatchDto: UserMatchDto) {
     /**
-     * MatchMakingPolicy에 따라 user가 매칭되면 같이 매칭된 user들(SameGameRoom)
-     * 과 함께 songTilte, Singer 정보를 전송
+     * MatchMakingPolicy에 따라 user가 매칭되면 GameRoom에 추가 후
+     * 같이 매칭된 user들(same GameRoom) 과 함께 songTilte, Singer 정보를 전송
      */
-    if (this.gameService.isMatchingAvailable(userGameDto)) {
-      const userList: Array<UserGameDto> =
-        this.gameService.findUsersInSameRoom(user);
-      for (const user of userList) {
-        user.socket.emit('match_making', true); //songTilte, singer DTO를 전송
-      }
-    }
+    this.gameService.matchMaking(user, UserMatchDto);
+  }
+
+  @SubscribeMessage('accept')
+  matchAcceptData(@ConnectedSocket() user: Socket, accept: boolean) {
+    /**
+     * 같은 Room user가 전부 accpet시 게임시작
+     * 한명이라도 거절시 Room 제거, 수락한 user는 readyQueue 에 다시 push
+     */
   }
 }

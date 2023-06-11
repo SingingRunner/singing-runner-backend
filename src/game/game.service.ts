@@ -4,6 +4,7 @@ import { GameRoomHandler } from './room/game.room.handler';
 import { Inject, Injectable } from '@nestjs/common';
 import { Socket } from 'socket.io';
 import { GameRoom } from './room/game.room';
+import { UserMatchDto } from 'src/user/dto/user.match.dto';
 
 @Injectable()
 export class GameService {
@@ -13,16 +14,26 @@ export class GameService {
     private matchMakingPolicy: MatchMakingPolicy,
   ) {}
 
-  public isMatchingAvailable(userGameDto: UserGameDto): boolean {
-    if (this.matchMakingPolicy.isQueueReady()) {
+  public matchMaking(user: Socket, userMatchDto: UserMatchDto) {
+    const userGameDto = this.initUserGameDto(user, userMatchDto);
+    if (this.isMatchingAvailable()) {
       const userList: Array<UserGameDto> =
         this.matchMakingPolicy.getAvailableUsers();
 
       userList.push(userGameDto);
       this.joinRoom(userList);
-      return true;
+      for (const user of userList) {
+        user.socket.emit('match_making', true); //songTilte, singer DTO를 전송
+      }
+      return;
     }
     this.matchMakingPolicy.joinQueue(userGameDto);
+  }
+
+  private isMatchingAvailable(): boolean {
+    if (this.matchMakingPolicy.isQueueReady()) {
+      return true;
+    }
     return false;
   }
 
@@ -31,7 +42,22 @@ export class GameService {
     this.gameRoomHandler.addUser(gameRoom, userList);
   }
 
-  public findUsersInSameRoom(user: Socket): Array<UserGameDto> {
+  private findUsersInSameRoom(user: Socket): Array<UserGameDto> {
     return this.gameRoomHandler.findUsersInRoom(user);
+  }
+
+  private initUserGameDto(
+    socket: Socket,
+    userMatchDto: UserMatchDto,
+  ): UserGameDto {
+    const userGameDto: UserGameDto = {
+      userName: userMatchDto.userName,
+      userMMR: userMatchDto.userMMR,
+      nickname: userMatchDto.userName,
+      userActive: userMatchDto.userActive,
+      userKeynote: userMatchDto.userKeynote,
+      socket: socket,
+    };
+    return userGameDto;
   }
 }
