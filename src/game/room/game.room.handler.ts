@@ -15,7 +15,7 @@ export class GameRoomHandler {
   }
 
   public isGameRoomReady(gameRoom: GameRoom) {
-    if (gameRoom.acceptCount === 3) {
+    if (gameRoom.getAcceptCount() === 3) {
       return true;
     }
     return false;
@@ -23,7 +23,7 @@ export class GameRoomHandler {
 
   public increaseAcceptCount(user: Socket) {
     const gameRoom: GameRoom = this.findRoomBySocket(user);
-    gameRoom.acceptCount += 1;
+    gameRoom.increaseAcceptCount();
   }
 
   public findUsersInRoom(gameRoom: GameRoom): Array<UserGameDto> {
@@ -31,11 +31,11 @@ export class GameRoomHandler {
   }
 
   public createRoom(): GameRoom {
-    const gameRoom: GameRoom = {
-      roomId: this.roomCount() + 1,
-      gameRoomStatus: GameRoomStatus.MATCHING,
-      acceptCount: 0,
-    };
+    const gameRoom: GameRoom = new GameRoom(
+      this.roomCount() + 1,
+      GameRoomStatus.MATCHING,
+      0,
+    );
     this.roomList.set(gameRoom, []);
     return gameRoom;
   }
@@ -49,7 +49,7 @@ export class GameRoomHandler {
     for (const key of this.roomList.keys()) {
       const foundUser = this.roomList
         .get(key)
-        .find((userInRoom) => userInRoom.socket === user);
+        .find((userInRoom) => userInRoom.getSocket() === user);
       if (foundUser) {
         return key;
       }
