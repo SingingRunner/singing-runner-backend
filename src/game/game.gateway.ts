@@ -73,4 +73,12 @@ export class GameGateway
   loadSongData(@ConnectedSocket() user: Socket) {
     this.gameService.loadData(user);
   }
+
+  @SubscribeMessage('game_ready')
+  gameReadyData(
+    @ConnectedSocket() user: Socket,
+    @MessageBody() gameReady: boolean,
+  ) {
+    this.gameService.loadData(user);
+  }
 }
