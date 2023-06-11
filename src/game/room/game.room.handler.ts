@@ -26,15 +26,8 @@ export class GameRoomHandler {
     gameRoom.acceptCount += 1;
   }
 
-  public findUsersInRoom(user: Socket): Array<UserGameDto> {
-    for (const userList of this.roomList.values()) {
-      const foundUser = userList.find(
-        (userInRoom) => userInRoom.socket === user,
-      );
-      if (foundUser) {
-        return userList;
-      }
-    }
+  public findUsersInRoom(gameRoom: GameRoom): Array<UserGameDto> {
+    return this.roomList.get(gameRoom);
   }
 
   public createRoom(): GameRoom {
@@ -52,7 +45,7 @@ export class GameRoomHandler {
     this.roomList.delete(gameRoom);
   }
 
-  private findRoomBySocket(user: Socket): GameRoom {
+  public findRoomBySocket(user: Socket): GameRoom {
     for (const key of this.roomList.keys()) {
       const foundUser = this.roomList
         .get(key)
