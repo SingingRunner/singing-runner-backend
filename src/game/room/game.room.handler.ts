@@ -18,7 +18,7 @@ export class GameRoomHandler {
     }
   }
 
-  public isGameRoomReady(gameRoom: GameRoom) {
+  public isGameRoomReady(gameRoom: GameRoom): boolean {
     if (gameRoom.getAcceptCount() === 3) {
       return true;
     }

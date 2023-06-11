@@ -1,3 +1,4 @@
+import { GameRoom } from './../room/game.room';
 import { GameSongDto } from 'src/song/dto/game-song.dto';
 import { UserGameDto } from 'src/user/dto/user.game.dto';
 import { Inject, Injectable } from '@nestjs/common';
@@ -41,6 +42,7 @@ export class MatchService {
       this.gameRoomHandler.findUsersInRoom(gameRoom);
     this.gameRoomHandler.increaseAcceptCount(user);
     if (this.gameRoomHandler.isGameRoomReady(gameRoom)) {
+      gameRoom.resetAcceptCount();
       for (const user of userList) {
         user.getSocket().emit('accept', true);
       }
