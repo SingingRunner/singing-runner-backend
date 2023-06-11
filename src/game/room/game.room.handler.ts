@@ -8,11 +8,9 @@ import { GameRoomStatus } from '../utill/game.enum';
 export class GameRoomHandler {
   private roomList: Map<GameRoom, Array<UserGameDto>> = new Map();
 
-  public addUser(gameRoom: GameRoom, userGameDto: UserGameDto) {
-    const userList: Array<UserGameDto> = this.roomList.get(gameRoom);
-    userList.push(userGameDto);
-    if (userList.length >= 3) {
-      gameRoom.gameRoomStatus = GameRoomStatus.INGAME;
+  public addUser(gameRoom: GameRoom, userList: Array<UserGameDto>) {
+    for (const user of userList) {
+      this.roomList.get(gameRoom).push(user);
     }
   }
 
@@ -25,25 +23,27 @@ export class GameRoomHandler {
     return this.createRoom();
   }
 
-  public findUsersInRoom(client: Socket): Array<UserGameDto> {
+  public findUsersInRoom(user: Socket): Array<UserGameDto> {
     for (const userList of this.roomList.values()) {
-      const foundUserSocket = userList.find((user) => user.socket === client);
-      if (foundUserSocket) {
+      const foundUser = userList.find(
+        (userInRoom) => userInRoom.socket === user,
+      );
+      if (foundUser) {
         return userList;
       }
     }
   }
 
-  private roomCount(): number {
-    return this.roomList.size;
-  }
-
-  private createRoom(): GameRoom {
+  public createRoom(): GameRoom {
     const gameRoom: GameRoom = {
       roomId: this.roomCount() + 1,
       gameRoomStatus: GameRoomStatus.MATCHING,
     };
     this.roomList.set(gameRoom, []);
     return gameRoom;
+  }
+
+  private roomCount(): number {
+    return this.roomList.size;
   }
 }
