@@ -1,9 +1,9 @@
 import { userActiveStatus, userKeynoteStatus } from '../util/user.enum';
-import { IsNotEmpty, isNotEmpty } from '@nestjs/class-validator';
+import { IsNotEmpty } from '@nestjs/class-validator';
 
 export class UserMatchDto {
   @IsNotEmpty()
-  userName: string;
+  userId: string;
 
   @IsNotEmpty()
   userMMR: number;
