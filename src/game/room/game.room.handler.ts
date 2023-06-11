@@ -1,4 +1,3 @@
-import { find } from 'rxjs';
 import { Injectable } from '@nestjs/common';
 import { Socket } from 'socket.io';
 import { GameRoom } from './game.room';
