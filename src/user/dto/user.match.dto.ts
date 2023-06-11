@@ -6,7 +6,7 @@ export class UserMatchDto {
   userName: string;
 
   @IsNotEmpty()
-  serMMR: number;
+  userMMR: number;
 
   @IsNotEmpty()
   nickName: string;
@@ -15,5 +15,5 @@ export class UserMatchDto {
   userActive: userActiveStatus;
 
   @IsNotEmpty()
-  uerKeynote: userKeynoteStatus;
+  userKeynote: userKeynoteStatus;
 }
