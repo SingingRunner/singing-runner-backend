@@ -11,7 +11,10 @@ import {
 import { Server, Socket } from 'socket.io';
 import { GameService } from './game.service';
 import { find } from 'rxjs';
-
+import { subscribe } from 'diagnostics_channel';
+/**
+ * webSocket 통신을 담당하는 Handler
+ */
 @WebSocketGateway()
 export class GameGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
@@ -34,12 +37,15 @@ export class GameGateway
 
   @SubscribeMessage('match_making')
   matchMakingData(@ConnectedSocket() user: Socket, userGameDto: UserGameDto) {
+    /**
+     * MatchMakingPolicy에 따라 user가 매칭되면 같이 매칭된 user들(SameGameRoom)
+     * 과 함께 songTilte, Singer 정보를 전송
+     */
     if (this.gameService.isMatchingAvailable(userGameDto)) {
       const userList: Array<UserGameDto> =
         this.gameService.findUsersInSameRoom(user);
-
       for (const user of userList) {
-        user.socket.emit('match_making', true);
+        user.socket.emit('match_making', true); //songTilte, singer DTO를 전송
       }
     }
   }
