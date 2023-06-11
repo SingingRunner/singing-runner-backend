@@ -9,7 +9,9 @@ export class SimpleMatchMaking implements MatchMakingPolicy {
   public joinQueue(userGameDto: UserGameDto) {
     this.readyQueue.push(userGameDto);
   }
-
+  public joinQueueAtFront(UserGameDto: UserGameDto) {
+    this.readyQueue.unshift(UserGameDto);
+  }
   public leaveQueue(userGameDto: UserGameDto) {
     return;
   }

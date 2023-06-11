@@ -30,6 +30,28 @@ export class GameService {
     this.matchMakingPolicy.joinQueue(userGameDto);
   }
 
+  public matchAccept(user: Socket, accept: boolean) {
+    const userList: Array<UserGameDto> =
+      this.gameRoomHandler.findUsersInRoom(user);
+    if (!accept) {
+      for (const user of userList) {
+        this.matchMakingPolicy.joinQueueAtFront(user);
+      }
+      this.gameRoomHandler.deleteRoom(user);
+      for (const user of userList) {
+        user.socket.emit('accept', false);
+      }
+      return;
+    }
+
+    this.gameRoomHandler.increaseAcceptCount(user);
+    if (this.gameRoomHandler.isGameRoomReady) {
+      for (const user of userList) {
+        user.socket.emit('accept', true);
+      }
+    }
+  }
+
   private isMatchingAvailable(): boolean {
     if (this.matchMakingPolicy.isQueueReady()) {
       return true;
@@ -40,10 +62,6 @@ export class GameService {
   private joinRoom(userList: Array<UserGameDto>) {
     const gameRoom: GameRoom = this.gameRoomHandler.createRoom();
     this.gameRoomHandler.addUser(gameRoom, userList);
-  }
-
-  private findUsersInSameRoom(user: Socket): Array<UserGameDto> {
-    return this.gameRoomHandler.findUsersInRoom(user);
   }
 
   private initUserGameDto(

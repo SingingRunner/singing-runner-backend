@@ -1,6 +1,4 @@
 import { UserMatchDto } from './../user/dto/user.match.dto';
-import { UserGameDto } from 'src/user/dto/user.game.dto';
-import { UserGameDto } from './../user/dto/user.game.dto';
 import {
   ConnectedSocket,
   OnGatewayConnection,
@@ -12,8 +10,6 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { GameService } from './game.service';
-import { find } from 'rxjs';
-import { subscribe } from 'diagnostics_channel';
 /**
  * webSocket 통신을 담당하는 Handler
  */
@@ -37,20 +33,21 @@ export class GameGateway
     console.log(`Client disconnected: ${user.id}`);
   }
 
+  /**
+   * MatchMakingPolicy에 따라 user가 매칭되면 GameRoom에 추가 후
+   * 같이 매칭된 user들(same GameRoom) 과 함께 songTilte, Singer 정보를 전송
+   */
   @SubscribeMessage('match_making')
   matchMakingData(@ConnectedSocket() user: Socket, UserMatchDto: UserMatchDto) {
-    /**
-     * MatchMakingPolicy에 따라 user가 매칭되면 GameRoom에 추가 후
-     * 같이 매칭된 user들(same GameRoom) 과 함께 songTilte, Singer 정보를 전송
-     */
     this.gameService.matchMaking(user, UserMatchDto);
   }
 
+  /**
+   * 같은 Room user가 전부 accpet시 게임시작
+   * 한명이라도 거절시 Room 제거, 수락한 user는 readyQueue 에 우선순위가 높게 push
+   */
   @SubscribeMessage('accept')
   matchAcceptData(@ConnectedSocket() user: Socket, accept: boolean) {
-    /**
-     * 같은 Room user가 전부 accpet시 게임시작
-     * 한명이라도 거절시 Room 제거, 수락한 user는 readyQueue 에 다시 push
-     */
+    this.gameService.matchAccept(user, accept);
   }
 }

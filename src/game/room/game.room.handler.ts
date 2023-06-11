@@ -1,3 +1,4 @@
+import { find } from 'rxjs';
 import { Injectable } from '@nestjs/common';
 import { Socket } from 'socket.io';
 import { GameRoom } from './game.room';
@@ -14,15 +15,16 @@ export class GameRoomHandler {
     }
   }
 
-  public findRoomBySocket(user: Socket): GameRoom {
-    for (const key of this.roomList.keys()) {
-      const foundUser = this.roomList
-        .get(key)
-        .find((userInRoom) => userInRoom.socket === user);
-      if (foundUser) {
-        return key;
-      }
+  public isGameRoomReady(gameRoom: GameRoom) {
+    if (gameRoom.acceptCount === 3) {
+      return true;
     }
+    return false;
+  }
+
+  public increaseAcceptCount(user: Socket) {
+    const gameRoom: GameRoom = this.findRoomBySocket(user);
+    gameRoom.acceptCount += 1;
   }
 
   public findUsersInRoom(user: Socket): Array<UserGameDto> {
@@ -44,6 +46,22 @@ export class GameRoomHandler {
     };
     this.roomList.set(gameRoom, []);
     return gameRoom;
+  }
+
+  public deleteRoom(user: Socket) {
+    const gameRoom: GameRoom = this.findRoomBySocket(user);
+    this.roomList.delete(gameRoom);
+  }
+
+  private findRoomBySocket(user: Socket): GameRoom {
+    for (const key of this.roomList.keys()) {
+      const foundUser = this.roomList
+        .get(key)
+        .find((userInRoom) => userInRoom.socket === user);
+      if (foundUser) {
+        return key;
+      }
+    }
   }
 
   private roomCount(): number {
