@@ -36,4 +36,7 @@ export class GameRoom {
   public increaseAcceptCount() {
     this.acceptCount += 1;
   }
+  public resetAcceptCount() {
+    this.acceptCount = 0;
+  }
 }
