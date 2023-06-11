@@ -36,12 +36,13 @@ export class GameService {
     const userList: Array<UserGameDto> =
       this.gameRoomHandler.findUsersInRoom(gameRoom);
     if (!accept) {
-      for (const user of userList) {
-        this.matchMakingPolicy.joinQueueAtFront(user);
+      for (const userInfo of userList) {
+        this.joinQueueWithOutDenyUser(userInfo, user);
       }
       this.gameRoomHandler.deleteRoom(user);
-      for (const user of userList) {
-        user.getSocket().emit('accept', false);
+      user.disconnect(true);
+      for (const userInfo of userList) {
+        userInfo.getSocket().emit('accept', false);
       }
       return;
     }
@@ -52,6 +53,12 @@ export class GameService {
         user.getSocket().emit('accept', true);
       }
     }
+  }
+  private joinQueueWithOutDenyUser(userInfo: UserGameDto, user: Socket) {
+    if (userInfo.getSocket() === user) {
+      return;
+    }
+    this.matchMakingPolicy.joinQueueAtFront(userInfo);
   }
 
   private isMatchingAvailable(): boolean {
