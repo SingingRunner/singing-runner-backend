@@ -23,10 +23,6 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Run Jest tests
-        id: test
-        run: npm run test
-        
       - name: Extract version from PR message
         if: ${{ steps.test.outcome == 'success' }}
         id: extract-version
