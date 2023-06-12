@@ -26,15 +26,7 @@ jobs:
       - name: Run Jest tests
         id: test
         run: npm run test
-
-      - name: Merge into main branch
-        if: ${{ steps.test.outcome == 'success' && github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main' }}
-        uses: pullreminders/merge@v1
-        with:
-          merge_method: squash
-          github_token: ${{ secrets.GIT_TOKEN }}
-          commit_message: Merge pull request #${{ github.event.pull_request.number }} from ${{ github.event.pull_request.head.ref }}
-
+        
       - name: Extract version from PR message
         if: ${{ steps.test.outcome == 'success' }}
         id: extract-version
