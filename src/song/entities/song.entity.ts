@@ -2,8 +2,8 @@ import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class Song {
-  @PrimaryGeneratedColumn('uuid')
-  songId: Int16Array;
+  @PrimaryGeneratedColumn()
+  songId: number;
 
   @Column()
   songTitle: string;

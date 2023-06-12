@@ -1,8 +1,8 @@
-import { IsString, IsUrl, IsBoolean, IsUUID, IsDate } from 'class-validator';
+import { IsString, IsUrl, IsBoolean, IsDate, IsNumber } from 'class-validator';
 
 export class CreateSongDto {
-  @IsUUID('4')
-  songId: Int16Array;
+  @IsNumber()
+  songId: number;
 
   @IsString()
   songTitle: string;
