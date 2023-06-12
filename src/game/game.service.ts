@@ -5,6 +5,7 @@ import { GameRoom } from './room/game.room';
 import { UserGameDto } from 'src/user/dto/user.game.dto';
 import { ItemPolicy } from './item/item.policy';
 import { Item } from './item/item.enum';
+import { GameSongDto } from 'src/song/dto/game-song.dto';
 
 @Injectable()
 export class GameService {
@@ -16,7 +17,9 @@ export class GameService {
 
   public loadData(user: Socket) {
     const gameRoom: GameRoom = this.gameRoomHandler.findRoomBySocket(user);
-    user.emit('loading', gameRoom.getGameSongDto);
+    const gameSongdto: GameSongDto = gameRoom.getGameSongDto();
+    const gameSong = gameSongdto.toJSON();
+    user.emit('loading', gameSong);
   }
 
   public gameReady(user: Socket) {
@@ -55,7 +58,9 @@ export class GameService {
 
   public itemGenerate(user: Socket) {
     const item = this.itemPolicy.getItems();
-    if (item === null) return;
+    if (item === null) {
+      return;
+    }
     console.log(item);
     const gameRoom: GameRoom = this.gameRoomHandler.findRoomBySocket(user);
     const userList: Array<UserGameDto> =
