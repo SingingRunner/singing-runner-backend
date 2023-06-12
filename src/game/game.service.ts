@@ -84,7 +84,7 @@ export class GameService {
       if (userInfo.getSocket() === user) {
         continue;
       }
-      userInfo.getSocket().emit('use_item', item);
+      userInfo.getSocket().emit('use_item', { user: user.id, item: item });
     }
   }
 
