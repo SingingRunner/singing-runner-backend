@@ -79,8 +79,8 @@ export class GameGateway
     this.gameService.gameReady(user);
   }
 
-  // @SubscribeMessage('score')
-  // scoreData(@ConnectedSocket() user: Socket, @MessageBody() score: number) {
-  //   this.gameService.scoreData(user, score);
-  // }
+  @SubscribeMessage('score')
+  scoreData(@ConnectedSocket() user: Socket, @MessageBody() score: number) {
+    this.gameService.broadcastScore(user, score);
+  }
 }

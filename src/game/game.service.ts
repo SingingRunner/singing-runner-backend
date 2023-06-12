@@ -23,10 +23,6 @@ export class GameService {
     }
   }
 
-  // public score(user, score) {
-
-  // }
-
   private broadcastGameRoom(gameRoom: GameRoom) {
     const userList: Array<UserGameDto> =
       this.gameRoomHandler.findUsersInRoom(gameRoom);
@@ -35,11 +31,15 @@ export class GameService {
     }
   }
 
-  // private broadcastScore(score) {
-  //   const userList: Array<UserGameDto> =
-  //     this.gameRoomHandler.findUsersInRoom(score);
-  //   for (const user of userList) {
-  //     user.getSocket().emit('score', );
-  //   }
-  // }
+  public broadcastScore(user: Socket, score: number) {
+    const gameRoom: GameRoom = this.gameRoomHandler.findRoomBySocket(user);
+    const userList: Array<UserGameDto> =
+      this.gameRoomHandler.findUsersInRoom(gameRoom);
+    for (const userInfo of userList) {
+      if (user === userInfo.getSocket()) {
+        continue;
+      }
+      user.emit('score', score);
+    }
+  }
 }
