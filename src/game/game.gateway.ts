@@ -86,21 +86,16 @@ export class GameGateway
 
   @SubscribeMessage('get_item')
   getItemData(@ConnectedSocket() user: Socket) {
-    console.log('get item!!!');
+    console.log('get item');
     this.gameService.itemGenerate(user);
   }
 
-  @SubscribeMessage('escape_frozen')
-  escapeFrozenData(@ConnectedSocket() user: Socket, @MessageBody() item: Item) {
-    console.log('escape frozen!!!');
-    this.gameService.escapeItem(user, item);
+  @SubscribeMessage('escape_item')
+  escapeFrozenData(@ConnectedSocket() user: Socket) {
+    console.log('escape item');
+    this.gameService.escapeItem(user);
   }
 
-  @SubscribeMessage('escape_mute')
-  escapeMuteData(@ConnectedSocket() user: Socket, @MessageBody() item: Item) {
-    console.log('escape mute!!!');
-    this.gameService.escapeItem(user, item);
-  }
   @SubscribeMessage('score')
   scoreData(@ConnectedSocket() user: Socket, @MessageBody() score: number) {
     this.gameService.broadcastScore(user, score);

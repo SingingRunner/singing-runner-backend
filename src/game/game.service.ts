@@ -71,34 +71,28 @@ export class GameService {
       this.gameRoomHandler.findUsersInRoom(gameRoom);
     if (this.itemPolicy.useItemAll(item)) {
       for (const userInfo of userList) {
-        console.log('used item!!!11');
         userInfo.getSocket().emit('use_item', item);
       }
       return;
-    } else {
-      for (const userInfo of userList) {
-        if (userInfo.getSocket() !== user) continue;
-        userInfo.getSocket().emit('use_item', item);
+    }
+    for (const userInfo of userList) {
+      if (userInfo.getSocket() === user) {
+        continue;
       }
+      userInfo.getSocket().emit('use_item', item);
     }
   }
 
-  public escapeItem(user: Socket, item: Item) {
+  public escapeItem(user: Socket) {
     const gameRoom: GameRoom = this.gameRoomHandler.findRoomBySocket(user);
     const userList: Array<UserGameDto> =
       this.gameRoomHandler.findUsersInRoom(gameRoom);
-    if (this.itemPolicy.escapeItem(item)) {
-      console.log(item);
-      for (const userInfo of userList) {
-        console.log('escape item!!!11');
-        if (userInfo.getSocket() === user) {
-          if (item === Item.FROZEN) {
-            userInfo.getSocket().emit('escape_frozen', item);
-          } else if (item === Item.MUTE) {
-            userInfo.getSocket().emit('escape_mute', item);
-          }
-        }
+
+    for (const userInfo of userList) {
+      if (user === userInfo.getSocket()) {
+        continue;
       }
+      userInfo.getSocket().emit('escape_item', user.id);
     }
   }
 }
