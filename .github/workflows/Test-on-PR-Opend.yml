@@ -2,8 +2,7 @@ name: Test on PR Opened
 
 on:
   pull_request:
-    types:
-      - opened
+    branches: [ develop ]
 
 jobs:
   test:
