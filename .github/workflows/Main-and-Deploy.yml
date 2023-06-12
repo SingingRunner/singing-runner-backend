@@ -33,12 +33,17 @@ jobs:
           version=${{ steps.extract-version.outputs.version }}
           docker build -t singing-runner-backend:$version .
 
-      - name: Push image to Docker Hub
-        uses: docker/build-push-action@v2
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v1
         with:
-          context: .
-          push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/singing-runner-backend:${{ steps.extract-version.outputs.version }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_ACCESS_TOKEN }}
+
+      - name: Push image to Docker Hub
+        run: |
+          version=${{ steps.extract-version.outputs.version }}
+          docker tag singing-runner-backend:$version ${{ secrets.DOCKERHUB_USERNAME }}/singing-runner-backend:$version
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/singing-runner-backend:$version
 
       - name: SSH into EC2 instance and deploy
         uses: appleboy/ssh-action@master
@@ -49,4 +54,4 @@ jobs:
           script: |
             docker rmi -f $(docker images -q) || true
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/singing-runner-backend:${{ steps.extract-version.outputs.version }}
-            docker run -d -p 4000:4000 --name singing-runner-backend ${{ secrets.DOCKERHUB_USERNAME }}/singing-runner-backend:${{ steps.extract-version.outputs.version }}
+            docker run -d -p 4000:4000 --name singing-runner-backend ${{
