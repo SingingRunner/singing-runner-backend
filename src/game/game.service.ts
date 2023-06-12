@@ -53,18 +53,6 @@ export class GameService {
     }
   }
 
-  public broadcastScore(user: Socket, score: number) {
-    const gameRoom: GameRoom = this.gameRoomHandler.findRoomBySocket(user);
-    const userList: Array<UserGameDto> =
-      this.gameRoomHandler.findUsersInRoom(gameRoom);
-    for (const userInfo of userList) {
-      if (user === userInfo.getSocket()) {
-        continue;
-      }
-      user.emit('score', score);
-    }
-  }
-
   public itemGenerate(user: Socket) {
     const item = this.itemPolicy.getItems();
     if (item === null) return;
