@@ -54,4 +54,4 @@ jobs:
           script: |
             docker rmi -f $(docker images -q) || true
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/singing-runner-backend:${{ steps.extract-version.outputs.version }}
-            docker run -d -p 4000:4000 --name singing-runner-backend ${{
+            docker run -d -p 4000:3000 --name singing-runner-backend ${{ secrets.DOCKERHUB_USERNAME }}/singing-runner-backend:${{ steps.extract-version.outputs.version }}
