@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ConsoleLogger, Injectable } from '@nestjs/common';
 import { Socket } from 'socket.io';
 import { GameRoom } from './game.room';
 import { UserGameDto } from 'src/user/dto/user.game.dto';
@@ -63,11 +63,10 @@ export class GameRoomHandler {
   }
 
   public getSongInfo(gameRoom: GameRoom) {
-    const songInfo: Partial<MatchCompleteSongDto> = {
-      songTitle: gameRoom.getGameSongDto().songTitle,
-      singer: gameRoom.getGameSongDto().singer,
-    };
-    return new MatchCompleteSongDto(songInfo);
+    const songTitle: string = gameRoom.getGameSongDto().songTitle;
+    const singer: string = gameRoom.getGameSongDto().singer;
+
+    return new MatchCompleteSongDto(songTitle, singer);
   }
 
   private roomCount(): number {

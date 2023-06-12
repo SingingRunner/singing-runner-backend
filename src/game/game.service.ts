@@ -19,15 +19,27 @@ export class GameService {
     this.gameRoomHandler.increaseAcceptCount(user);
     if (this.gameRoomHandler.isGameRoomReady(gameRoom)) {
       gameRoom.resetAcceptCount();
-      this.broadCastGameRoom(gameRoom);
+      this.broadcastGameRoom(gameRoom);
     }
   }
 
-  public broadCastGameRoom(gameRoom: GameRoom) {
+  // public score(user, score) {
+
+  // }
+
+  private broadcastGameRoom(gameRoom: GameRoom) {
     const userList: Array<UserGameDto> =
       this.gameRoomHandler.findUsersInRoom(gameRoom);
     for (const user of userList) {
       user.getSocket().emit('game_ready', true);
     }
   }
+
+  // private broadcastScore(score) {
+  //   const userList: Array<UserGameDto> =
+  //     this.gameRoomHandler.findUsersInRoom(score);
+  //   for (const user of userList) {
+  //     user.getSocket().emit('score', );
+  //   }
+  // }
 }
