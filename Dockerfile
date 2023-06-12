@@ -4,9 +4,6 @@ FROM node:16.14.0
 # Create app directory
 WORKDIR /usr/src/app
 
-# Install Yarn
-RUN npm install -g yarn
-
 # Install app dependencies
 # A wildcard is used to ensure both package.json AND yarn.lock are copied
 COPY package*.json ./
