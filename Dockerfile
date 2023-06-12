@@ -1,23 +1,27 @@
-# Base image
-FROM node:14-alpine
+# Choose the right version as per your requirements
+FROM node:16.14.0
 
-# Set the working directory inside the container
-WORKDIR /app
+# Create app directory
+WORKDIR /usr/src/app
 
-# Copy package.json and yarn.lock
-COPY package*.json yarn.lock ./
+# Install Yarn
+RUN npm install -g yarn
 
-# Install dependencies
-RUN yarn install --production
+# Install app dependencies
+# A wildcard is used to ensure both package.json AND yarn.lock are copied
+COPY package*.json ./
+COPY yarn.lock ./
 
-# Copy the entire project directory into the container
+RUN yarn install
+
+# Bundle app source
 COPY . .
 
-# Build TypeScript files
+# Compile TypeScript to JavaScript
 RUN yarn build
 
-# Expose the port on which the Nest.js application will run (change if necessary)
+# Expose the port your app runs on
 EXPOSE 3000
 
-# Start the Nest.js application
-CMD ["node", "dist/main"]
+# The command to start your application
+CMD [ "yarn", "start:prod" ]
