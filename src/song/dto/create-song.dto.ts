@@ -11,50 +11,50 @@ export class CreateSongDto {
   singer: string;
 
   @IsString()
-  song_lylics: string;
+  songLylics: string;
 
   @IsUrl()
-  song_file: string;
+  songFile: string;
 
   @IsBoolean()
-  song_gender: boolean;
+  songGender: boolean;
 
   @IsUrl()
-  song_male: string;
+  songMale: string;
 
   @IsUrl()
-  song_male_up: string;
+  songMaleUp: string;
 
   @IsUrl()
-  song_male_down: string;
+  songMaleDown: string;
 
   @IsUrl()
-  song_female: string;
+  songFemale: string;
 
   @IsUrl()
-  song_female_up: string;
+  songFemaleUp: string;
 
   @IsUrl()
-  song_female_down: string;
+  songFemaleDown: string;
 
   @IsUrl()
-  vocal_male: string;
+  vocalMale: string;
 
   @IsUrl()
-  vocal_male_up: string;
+  vocalMaleUp: string;
 
   @IsUrl()
-  vocal_male_down: string;
+  vocalMaleDown: string;
 
   @IsUrl()
-  vocal_female: string;
+  vocalFemale: string;
 
   @IsUrl()
-  vocal_female_up: string;
+  vocalFemaleUp: string;
 
   @IsUrl()
-  vocal_female_down: string;
+  vocalFemaleDown: string;
 
   @IsDate()
-  created_at: Date;
+  createdAt: Date;
 }

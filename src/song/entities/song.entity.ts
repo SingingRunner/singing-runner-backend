@@ -12,50 +12,50 @@ export class Song {
   singer: string;
 
   @Column()
-  song_lylics: string;
+  songLylics: string;
 
   @Column()
-  song_file: string;
+  songFile: string;
 
   @Column()
-  song_gender: boolean;
+  songGender: boolean;
 
   @Column()
-  song_male: string;
+  songMale: string;
 
   @Column()
-  song_male_up: string;
+  songMaleUp: string;
 
   @Column()
-  song_male_down: string;
+  songMaleDown: string;
 
   @Column()
-  song_female: string;
+  songFemale: string;
 
   @Column()
-  song_female_up: string;
+  songFemaleUp: string;
 
   @Column()
-  song_female_down: string;
+  songFemaleDown: string;
 
   @Column()
-  vocal_male: string;
+  vocalMale: string;
 
   @Column()
-  vocal_male_up: string;
+  vocalMaleUp: string;
 
   @Column()
-  vocal_male_down: string;
+  vocalMaleDown: string;
 
   @Column()
-  vocal_female: string;
+  vocalFemale: string;
 
   @Column()
-  vocal_female_up: string;
+  vocalFemaleUp: string;
 
   @Column()
-  vocal_female_down: string;
+  vocalFemaleDown: string;
 
   @Column()
-  created_at: Date;
+  createdAt: Date;
 }
