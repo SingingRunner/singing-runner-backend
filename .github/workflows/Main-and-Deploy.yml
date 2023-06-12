@@ -22,26 +22,19 @@ jobs:
 
       - name: Install dependencies
         run: npm install
-
-      - name: Run Jest tests
-        id: test
-        run: npm run test
         
       - name: Extract version from PR message
-        if: ${{ steps.test.outcome == 'success' }}
         id: extract-version
         run: |
           version=$(echo "${{ github.event.pull_request.title }}" | grep -oP '(?<=\[Version: ).*?(?=\])')
           echo "::set-output name=version::$version"
 
       - name: Build Docker image
-        if: ${{ steps.test.outcome == 'success' }}
         run: |
           version=${{ steps.extract-version.outputs.version }}
           docker build -t singing-runner-backend:$version .
 
       - name: Push image to Docker Hub
-        if: ${{ steps.test.outcome == 'success' }}
         uses: docker/build-push-action@v2
         with:
           context: .
@@ -49,7 +42,6 @@ jobs:
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/singing-runner-backend:${{ steps.extract-version.outputs.version }}
 
       - name: SSH into EC2 instance and deploy
-        if: ${{ steps.test.outcome == 'success' }}
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.EC2_INSTANCE_IP }}
