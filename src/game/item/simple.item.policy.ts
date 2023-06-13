@@ -19,8 +19,16 @@ export class SimpleItemPolicy implements ItemPolicy {
     this.itemCount = 0;
     return this.items[this.itemIndex++];
   }
+
   useItemAll(item: Item): boolean {
     if (item === Item.KEY_UP || Item.KEY_DOWN) {
+      return true;
+    }
+    return false;
+  }
+
+  escapeItem(item: Item): boolean {
+    if (item === Item.FROZEN || Item.MUTE) {
       return true;
     }
     return false;

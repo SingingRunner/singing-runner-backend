@@ -89,4 +89,16 @@ export class GameGateway
     console.log('get item!!!');
     this.gameService.itemGenerate(user);
   }
+
+  @SubscribeMessage('escape_frozen')
+  escapeFrozenData(@ConnectedSocket() user: Socket, @MessageBody() item: Item) {
+    console.log('escape frozen!!!');
+    this.gameService.escapeItem(user, item);
+  }
+
+  @SubscribeMessage('escape_mute')
+  escapeMuteData(@ConnectedSocket() user: Socket, @MessageBody() item: Item) {
+    console.log('escape mute!!!');
+    this.gameService.escapeItem(user, item);
+  }
 }

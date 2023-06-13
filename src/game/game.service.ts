@@ -66,4 +66,23 @@ export class GameService {
       }
     }
   }
+
+  public escapeItem(user: Socket, item: Item) {
+    const gameRoom: GameRoom = this.gameRoomHandler.findRoomBySocket(user);
+    const userList: Array<UserGameDto> =
+      this.gameRoomHandler.findUsersInRoom(gameRoom);
+    if (this.itemPolicy.escapeItem(item)) {
+      console.log(item);
+      for (const userInfo of userList) {
+        console.log('escape item!!!11');
+        if (userInfo.getSocket() === user) {
+          if (item === Item.FROZEN) {
+            userInfo.getSocket().emit('escape_frozen', item);
+          } else if (item === Item.MUTE) {
+            userInfo.getSocket().emit('escape_mute', item);
+          }
+        }
+      }
+    }
+  }
 }
