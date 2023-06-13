@@ -11,7 +11,7 @@ export class CreateSongDto {
   singer: string;
 
   @IsString()
-  songLylics: string;
+  songLyrics: string;
 
   @IsUrl()
   songFile: string;

@@ -20,24 +20,6 @@ export class SongService {
     const song: Song = songs[randomIndex];
 
     // Song Entity를 GameSongDto로 변환
-    return {
-      songTitle: song.songTitle,
-      singer: song.singer,
-      songLyrics: song.songLyrics,
-      songFile: song.songFile,
-      songGender: song.songGender,
-      songMale: song.songMale,
-      songMaleUp: song.songMaleUp,
-      songMaleDown: song.songMaleDown,
-      songFemale: song.songFemale,
-      songFemaleUp: song.songFemaleUp,
-      songFemaleDown: song.songFemaleDown,
-      vocalMale: song.vocalMale,
-      vocalMaleUp: song.vocalMaleUp,
-      vocalMaleDown: song.vocalMaleDown,
-      vocalFemale: song.vocalFemale,
-      vocalFemaleUp: song.vocalFemaleUp,
-      vocalFemaleDown: song.vocalFemaleDown,
-    };
+    return new GameSongDto(song);
   }
 }
