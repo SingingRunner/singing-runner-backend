@@ -14,20 +14,19 @@ export class MatchService {
     private matchMakingPolicy: MatchMakingPolicy,
   ) {}
 
-  public matchMaking(user: Socket, userMatchDto: UserMatchDto) {
+  public async matchMaking(user: Socket, userMatchDto: UserMatchDto) {
     const userGameDto: UserGameDto = new UserGameDto(user, userMatchDto);
 
     if (this.isMatchingAvailable()) {
       const userList: Array<UserGameDto> =
         this.matchMakingPolicy.getAvailableUsers();
       userList.push(userGameDto);
-      this.joinRoom(userList);
+      await this.joinRoom(userList);
       const gameRoom: GameRoom = this.gameRoomHandler.findRoomBySocket(user);
-
       for (const user of userList) {
         user
           .getSocket()
-          .emit('match_making', this.gameRoomHandler.getSongInfo(gameRoom)); //songTilte, singer DTO를 전송
+          .emit('match_making', this.gameRoomHandler.getSongInfo(gameRoom));
       }
       return;
     }
