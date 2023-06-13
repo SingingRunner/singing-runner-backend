@@ -26,8 +26,24 @@ export class GameService {
   private broadcastGameRoom(gameRoom: GameRoom) {
     const userList: Array<UserGameDto> =
       this.gameRoomHandler.findUsersInRoom(gameRoom);
-    for (const user of userList) {
-      user.getSocket().emit('game_ready', true);
+    const userIdList: string[] = [];
+    for (const userInfo of userList) {
+      userIdList.push(userInfo.getSocket().id);
+    }
+    for (const userInfo of userList) {
+      userInfo.getSocket().emit('game_ready', userIdList);
+    }
+  }
+
+  public broadcastScore(user: Socket, score: number) {
+    const gameRoom: GameRoom = this.gameRoomHandler.findRoomBySocket(user);
+    const userList: Array<UserGameDto> =
+      this.gameRoomHandler.findUsersInRoom(gameRoom);
+    for (const userInfo of userList) {
+      if (user === userInfo.getSocket()) {
+        continue;
+      }
+      userInfo.getSocket().emit('score', { user: user.id, score: score });
     }
   }
 
