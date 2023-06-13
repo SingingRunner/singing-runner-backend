@@ -68,4 +68,14 @@ export class GameGateway
     }
     this.matchService.matchDeny(user);
   }
+
+  @SubscribeMessage('loading')
+  loadSongData(@ConnectedSocket() user: Socket) {
+    this.gameService.loadData(user);
+  }
+
+  @SubscribeMessage('game_ready')
+  gameReadyData(@ConnectedSocket() user: Socket) {
+    this.gameService.gameReady(user);
+  }
 }
