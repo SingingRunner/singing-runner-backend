@@ -10,8 +10,10 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import { MatchService } from './match/match.service';
 import { GameService } from './game.service';
-import { UsePipes, ValidationPipe } from '@nestjs/common';
+import { subscribe } from 'diagnostics_channel';
+
 /**
  * webSocket 통신을 담당하는 Handler
  */
@@ -21,7 +23,10 @@ export class GameGateway
 {
   @WebSocketServer() server: Server;
 
-  constructor(private gameService: GameService) {}
+  constructor(
+    private matchService: MatchService,
+    private gameService: GameService,
+  ) {}
 
   afterInit(server: Server) {
     console.log('Socket.io server initialized in ');
@@ -45,7 +50,7 @@ export class GameGateway
     @MessageBody() userMatchDto: UserMatchDto,
   ) {
     console.log('matchmaking connect');
-    this.gameService.matchMaking(user, userMatchDto);
+    this.matchService.matchMaking(user, userMatchDto);
   }
 
   /**
@@ -57,6 +62,10 @@ export class GameGateway
     @ConnectedSocket() user: Socket,
     @MessageBody() accept: boolean,
   ) {
-    this.gameService.matchAccept(user, accept);
+    if (accept) {
+      this.matchService.matchAccept(user);
+      return;
+    }
+    this.matchService.matchDeny(user);
   }
 }
