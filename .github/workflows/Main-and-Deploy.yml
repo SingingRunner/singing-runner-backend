@@ -52,6 +52,21 @@ jobs:
           username: ${{ secrets.EC2_INSTANCE_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            docker rmi -f $(docker images -q) || true
+            CONTAINER_IDS=$(docker ps -a --format "{{.ID}} {{.Image}}" | awk '/singing-runner-backend/ {print $1}')
+            for CONTAINER_ID in $CONTAINER_IDS; do
+              docker stop "$CONTAINER_ID"
+              docker rm "$CONTAINER_ID"
+            done
+            IMAGE_IDS=$(docker images --format "{{.ID}} {{.Repository}}" | awk '$2 ~ /singing-runner-backend/ {print $1}')
+
+            if [ -n "$IMAGE_IDS" ]; then
+              # Delete each image by ID
+              for IMAGE_ID in $IMAGE_IDS; do
+                docker rmi -f "$IMAGE_ID"
+              done
+            else
+              echo "No images found matching the pattern *singing-runner-backend*"
+            fi
+            
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/singing-runner-backend:${{ steps.extract-version.outputs.version }}
             docker run -d -p 4000:3000 --name singing-runner-backend ${{ secrets.DOCKERHUB_USERNAME }}/singing-runner-backend:${{ steps.extract-version.outputs.version }}
