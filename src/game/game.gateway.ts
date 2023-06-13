@@ -12,7 +12,7 @@ import {
 import { Server, Socket } from 'socket.io';
 import { MatchService } from './match/match.service';
 import { GameService } from './game.service';
-import { subscribe } from 'diagnostics_channel';
+import { Item } from './item/item.enum';
 
 /**
  * webSocket 통신을 담당하는 Handler
@@ -77,5 +77,16 @@ export class GameGateway
   @SubscribeMessage('game_ready')
   gameReadyData(@ConnectedSocket() user: Socket) {
     this.gameService.gameReady(user);
+  }
+
+  @SubscribeMessage('use_item')
+  useItemData(@ConnectedSocket() user: Socket, @MessageBody() item: Item) {
+    this.gameService.useItem(user, item);
+  }
+
+  @SubscribeMessage('get_item')
+  getItemData(@ConnectedSocket() user: Socket) {
+    console.log('get item!!!');
+    this.gameService.itemGenerate(user);
   }
 }
