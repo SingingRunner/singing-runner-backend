@@ -66,7 +66,7 @@ export class GameRoomHandler {
     const songTitle: string = gameRoom.getGameSongDto().songTitle;
     const singer: string = gameRoom.getGameSongDto().singer;
 
-    return new MatchCompleteSongDto(songTitle, singer);
+    return { songTitle: songTitle, singer: singer };
   }
 
   private roomCount(): number {

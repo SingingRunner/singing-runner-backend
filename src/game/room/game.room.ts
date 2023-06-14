@@ -1,6 +1,6 @@
 import { GameSongDto } from 'src/song/dto/game-song.dto';
 import { GameRoomStatus } from './../utill/game.enum';
-
+import { plainToClass } from 'class-transformer';
 export class GameRoom {
   private roomId: number;
   private gameRoomStatus: GameRoomStatus;
@@ -39,4 +39,13 @@ export class GameRoom {
   public resetAcceptCount() {
     this.acceptCount = 0;
   }
+
+  // public toJSON() {
+  //   return {
+  //     roomId: this.roomId,
+  //     gameRoomStatus: this.gameRoomStatus,
+  //     acceptCount: this.acceptCount,
+  //     gameSongDto: plainToClass(GameSongDto, this.gameSongDto),
+  //   };
+  // }
 }
