@@ -21,14 +21,14 @@ export class SimpleItemPolicy implements ItemPolicy {
   }
 
   useItemAll(item: Item): boolean {
-    if (item === Item.KEY_UP || Item.KEY_DOWN) {
+    if (item === Item.KEY_UP || item === Item.KEY_DOWN) {
       return true;
     }
     return false;
   }
 
   escapeItem(item: Item): boolean {
-    if (item === Item.FROZEN || Item.MUTE) {
+    if (item === Item.FROZEN || item === Item.MUTE) {
       return true;
     }
     return false;
