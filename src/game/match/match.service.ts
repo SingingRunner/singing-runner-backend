@@ -57,7 +57,6 @@ export class MatchService {
     const filteredDenyUser: Array<UserGameDto> = userList.filter(
       (userInfo) => userInfo.getSocket() !== user,
     );
-    user.disconnect(true);
     for (const userInfo of filteredDenyUser) {
       userInfo.getSocket().emit('accept', false);
     }
