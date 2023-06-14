@@ -12,7 +12,7 @@ import {
 import { Server, Socket } from 'socket.io';
 import { MatchService } from './match/match.service';
 import { GameService } from './game.service';
-import { subscribe } from 'diagnostics_channel';
+import { Item } from './item/item.enum';
 
 /**
  * webSocket 통신을 담당하는 Handler
@@ -79,6 +79,28 @@ export class GameGateway
     this.gameService.gameReady(user);
   }
 
+  @SubscribeMessage('use_item')
+  useItemData(@ConnectedSocket() user: Socket, @MessageBody() item: Item) {
+    this.gameService.useItem(user, item);
+  }
+
+  @SubscribeMessage('get_item')
+  getItemData(@ConnectedSocket() user: Socket) {
+    console.log('get item!!!');
+    this.gameService.itemGenerate(user);
+  }
+
+  @SubscribeMessage('escape_frozen')
+  escapeFrozenData(@ConnectedSocket() user: Socket, @MessageBody() item: Item) {
+    console.log('escape frozen!!!');
+    this.gameService.escapeItem(user, item);
+  }
+
+  @SubscribeMessage('escape_mute')
+  escapeMuteData(@ConnectedSocket() user: Socket, @MessageBody() item: Item) {
+    console.log('escape mute!!!');
+    this.gameService.escapeItem(user, item);
+  }
   @SubscribeMessage('score')
   scoreData(@ConnectedSocket() user: Socket, @MessageBody() score: number) {
     this.gameService.broadcastScore(user, score);
