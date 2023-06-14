@@ -23,11 +23,10 @@ export class MatchService {
       userList.push(userGameDto);
       await this.joinRoom(userList);
       const gameRoom: GameRoom = this.gameRoomHandler.findRoomBySocket(user);
-
       for (const user of userList) {
         user
           .getSocket()
-          .emit('match_making', this.gameRoomHandler.getSongInfo(gameRoom)); //songTilte, singer DTO를 전송
+          .emit('match_making', this.gameRoomHandler.getSongInfo(gameRoom));
       }
       return;
     }

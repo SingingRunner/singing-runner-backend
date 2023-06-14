@@ -101,4 +101,8 @@ export class GameGateway
     console.log('escape mute!!!');
     this.gameService.escapeItem(user, item);
   }
+  @SubscribeMessage('score')
+  scoreData(@ConnectedSocket() user: Socket, @MessageBody() score: number) {
+    this.gameService.broadcastScore(user, score);
+  }
 }
