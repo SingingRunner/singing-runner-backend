@@ -69,4 +69,4 @@ jobs:
             fi
             
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/singing-runner-backend:${{ steps.extract-version.outputs.version }}
-            docker run -d -p 4000:3000 --name singing-runner-backend ${{ secrets.DOCKERHUB_USERNAME }}/singing-runner-backend:${{ steps.extract-version.outputs.version }}
+            docker run -d -p 4000:3000 --env-file ./.env --add-host=host.docker.internal:host-gateway --name singing-runner-backend ${{ secrets.DOCKERHUB_USERNAME }}/singing-runner-backend:${{ steps.extract-version.outputs.version }}
