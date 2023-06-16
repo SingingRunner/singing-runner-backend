@@ -16,7 +16,7 @@ export class SimpleMatchMaking implements MatchMakingPolicy {
     this.readyQueue.filter((user) => user !== userGameDto);
   }
 
-  public isQueueReady(): boolean {
+  public isQueueReady(userGameDto: UserGameDto): boolean {
     return this.readyQueue.length >= 2;
   }
 

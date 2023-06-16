@@ -51,7 +51,7 @@ export class GameGateway
       this.matchService.matchMaking(user, data.UserMatchDto);
       return;
     }
-    this.matchService.matchCancle(user, data.UserMatchDto);
+    this.matchService.matchCancel(user, data.UserMatchDto);
   }
 
   /**

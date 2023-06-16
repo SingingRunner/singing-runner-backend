@@ -17,9 +17,9 @@ export class MatchService {
   public async matchMaking(user: Socket, userMatchDto: UserMatchDto) {
     const userGameDto: UserGameDto = new UserGameDto(user, userMatchDto);
 
-    if (this.matchMakingPolicy.isQueueReady()) {
+    if (this.matchMakingPolicy.isQueueReady(userGameDto)) {
       const userList: Array<UserGameDto> =
-        this.matchMakingPolicy.getAvailableUsers();
+        this.matchMakingPolicy.getAvailableUsers(userGameDto);
       userList.push(userGameDto);
       const gameRoom: GameRoom = await this.gameRoomHandler.createRoom();
       this.gameRoomHandler.joinRoom(gameRoom, userList);
