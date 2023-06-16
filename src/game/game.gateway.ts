@@ -45,12 +45,13 @@ export class GameGateway
    * 같이 매칭된 user들(same GameRoom) 과 함께 songTilte, Singer 정보를 전송
    */
   @SubscribeMessage('match_making')
-  matchMakingData(
-    @ConnectedSocket() user: Socket,
-    @MessageBody() userMatchDto: UserMatchDto,
-  ) {
+  matchMakingData(@ConnectedSocket() user: Socket, @MessageBody() data) {
     console.log('matchmaking connect');
-    this.matchService.matchMaking(user, userMatchDto);
+    if (data.accpet) {
+      this.matchService.matchMaking(user, data.UserMatchDto);
+      return;
+    }
+    this.matchService.matchCancle(user, data.UserMatchDto);
   }
 
   /**

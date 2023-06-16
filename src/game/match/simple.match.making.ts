@@ -13,7 +13,7 @@ export class SimpleMatchMaking implements MatchMakingPolicy {
     this.readyQueue.unshift(UserGameDto);
   }
   public leaveQueue(userGameDto: UserGameDto) {
-    return;
+    this.readyQueue.filter((user) => user !== userGameDto);
   }
 
   public isQueueReady(): boolean {
