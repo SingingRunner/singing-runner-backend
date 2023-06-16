@@ -33,6 +33,11 @@ export class MatchService {
     this.matchMakingPolicy.joinQueue(userGameDto);
   }
 
+  public matchCancle(user: Socket, userMatchDto: UserMatchDto) {
+    const userGameDto: UserGameDto = new UserGameDto(user, userMatchDto);
+    this.matchMakingPolicy.leaveQueue(userGameDto);
+  }
+
   public matchAccept(user: Socket) {
     const gameRoom: GameRoom = this.gameRoomHandler.findRoomBySocket(user);
     const userList: Array<UserGameDto> =
