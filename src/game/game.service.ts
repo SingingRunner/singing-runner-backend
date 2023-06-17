@@ -55,36 +55,8 @@ export class GameService {
       userInfo.getSocket().emit("score", { user: user.id, score: score });
     }
   }
-
-  public itemGenerate(user: Socket) {
-    const item = this.itemPolicy.getItems();
-    if (item === null) {
-      return;
-    }
-    console.log(item);
-    const gameRoom: GameRoom = this.gameRoomHandler.findRoomBySocket(user);
-    const userList: Array<UserGameDto> =
-      this.gameRoomHandler.findUsersInRoom(gameRoom);
-    for (const userInfo of userList) {
-      userInfo.getSocket().emit("get_item", item);
-    }
-  }
-
-  public useItem(user: Socket, item: Item) {
-    const gameRoom: GameRoom = this.gameRoomHandler.findRoomBySocket(user);
-    const userList: Array<UserGameDto> =
-      this.gameRoomHandler.findUsersInRoom(gameRoom);
-    if (this.itemPolicy.useItemAll(item)) {
-      for (const userInfo of userList) {
-        userInfo.getSocket().emit("use_item", item);
-      }
-      return;
-    }
-    for (const userInfo of userList) {
-      if (userInfo.getSocket() === user) {
-        continue;
-      }
-      userInfo.getSocket().emit("use_item", { user: user.id, item: item });
-    }
+  
+  public getItem(){
+    return this.itemPolicy.getItems();
   }
 }
