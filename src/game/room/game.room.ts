@@ -6,6 +6,7 @@ export class GameRoom {
   private gameRoomStatus: GameRoomStatus;
   private acceptCount: number;
   private gameSongDto: GameSongDto;
+  private roomMaster: string;
   constructor(
     roomId: number,
     gameRoomStatus: GameRoomStatus,
@@ -16,6 +17,7 @@ export class GameRoom {
     this.gameRoomStatus = gameRoomStatus;
     this.acceptCount = acceptCount;
     this.gameSongDto = gameSongDto;
+    this.roomMaster = "";
   }
 
   public getRoomId(): number {
@@ -39,7 +41,9 @@ export class GameRoom {
   public resetAcceptCount() {
     this.acceptCount = 0;
   }
-
+  public setRoomMaster(userId:string) {
+    this.roomMaster = userId;
+  }
   // public toJSON() {
   //   return {
   //     roomId: this.roomId,
