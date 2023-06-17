@@ -38,6 +38,7 @@ export class GameGateway
 
   handleDisconnect(@ConnectedSocket() user: Socket) {
     console.log(`Client disconnected: ${user.id}`);
+    this.matchService.matchCancel(user);
   }
 
   /**
@@ -51,7 +52,7 @@ export class GameGateway
       this.matchService.matchMaking(user, data.UserMatchDto);
       return;
     }
-    this.matchService.matchCancel(user, data.UserMatchDto);
+    this.matchService.matchCancel(user);
   }
 
   /**

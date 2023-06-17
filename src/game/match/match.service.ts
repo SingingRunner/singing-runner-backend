@@ -33,9 +33,8 @@ export class MatchService {
     this.matchMakingPolicy.joinQueue(userGameDto);
   }
 
-  public matchCancel(user: Socket, userMatchDto: UserMatchDto) {
-    const userGameDto: UserGameDto = new UserGameDto(user, userMatchDto);
-    this.matchMakingPolicy.leaveQueue(userGameDto);
+  public matchCancel(user: Socket) {
+    this.matchMakingPolicy.leaveQueue(user);
   }
 
   public matchAccept(user: Socket) {
@@ -60,16 +59,15 @@ export class MatchService {
     }
     this.gameRoomHandler.deleteRoom(user);
     const filteredDenyUser: Array<UserGameDto> = userList.filter(
-      (userInfo) => userInfo.getSocket() !== user,
+      (userInfo) => userInfo.getSocket().id !== user.id,
     );
     for (const userInfo of filteredDenyUser) {
       userInfo.getSocket().emit('accept', false);
     }
     return;
   }
-
   private joinQueueWithOutDenyUser(userInfo: UserGameDto, user: Socket) {
-    if (userInfo.getSocket() === user) {
+    if (userInfo.getSocket().id === user.id) {
       return;
     }
     this.matchMakingPolicy.joinQueueAtFront(userInfo);
