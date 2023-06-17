@@ -55,7 +55,7 @@ export class GameGateway
     if (data.accept && this.matchService.matchMade(user, data.UserMatchDto)) {
       const gameRoom: GameRoom = this.matchService.findRoomBySocket(user);
       const responseData = this.matchService.getSongInfo(gameRoom);
-      this.broadCast(this.matchService.findUsersInSameRoom(gameRoom), message, responseData);      
+      this.broadCast(user, message, responseData);      
       return
     }
     this.matchService.matchCancel(user);
@@ -71,15 +71,14 @@ export class GameGateway
     @MessageBody() accept: boolean
   ) {
     const message = "match_making";
-    const gameRoom: GameRoom = this.matchService.findRoomBySocket(user);
 
     if (accept&& this.matchService.acceptAllUsers(user)) {
-      this.broadCast(this.matchService.findUsersInSameRoom(gameRoom), message, true);
+      this.broadCast(user, message, true);
       return;
     }
 
     this.matchService.matchDeny(user);
-    this.broadCast(this.matchService.findUsersInSameRoom(gameRoom), message, false);
+    this.broadCast(user, message, false);
     this.matchService.deleteRoom(user);
   }
 
@@ -95,13 +94,23 @@ export class GameGateway
 
   @SubscribeMessage("use_item")
   useItemData(@ConnectedSocket() user: Socket, @MessageBody() item: Item) {
-    this.gameService.useItem(user, item);
+    if (this.gameService.checkItemValidityForAllUsersInRoom(user, item)){
+      this.broadCast(user,"use_item",item);
+      return;
+    }
+    this.broadCast(user, "use_item", item);
   }
 
   @SubscribeMessage("get_item")
   getItemData(@ConnectedSocket() user: Socket) {
     console.log("get item");
-    this.gameService.itemGenerate(user);
+    const item = this.gameService.getItem();
+    if (item !== null){
+      const gameRoom: GameRoom = this.matchService.findRoomBySocket(user);
+      const userList: Array<UserGameDto> =this.matchService.findUsersInSameRoom(gameRoom);
+      this.broadCast(userList, "get_item", item);
+      return;
+    }
   }
 
   @SubscribeMessage("escape_item")
@@ -117,7 +126,9 @@ export class GameGateway
     this.gameService.broadcastScore(user, score);
   }
 
-  private broadCast(userList: UserGameDto[], message:string, responseData: any){
+  private broadCast(user: Socket, message:string, responseData: any){
+    const gameRoom: GameRoom = this.matchService.findRoomBySocket(user);
+    const userList: UserGameDto[] = this.matchService.findUsersInSameRoom(gameRoom);
     for (const user of userList) {
       user.getSocket().emit(message, responseData);
     }
