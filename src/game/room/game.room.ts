@@ -9,6 +9,7 @@ export class GameRoom {
   private gameSongDto: GameSongDto;
   private roomMaster: string;
   private songListInCustom: GameSongDto[];
+  //private gameEvent: GameEvent[]
   constructor(
     roomId: number,
     gameRoomStatus: GameRoomStatus,

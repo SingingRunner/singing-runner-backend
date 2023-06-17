@@ -14,7 +14,8 @@ import { GameService } from "./game.service";
 import { Item } from "./item/item.enum";
 import { GameRoom } from "./room/game.room";
 import { UserGameDto } from "src/user/dto/user.game.dto";
-import { EscapeItemDto } from "./item/dto/escape-item.dto";
+import { subscribe } from "diagnostics_channel";
+import { UserItemDto } from "./item/dto/escape-item.dto";
 
 /**
  * webSocket 통신을 담당하는 Handler
@@ -39,6 +40,7 @@ export class GameGateway
   }
 
   handleDisconnect(@ConnectedSocket() user: Socket) {
+    // 게임중일떄 disconnect 시 탈주자처리
     console.log(`Client disconnected: ${user.id}`);
     this.matchService.matchCancel(user);
   }
@@ -104,9 +106,11 @@ export class GameGateway
   }
 
   @SubscribeMessage("use_item")
-  useItemData(@ConnectedSocket() user: Socket, @MessageBody() item: Item) {
-    console.log("use_item : ", item);
-    this.broadCast(user, "use_item", item);
+  //userId, item 
+  useItemData(@ConnectedSocket() user: Socket, @MessageBody() useItem: UserItemDto) {
+    console.log("use_item : ", useItem);
+
+    this.broadCast(user, "use_item", useItem);
   }
 
   @SubscribeMessage("get_item")
@@ -120,15 +124,25 @@ export class GameGateway
   }
 
   @SubscribeMessage("escape_item")
-  escapeFrozenData(@ConnectedSocket() user: Socket, @MessageBody() escapeItemDto: EscapeItemDto) {
+  escapeFrozenData(@ConnectedSocket() user: Socket, @MessageBody() escapeItem: UserItemDto) {
     const message = "escape_item";
     console.log("escape item");
-    this.broadCast(user, message, escapeItemDto);
+    this.broadCast(user, message, escapeItem);
   }
 
   @SubscribeMessage("score")
   scoreData(@ConnectedSocket() user: Socket, @MessageBody() score) {
     this.broadCast(user, "score", { user: user.id, score: score });
+  }
+
+  @SubscribeMessage("game_terminated")
+  gameTermintated(@ConnectedSocket() user: Socket) {
+    /**
+     * 게임종료시 gameRoom안에 인원이 전부(탈주자 예외처리) 
+     * terminated 메시지와 점수, 녹음정보(리플레이용)를 보내면 
+     * 순위, mmr, userId 를 보내줘야함
+     * + 게임이벤트 및 녹음정보를 각 user마다 DB에 저장. 
+     */
   }
 
   private broadCast(user: Socket, message:string, responseData: any){
@@ -139,4 +153,6 @@ export class GameGateway
       user.getSocket().emit(message, responseData);
     }
   }
+
+  
 }

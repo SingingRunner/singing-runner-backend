@@ -5,6 +5,7 @@ import { GameRoom } from "./room/game.room";
 import { UserGameDto } from "src/user/dto/user.game.dto";
 import { ItemPolicy } from "./item/item.policy";
 import { GameSongDto } from "src/song/dto/game-song.dto";
+import { UserCharacterDto } from "src/user/dto/user-character.dto";
 
 @Injectable()
 export class GameService {
@@ -16,9 +17,18 @@ export class GameService {
 
   public loadData(user: Socket) {
     const gameRoom: GameRoom = this.gameRoomHandler.findRoomBySocket(user);
+    const userList: UserGameDto[] = this.gameRoomHandler.findUsersInRoom(gameRoom);
+    const characterList = [];
+    for (const user of userList){
+      characterList
+      .push({
+        "userId":user.getUserMatchDto().userId, 
+        "character":user.getUserMatchDto().character
+      })
+    }
     const gameSongdto: GameSongDto = gameRoom.getGameSongDto();
     const gameSong = gameSongdto.toJSON();
-    user.emit("loading", gameSong);
+    user.emit("loading", {"gameSong":gameSong, "characterList" :characterList});
   }
 
   public isGameReady(user: Socket):boolean {
@@ -46,4 +56,10 @@ export class GameService {
   public getItem(){
     return this.itemPolicy.getItems();
   }
+
+  // public gameEvent(){
+  //  GameRoom 마다 replay용 game event 저장.
+  // }
+
+  //게임종료시 DB에 event 저장
 }
