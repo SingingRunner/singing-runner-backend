@@ -14,19 +14,23 @@ export class MatchService {
     private matchMakingPolicy: MatchMakingPolicy
   ) {}
 
-  public async matchMade(user: Socket, userMatchDto: UserMatchDto) {
-    const userGameDto: UserGameDto = new UserGameDto(user, userMatchDto);
-
-    if (this.matchMakingPolicy.isQueueReady(userGameDto)) {
+  public async matchMaking(userGameDto) {
       const userList: Array<UserGameDto> =
         this.matchMakingPolicy.getAvailableUsers(userGameDto);
       userList.push(userGameDto);
       const gameRoom: GameRoom = await this.gameRoomHandler.createRoom();
+      console.log("gameRoom : ", gameRoom);
       this.gameRoomHandler.joinRoom(gameRoom, userList);
+  }
+
+  public async isMatchMade(user: Socket, userMatchDto: UserMatchDto):Promise<boolean>{
+    const userGameDto: UserGameDto = new UserGameDto(user, userMatchDto);
+    if (this.matchMakingPolicy.isQueueReady(userGameDto)) {
+      await this.matchMaking(userGameDto);
       return true;
     }
     this.matchMakingPolicy.joinQueue(userGameDto);
-    return false
+    return false;
   }
 
   public matchCancel(user: Socket) {

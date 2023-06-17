@@ -1,4 +1,3 @@
-import { UserMatchDto } from "./../user/dto/user.match.dto";
 import {
   ConnectedSocket,
   MessageBody,
@@ -50,16 +49,21 @@ export class GameGateway
    */
 
   @SubscribeMessage("match_making")
-  matchMakingData(@ConnectedSocket() user: Socket, @MessageBody() data) {
+  async matchMakingData(@ConnectedSocket() user: Socket, @MessageBody() data) {
     console.log("matchmaking connect");
     const message = "match_making";
-    if (data.accept && this.matchService.matchMade(user, data.UserMatchDto)) {
-      const gameRoom: GameRoom = this.matchService.findRoomBySocket(user);
-      const responseData = this.matchService.getSongInfo(gameRoom);
-      this.broadCast(user, message, responseData);      
-      return
+    if (!data.accept) {
+      this.matchService.matchCancel(user);
+      return;
     }
-    this.matchService.matchCancel(user);
+    if(!(await this.matchService.isMatchMade(user, data.UserMatchDto))){
+      return;
+    }
+    const gameRoom: GameRoom = this.matchService.findRoomBySocket(user);
+    const responseData = this.matchService.getSongInfo(gameRoom);
+    console.log("before broadcast : ");
+    this.broadCast(user, message, responseData);      
+    return;
   }
 
   /**
@@ -71,9 +75,12 @@ export class GameGateway
     @ConnectedSocket() user: Socket,
     @MessageBody() accept: boolean
   ) {
-    const message = "match_making";
+    const message = "accept";
 
-    if (accept&& this.matchService.acceptAllUsers(user)) {
+    if (accept) {
+      if(!this.matchService.acceptAllUsers(user)){
+        return;
+      }
       this.broadCast(user, message, true);
       return;
     }
@@ -90,11 +97,15 @@ export class GameGateway
 
   @SubscribeMessage("game_ready")
   gameReadyData(@ConnectedSocket() user: Socket) {
-    this.gameService.gameReady(user);
+    if(this.gameService.isGameReady(user)){
+      const userIdList: string[] = this.gameService.findUsersIdInSameRoom(user)
+      this.broadCast(user, "game_ready", userIdList);
+    }
   }
 
   @SubscribeMessage("use_item")
   useItemData(@ConnectedSocket() user: Socket, @MessageBody() item: Item) {
+    console.log("use_item : ", item);
     this.broadCast(user, "use_item", item);
   }
 
@@ -116,11 +127,12 @@ export class GameGateway
   }
 
   @SubscribeMessage("score")
-  scoreData(@ConnectedSocket() user: Socket, @MessageBody() score: number) {
-    this.gameService.broadcastScore(user, score);
+  scoreData(@ConnectedSocket() user: Socket, @MessageBody() score) {
+    this.broadCast(user, "score", { user: user.id, score: score });
   }
 
   private broadCast(user: Socket, message:string, responseData: any){
+    console.log("in broad cast : ", responseData);
     const gameRoom: GameRoom = this.matchService.findRoomBySocket(user);
     const userList: UserGameDto[] = this.matchService.findUsersInSameRoom(gameRoom);
     for (const user of userList) {

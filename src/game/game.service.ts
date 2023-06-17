@@ -22,26 +22,26 @@ export class GameService {
     user.emit("loading", gameSong);
   }
 
-  public gameReady(user: Socket) {
+  public isGameReady(user: Socket):boolean {
     const gameRoom: GameRoom = this.gameRoomHandler.findRoomBySocket(user);
 
     this.gameRoomHandler.increaseAcceptCount(user);
     if (this.gameRoomHandler.isGameRoomReady(gameRoom)) {
       gameRoom.resetAcceptCount();
-      this.broadcastGameRoom(gameRoom);
+      return true;
     }
+    return false;
   }
 
-  private broadcastGameRoom(gameRoom: GameRoom) {
+  public findUsersIdInSameRoom(user: Socket) : string[]{
+    const gameRoom:GameRoom = this.gameRoomHandler.findRoomBySocket(user);
     const userList: Array<UserGameDto> =
       this.gameRoomHandler.findUsersInRoom(gameRoom);
     const userIdList: string[] = [];
     for (const userInfo of userList) {
-      userIdList.push(userInfo.getSocket().id);
+      userIdList.push(userInfo.getUserMatchDto().userId);
     }
-    for (const userInfo of userList) {
-      userInfo.getSocket().emit("game_ready", userIdList);
-    }
+    return userIdList;
   }
 
   public broadcastScore(user: Socket, score: number) {
