@@ -1,6 +1,6 @@
-import { Socket } from 'socket.io';
-import { UserMatchDto } from './user.match.dto';
-import { IsNotEmpty } from '@nestjs/class-validator';
+import { Socket } from "socket.io";
+import { UserMatchDto } from "./user.match.dto";
+import { IsNotEmpty } from "@nestjs/class-validator";
 
 export class UserGameDto {
   @IsNotEmpty()

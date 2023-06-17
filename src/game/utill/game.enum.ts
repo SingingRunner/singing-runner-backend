@@ -1,4 +1,4 @@
 export enum GameRoomStatus {
-  IN_GAME = 'inGame',
-  MATCHING = 'matching',
+  IN_GAME = "inGame",
+  MATCHING = "matching",
 }

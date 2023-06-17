@@ -1,4 +1,4 @@
-import { UserGameDto } from 'src/user/dto/user.game.dto';
+import { UserGameDto } from "src/user/dto/user.game.dto";
 
 export interface MatchMakingPolicy {
   joinQueue(userGameDto: UserGameDto);

@@ -1,4 +1,4 @@
-import { UserMatchDto } from './../user/dto/user.match.dto';
+import { UserMatchDto } from "./../user/dto/user.match.dto";
 import {
   ConnectedSocket,
   MessageBody,
@@ -8,11 +8,11 @@ import {
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
-} from '@nestjs/websockets';
-import { Server, Socket } from 'socket.io';
-import { MatchService } from './match/match.service';
-import { GameService } from './game.service';
-import { Item } from './item/item.enum';
+} from "@nestjs/websockets";
+import { Server, Socket } from "socket.io";
+import { MatchService } from "./match/match.service";
+import { GameService } from "./game.service";
+import { Item } from "./item/item.enum";
 
 /**
  * webSocket 통신을 담당하는 Handler
@@ -25,11 +25,11 @@ export class GameGateway
 
   constructor(
     private matchService: MatchService,
-    private gameService: GameService,
+    private gameService: GameService
   ) {}
 
   afterInit(server: Server) {
-    console.log('Socket.io server initialized in ');
+    console.log("Socket.io server initialized in ");
   }
 
   handleConnection(@ConnectedSocket() user: Socket) {
@@ -44,12 +44,12 @@ export class GameGateway
    * MatchMakingPolicy에 따라 user가 매칭되면 GameRoom에 추가 후
    * 같이 매칭된 user들(same GameRoom) 과 함께 songTilte, Singer 정보를 전송
    */
-  @SubscribeMessage('match_making')
+  @SubscribeMessage("match_making")
   matchMakingData(
     @ConnectedSocket() user: Socket,
-    @MessageBody() userMatchDto: UserMatchDto,
+    @MessageBody() userMatchDto: UserMatchDto
   ) {
-    console.log('matchmaking connect');
+    console.log("matchmaking connect");
     this.matchService.matchMaking(user, userMatchDto);
   }
 
@@ -57,10 +57,10 @@ export class GameGateway
    * 같은 Room user가 전부 accpet시 게임시작
    * 한명이라도 거절시 Room 제거, 수락한 user는 readyQueue 에 우선순위가 높게 push
    */
-  @SubscribeMessage('accept')
+  @SubscribeMessage("accept")
   matchAcceptData(
     @ConnectedSocket() user: Socket,
-    @MessageBody() accept: boolean,
+    @MessageBody() accept: boolean
   ) {
     if (accept) {
       this.matchService.matchAccept(user);
@@ -69,34 +69,34 @@ export class GameGateway
     this.matchService.matchDeny(user);
   }
 
-  @SubscribeMessage('loading')
+  @SubscribeMessage("loading")
   loadSongData(@ConnectedSocket() user: Socket) {
     this.gameService.loadData(user);
   }
 
-  @SubscribeMessage('game_ready')
+  @SubscribeMessage("game_ready")
   gameReadyData(@ConnectedSocket() user: Socket) {
     this.gameService.gameReady(user);
   }
 
-  @SubscribeMessage('use_item')
+  @SubscribeMessage("use_item")
   useItemData(@ConnectedSocket() user: Socket, @MessageBody() item: Item) {
     this.gameService.useItem(user, item);
   }
 
-  @SubscribeMessage('get_item')
+  @SubscribeMessage("get_item")
   getItemData(@ConnectedSocket() user: Socket) {
-    console.log('get item');
+    console.log("get item");
     this.gameService.itemGenerate(user);
   }
 
-  @SubscribeMessage('escape_item')
+  @SubscribeMessage("escape_item")
   escapeFrozenData(@ConnectedSocket() user: Socket) {
-    console.log('escape item');
+    console.log("escape item");
     this.gameService.escapeItem(user);
   }
 
-  @SubscribeMessage('score')
+  @SubscribeMessage("score")
   scoreData(@ConnectedSocket() user: Socket, @MessageBody() score: number) {
     this.gameService.broadcastScore(user, score);
   }

@@ -1,6 +1,6 @@
-import { IsString, IsBoolean } from 'class-validator';
-import { Song } from '../entities/song.entity';
-import { plainToClass } from 'class-transformer';
+import { IsString, IsBoolean } from "class-validator";
+import { Song } from "../entities/song.entity";
+import { plainToClass } from "class-transformer";
 export class GameSongDto {
   constructor(song: Song) {
     this.songTitle = song.songTitle;

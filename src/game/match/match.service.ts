@@ -1,17 +1,17 @@
-import { GameRoom } from './../room/game.room';
-import { UserGameDto } from 'src/user/dto/user.game.dto';
-import { Inject, Injectable } from '@nestjs/common';
-import { Socket } from 'socket.io';
-import { UserMatchDto } from 'src/user/dto/user.match.dto';
-import { GameRoomHandler } from '../room/game.room.handler';
-import { MatchMakingPolicy } from './match.making.policy';
+import { GameRoom } from "./../room/game.room";
+import { UserGameDto } from "../../user/dto/user.game.dto";
+import { Inject, Injectable } from "@nestjs/common";
+import { Socket } from "socket.io";
+import { UserMatchDto } from "../../user/dto/user.match.dto";
+import { GameRoomHandler } from "../room/game.room.handler";
+import { MatchMakingPolicy } from "./match.making.policy";
 
 @Injectable()
 export class MatchService {
   constructor(
     private gameRoomHandler: GameRoomHandler,
-    @Inject('MatchMakingPolicy')
-    private matchMakingPolicy: MatchMakingPolicy,
+    @Inject("MatchMakingPolicy")
+    private matchMakingPolicy: MatchMakingPolicy
   ) {}
 
   public async matchMaking(user: Socket, userMatchDto: UserMatchDto) {
@@ -26,7 +26,7 @@ export class MatchService {
       for (const user of userList) {
         user
           .getSocket()
-          .emit('match_making', this.gameRoomHandler.getSongInfo(gameRoom));
+          .emit("match_making", this.gameRoomHandler.getSongInfo(gameRoom));
       }
       return;
     }
@@ -41,7 +41,7 @@ export class MatchService {
     if (this.gameRoomHandler.isGameRoomReady(gameRoom)) {
       gameRoom.resetAcceptCount();
       for (const user of userList) {
-        user.getSocket().emit('accept', true);
+        user.getSocket().emit("accept", true);
       }
     }
   }
@@ -55,11 +55,11 @@ export class MatchService {
     }
     this.gameRoomHandler.deleteRoom(user);
     const filteredDenyUser: Array<UserGameDto> = userList.filter(
-      (userInfo) => userInfo.getSocket() !== user,
+      (userInfo) => userInfo.getSocket() !== user
     );
     user.disconnect(true);
     for (const userInfo of filteredDenyUser) {
-      userInfo.getSocket().emit('accept', false);
+      userInfo.getSocket().emit("accept", false);
     }
     return;
   }
