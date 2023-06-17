@@ -18,6 +18,11 @@ export class GameRoomHandler {
     }
   }
 
+  public leaveRoom(gameRoom: GameRoom, user: Socket) {
+    const users:UserGameDto[] = this.roomList.get(gameRoom).filter((userInfo) => userInfo.getSocket().id !== user.id);
+    this.roomList.set(gameRoom, users);
+  }
+
   public isGameRoomReady(gameRoom: GameRoom): boolean {
     if (gameRoom.getAcceptCount() === 3) {
       return true;
