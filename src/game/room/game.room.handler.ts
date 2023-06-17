@@ -12,10 +12,8 @@ export class GameRoomHandler {
 
   constructor(private songService: SongService) {}
 
-  public joinRoom(gameRoom: GameRoom, userList: Array<UserGameDto>) {
-    for (const user of userList) {
-      this.roomList.get(gameRoom).push(user);
-    }
+  public joinRoom(gameRoom: GameRoom, user: UserGameDto) {
+    this.roomList.get(gameRoom).push(user);
   }
 
   public leaveRoom(gameRoom: GameRoom, user: Socket) {
