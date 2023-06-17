@@ -4,7 +4,6 @@ import { Socket } from "socket.io";
 import { GameRoom } from "./room/game.room";
 import { UserGameDto } from "src/user/dto/user.game.dto";
 import { ItemPolicy } from "./item/item.policy";
-import { Item } from "./item/item.enum";
 import { GameSongDto } from "src/song/dto/game-song.dto";
 
 @Injectable()
@@ -42,18 +41,6 @@ export class GameService {
       userIdList.push(userInfo.getUserMatchDto().userId);
     }
     return userIdList;
-  }
-
-  public broadcastScore(user: Socket, score: number) {
-    const gameRoom: GameRoom = this.gameRoomHandler.findRoomBySocket(user);
-    const userList: Array<UserGameDto> =
-      this.gameRoomHandler.findUsersInRoom(gameRoom);
-    for (const userInfo of userList) {
-      if (user === userInfo.getSocket()) {
-        continue;
-      }
-      userInfo.getSocket().emit("score", { user: user.id, score: score });
-    }
   }
   
   public getItem(){
