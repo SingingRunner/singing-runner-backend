@@ -13,6 +13,8 @@ import { Server, Socket } from "socket.io";
 import { MatchService } from "./match/match.service";
 import { GameService } from "./game.service";
 import { Item } from "./item/item.enum";
+import { GameRoom } from "./room/game.room";
+import { UserGameDto } from "src/user/dto/user.game.dto";
 
 /**
  * webSocket 통신을 담당하는 Handler
@@ -49,9 +51,12 @@ export class GameGateway
   @SubscribeMessage("match_making")
   matchMakingData(@ConnectedSocket() user: Socket, @MessageBody() data) {
     console.log("matchmaking connect");
-    if (data.accept) {
-      this.matchService.matchMaking(user, data.UserMatchDto);
-      return;
+    const message = "match_making";
+    if (data.accept && this.matchService.matchMade(user, data.UserMatchDto)) {
+      const gameRoom: GameRoom = this.matchService.findRoomBySocket(user);
+      const responseData = this.matchService.getSongInfo(gameRoom);
+      this.broadCast(this.matchService.findUsersInSameRoom(gameRoom), message, responseData);      
+      return
     }
     this.matchService.matchCancel(user);
   }
@@ -102,5 +107,11 @@ export class GameGateway
   @SubscribeMessage("score")
   scoreData(@ConnectedSocket() user: Socket, @MessageBody() score: number) {
     this.gameService.broadcastScore(user, score);
+  }
+
+  private broadCast(userList: UserGameDto[], message:string, responseData: any){
+    for (const user of userList) {
+      user.getSocket().emit(message, responseData);
+    }
   }
 }

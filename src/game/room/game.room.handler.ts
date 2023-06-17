@@ -62,13 +62,6 @@ export class GameRoomHandler {
     }
   }
 
-  public getSongInfo(gameRoom: GameRoom) {
-    const songTitle: string = gameRoom.getGameSongDto().songTitle;
-    const singer: string = gameRoom.getGameSongDto().singer;
-
-    return { songTitle: songTitle, singer: singer };
-  }
-
   private roomCount(): number {
     return this.roomList.size;
   }

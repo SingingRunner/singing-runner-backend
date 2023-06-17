@@ -14,7 +14,7 @@ export class MatchService {
     private matchMakingPolicy: MatchMakingPolicy
   ) {}
 
-  public async matchMaking(user: Socket, userMatchDto: UserMatchDto) {
+  public async matchMade(user: Socket, userMatchDto: UserMatchDto) {
     const userGameDto: UserGameDto = new UserGameDto(user, userMatchDto);
 
     if (this.matchMakingPolicy.isQueueReady(userGameDto)) {
@@ -23,14 +23,10 @@ export class MatchService {
       userList.push(userGameDto);
       const gameRoom: GameRoom = await this.gameRoomHandler.createRoom();
       this.gameRoomHandler.joinRoom(gameRoom, userList);
-      for (const user of userList) {
-        user
-          .getSocket()
-          .emit("match_making", this.gameRoomHandler.getSongInfo(gameRoom));
-      }
-      return;
+      return true;
     }
     this.matchMakingPolicy.joinQueue(userGameDto);
+    return false
   }
 
   public matchCancel(user: Socket) {
@@ -66,6 +62,21 @@ export class MatchService {
     }
     return;
   }
+
+  public findRoomBySocket(user:Socket):GameRoom{
+   return this.gameRoomHandler.findRoomBySocket(user);
+  }
+
+  public findUsersInSameRoom(gameRoom: GameRoom): UserGameDto[]{
+    return this.gameRoomHandler.findUsersInRoom(gameRoom);
+  }
+
+  public getSongInfo(gameRoom:GameRoom){
+    const songTitle: string = gameRoom.getGameSongDto().songTitle;
+    const singer: string = gameRoom.getGameSongDto().singer;
+    return {songTitle, singer} 
+  }
+
   private joinQueueWithOutDenyUser(userInfo: UserGameDto, user: Socket) {
     if (userInfo.getSocket().id === user.id) {
       return;
