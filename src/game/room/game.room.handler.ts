@@ -64,7 +64,17 @@ export class GameRoomHandler {
       }
     }
   }
-
+  
+  public findRoomByUserId(userId: string): GameRoom {
+    for (const key of this.roomList.keys()) {
+      const foundUser = this.roomList
+        .get(key)
+        .find((userInRoom) => userInRoom.getUserMatchDto().userId === userId);
+      if (foundUser) {
+        return key;
+      }
+    }
+  }
   private roomCount(): number {
     return this.roomList.size;
   }
