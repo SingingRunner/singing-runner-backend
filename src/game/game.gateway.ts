@@ -15,6 +15,7 @@ import { GameService } from "./game.service";
 import { Item } from "./item/item.enum";
 import { GameRoom } from "./room/game.room";
 import { UserGameDto } from "src/user/dto/user.game.dto";
+import { EscapeItemDto } from "./item/dto/escape-item.dto";
 
 /**
  * webSocket 통신을 담당하는 Handler
@@ -94,10 +95,6 @@ export class GameGateway
 
   @SubscribeMessage("use_item")
   useItemData(@ConnectedSocket() user: Socket, @MessageBody() item: Item) {
-    if (this.gameService.checkItemValidityForAllUsersInRoom(user, item)){
-      this.broadCast(user,"use_item",item);
-      return;
-    }
     this.broadCast(user, "use_item", item);
   }
 
@@ -106,19 +103,16 @@ export class GameGateway
     console.log("get item");
     const item = this.gameService.getItem();
     if (item !== null){
-      const gameRoom: GameRoom = this.matchService.findRoomBySocket(user);
-      const userList: Array<UserGameDto> =this.matchService.findUsersInSameRoom(gameRoom);
-      this.broadCast(userList, "get_item", item);
+      this.broadCast(user, "get_item", item);
       return;
     }
   }
 
   @SubscribeMessage("escape_item")
-  escapeFrozenData(@ConnectedSocket() user: Socket) {
+  escapeFrozenData(@ConnectedSocket() user: Socket, @MessageBody() escapeItemDto: EscapeItemDto) {
     const message = "escape_item";
     console.log("escape item");
-    const gameRoom:GameRoom = this.matchService.findRoomBySocket(user);
-    this.broadCast(this.matchService.findUsersInSameRoom(gameRoom), message, user.id);
+    this.broadCast(user, message, escapeItemDto);
   }
 
   @SubscribeMessage("score")
