@@ -47,7 +47,8 @@ export class GameGateway
   @SubscribeMessage('match_making')
   matchMakingData(@ConnectedSocket() user: Socket, @MessageBody() data) {
     console.log('matchmaking connect');
-    if (data.accpet) {
+    if (data.accept) {
+      // 매칭 수락
       this.matchService.matchMaking(user, data.UserMatchDto);
       return;
     }
