@@ -33,17 +33,14 @@ export class MatchService {
     this.matchMakingPolicy.leaveQueue(user);
   }
 
-  public matchAccept(user: Socket) {
+  public acceptAllUsers(user: Socket):boolean {
     const gameRoom: GameRoom = this.gameRoomHandler.findRoomBySocket(user);
-    const userList: Array<UserGameDto> =
-      this.gameRoomHandler.findUsersInRoom(gameRoom);
     this.gameRoomHandler.increaseAcceptCount(user);
     if (this.gameRoomHandler.isGameRoomReady(gameRoom)) {
       gameRoom.resetAcceptCount();
-      for (const user of userList) {
-        user.getSocket().emit("accept", true);
-      }
+      return true;
     }
+    return false;
   }
 
   public matchDeny(user: Socket) {
@@ -53,14 +50,7 @@ export class MatchService {
     for (const userInfo of userList) {
       this.joinQueueWithOutDenyUser(userInfo, user);
     }
-    this.gameRoomHandler.deleteRoom(user);
-    const filteredDenyUser: Array<UserGameDto> = userList.filter(
-      (userInfo) => userInfo.getSocket().id !== user.id,
-    );
-    for (const userInfo of filteredDenyUser) {
-      userInfo.getSocket().emit("accept", false);
-    }
-    return;
+    this.gameRoomHandler.leaveRoom(gameRoom, user);
   }
 
   public findRoomBySocket(user:Socket):GameRoom{
@@ -75,6 +65,10 @@ export class MatchService {
     const songTitle: string = gameRoom.getGameSongDto().songTitle;
     const singer: string = gameRoom.getGameSongDto().singer;
     return {songTitle, singer} 
+  }
+
+  public deleteRoom(user:Socket){
+    this.gameRoomHandler.deleteRoom(user);
   }
 
   private joinQueueWithOutDenyUser(userInfo: UserGameDto, user: Socket) {

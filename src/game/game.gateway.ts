@@ -70,11 +70,17 @@ export class GameGateway
     @ConnectedSocket() user: Socket,
     @MessageBody() accept: boolean
   ) {
-    if (accept) {
-      this.matchService.matchAccept(user);
+    const message = "match_making";
+    const gameRoom: GameRoom = this.matchService.findRoomBySocket(user);
+
+    if (accept&& this.matchService.acceptAllUsers(user)) {
+      this.broadCast(this.matchService.findUsersInSameRoom(gameRoom), message, true);
       return;
     }
+    
     this.matchService.matchDeny(user);
+    this.broadCast(this.matchService.findUsersInSameRoom(gameRoom), message, false);
+    this.matchService.deleteRoom(user);
   }
 
   @SubscribeMessage("loading")
