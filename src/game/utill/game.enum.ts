@@ -4,9 +4,9 @@ export enum GameRoomStatus {
 }
 
 export enum UserMatchTier {
-  BRONZE = 100,
-  SILVER = 200,
-  GOLD = 300,
-  PLATINUM = 400,
-  DIA = 500,
+  BRONZE = 1000,
+  SILVER = 2000,
+  GOLD = 3000,
+  PLATINUM = 4000,
+  DIAMOND = 5000,
 }

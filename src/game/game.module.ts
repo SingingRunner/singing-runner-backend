@@ -6,6 +6,7 @@ import { GameGateway } from './game.gateway';
 import { MatchService } from './match/match.service';
 import { SongModule } from 'src/song/song.module';
 import { SimpleItemPolicy } from './item/simple.item.policy';
+import { MMRMatchPolicy } from './match/mmr.match.policy';
 
 @Module({
   imports: [SongModule],
@@ -15,7 +16,7 @@ import { SimpleItemPolicy } from './item/simple.item.policy';
     GameRoomHandler,
     {
       provide: 'MatchMakingPolicy',
-      useClass: SimpleMatchMaking,
+      useClass: MMRMatchPolicy,
     },
     GameGateway,
     {
