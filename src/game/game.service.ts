@@ -87,17 +87,4 @@ export class GameService {
       userInfo.getSocket().emit("use_item", { user: user.id, item: item });
     }
   }
-
-  public escapeItem(user: Socket) {
-    const gameRoom: GameRoom = this.gameRoomHandler.findRoomBySocket(user);
-    const userList: Array<UserGameDto> =
-      this.gameRoomHandler.findUsersInRoom(gameRoom);
-
-    for (const userInfo of userList) {
-      if (user === userInfo.getSocket()) {
-        continue;
-      }
-      userInfo.getSocket().emit("escape_item", user.id);
-    }
-  }
 }

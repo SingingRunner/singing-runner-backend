@@ -77,7 +77,7 @@ export class GameGateway
       this.broadCast(this.matchService.findUsersInSameRoom(gameRoom), message, true);
       return;
     }
-    
+
     this.matchService.matchDeny(user);
     this.broadCast(this.matchService.findUsersInSameRoom(gameRoom), message, false);
     this.matchService.deleteRoom(user);
@@ -106,8 +106,10 @@ export class GameGateway
 
   @SubscribeMessage("escape_item")
   escapeFrozenData(@ConnectedSocket() user: Socket) {
+    const message = "escape_item";
     console.log("escape item");
-    this.gameService.escapeItem(user);
+    const gameRoom:GameRoom = this.matchService.findRoomBySocket(user);
+    this.broadCast(this.matchService.findUsersInSameRoom(gameRoom), message, user.id);
   }
 
   @SubscribeMessage("score")
