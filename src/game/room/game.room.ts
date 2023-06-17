@@ -1,12 +1,14 @@
 import { GameSongDto } from "src/song/dto/game-song.dto";
 import { GameRoomStatus } from "./../utill/game.enum";
 import { plainToClass } from "class-transformer";
+import { publicDecrypt } from "crypto";
 export class GameRoom {
   private roomId: number;
   private gameRoomStatus: GameRoomStatus;
   private acceptCount: number;
   private gameSongDto: GameSongDto;
   private roomMaster: string;
+  private songListInCustom: GameSongDto[];
   constructor(
     roomId: number,
     gameRoomStatus: GameRoomStatus,
@@ -18,6 +20,7 @@ export class GameRoom {
     this.acceptCount = acceptCount;
     this.gameSongDto = gameSongDto;
     this.roomMaster = "";
+    this.songListInCustom = [];
   }
 
   public getRoomId(): number {
@@ -35,6 +38,9 @@ export class GameRoom {
   public getGameSongDto(): GameSongDto {
     return this.gameSongDto;
   }
+  public setGameSongDto(song: GameSongDto){
+    this.gameSongDto = song;
+  }
   public increaseAcceptCount() {
     this.acceptCount += 1;
   }
@@ -44,12 +50,12 @@ export class GameRoom {
   public setRoomMaster(userId:string) {
     this.roomMaster = userId;
   }
-  // public toJSON() {
-  //   return {
-  //     roomId: this.roomId,
-  //     gameRoomStatus: this.gameRoomStatus,
-  //     acceptCount: this.acceptCount,
-  //     gameSongDto: plainToClass(GameSongDto, this.gameSongDto),
-  //   };
-  // }
+  public setSongListInCustom(gameSongDtoList: GameSongDto[]){
+    this.songListInCustom = gameSongDtoList;
+  }
+
+  public getSongListinCustom(): GameSongDto[]{
+    return this.songListInCustom;
+  }
+ 
 }
