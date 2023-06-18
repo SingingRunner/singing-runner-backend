@@ -12,7 +12,7 @@ export class GameRoomHandler {
 
   constructor(private songService: SongService) {}
 
-  public addUser(gameRoom: GameRoom, userList: Array<UserGameDto>) {
+  public joinRoom(gameRoom: GameRoom, userList: Array<UserGameDto>) {
     for (const user of userList) {
       this.roomList.get(gameRoom).push(user);
     }

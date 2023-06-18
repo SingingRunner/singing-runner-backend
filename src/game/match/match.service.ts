@@ -17,12 +17,12 @@ export class MatchService {
   public async matchMaking(user: Socket, userMatchDto: UserMatchDto) {
     const userGameDto: UserGameDto = new UserGameDto(user, userMatchDto);
 
-    if (this.isMatchingAvailable()) {
+    if (this.matchMakingPolicy.isQueueReady(userGameDto)) {
       const userList: Array<UserGameDto> =
-        this.matchMakingPolicy.getAvailableUsers();
+        this.matchMakingPolicy.getAvailableUsers(userGameDto);
       userList.push(userGameDto);
-      await this.joinRoom(userList);
-      const gameRoom: GameRoom = this.gameRoomHandler.findRoomBySocket(user);
+      const gameRoom: GameRoom = await this.gameRoomHandler.createRoom();
+      this.gameRoomHandler.joinRoom(gameRoom, userList);
       for (const user of userList) {
         user
           .getSocket()
@@ -31,6 +31,11 @@ export class MatchService {
       return;
     }
     this.matchMakingPolicy.joinQueue(userGameDto);
+  }
+
+  public matchCancel(user: Socket, userMatchDto: UserMatchDto) {
+    const userGameDto: UserGameDto = new UserGameDto(user, userMatchDto);
+    this.matchMakingPolicy.leaveQueue(userGameDto);
   }
 
   public matchAccept(user: Socket) {
@@ -57,7 +62,6 @@ export class MatchService {
     const filteredDenyUser: Array<UserGameDto> = userList.filter(
       (userInfo) => userInfo.getSocket() !== user
     );
-    user.disconnect(true);
     for (const userInfo of filteredDenyUser) {
       userInfo.getSocket().emit("accept", false);
     }
@@ -69,17 +73,5 @@ export class MatchService {
       return;
     }
     this.matchMakingPolicy.joinQueueAtFront(userInfo);
-  }
-
-  private isMatchingAvailable(): boolean {
-    if (this.matchMakingPolicy.isQueueReady()) {
-      return true;
-    }
-    return false;
-  }
-
-  private async joinRoom(userList: Array<UserGameDto>) {
-    const gameRoom: GameRoom = await this.gameRoomHandler.createRoom();
-    this.gameRoomHandler.addUser(gameRoom, userList);
   }
 }
