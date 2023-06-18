@@ -1,4 +1,4 @@
-import { Item } from './item.enum';
+import { Item } from "./item.enum";
 
 export interface ItemPolicy {
   getItems(): Item;

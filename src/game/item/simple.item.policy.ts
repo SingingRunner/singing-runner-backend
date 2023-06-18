@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
-import { Item } from './item.enum';
-import { ItemPolicy } from './item.policy';
+import { Injectable } from "@nestjs/common";
+import { Item } from "./item.enum";
+import { ItemPolicy } from "./item.policy";
 
 @Injectable()
 export class SimpleItemPolicy implements ItemPolicy {

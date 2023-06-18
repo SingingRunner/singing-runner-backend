@@ -1,25 +1,25 @@
-import { GameRoomHandler } from './room/game.room.handler';
-import { Inject, Injectable } from '@nestjs/common';
-import { Socket } from 'socket.io';
-import { GameRoom } from './room/game.room';
-import { UserGameDto } from 'src/user/dto/user.game.dto';
-import { ItemPolicy } from './item/item.policy';
-import { Item } from './item/item.enum';
-import { GameSongDto } from 'src/song/dto/game-song.dto';
+import { GameRoomHandler } from "./room/game.room.handler";
+import { Inject, Injectable } from "@nestjs/common";
+import { Socket } from "socket.io";
+import { GameRoom } from "./room/game.room";
+import { UserGameDto } from "src/user/dto/user.game.dto";
+import { ItemPolicy } from "./item/item.policy";
+import { Item } from "./item/item.enum";
+import { GameSongDto } from "src/song/dto/game-song.dto";
 
 @Injectable()
 export class GameService {
   constructor(
     private gameRoomHandler: GameRoomHandler,
-    @Inject('ItemPolicy')
-    private itemPolicy: ItemPolicy,
+    @Inject("ItemPolicy")
+    private itemPolicy: ItemPolicy
   ) {}
 
   public loadData(user: Socket) {
     const gameRoom: GameRoom = this.gameRoomHandler.findRoomBySocket(user);
     const gameSongdto: GameSongDto = gameRoom.getGameSongDto();
     const gameSong = gameSongdto.toJSON();
-    user.emit('loading', gameSong);
+    user.emit("loading", gameSong);
   }
 
   public gameReady(user: Socket) {
@@ -40,7 +40,7 @@ export class GameService {
       userIdList.push(userInfo.getSocket().id);
     }
     for (const userInfo of userList) {
-      userInfo.getSocket().emit('game_ready', userIdList);
+      userInfo.getSocket().emit("game_ready", userIdList);
     }
   }
 
@@ -52,7 +52,7 @@ export class GameService {
       if (user === userInfo.getSocket()) {
         continue;
       }
-      userInfo.getSocket().emit('score', { user: user.id, score: score });
+      userInfo.getSocket().emit("score", { user: user.id, score: score });
     }
   }
 
@@ -66,7 +66,7 @@ export class GameService {
     const userList: Array<UserGameDto> =
       this.gameRoomHandler.findUsersInRoom(gameRoom);
     for (const userInfo of userList) {
-      userInfo.getSocket().emit('get_item', item);
+      userInfo.getSocket().emit("get_item", item);
     }
   }
 
@@ -76,7 +76,7 @@ export class GameService {
       this.gameRoomHandler.findUsersInRoom(gameRoom);
     if (this.itemPolicy.useItemAll(item)) {
       for (const userInfo of userList) {
-        userInfo.getSocket().emit('use_item', item);
+        userInfo.getSocket().emit("use_item", item);
       }
       return;
     }
@@ -84,7 +84,7 @@ export class GameService {
       if (userInfo.getSocket() === user) {
         continue;
       }
-      userInfo.getSocket().emit('use_item', { user: user.id, item: item });
+      userInfo.getSocket().emit("use_item", { user: user.id, item: item });
     }
   }
 
@@ -97,7 +97,7 @@ export class GameService {
       if (user === userInfo.getSocket()) {
         continue;
       }
-      userInfo.getSocket().emit('escape_item', user.id);
+      userInfo.getSocket().emit("escape_item", user.id);
     }
   }
 }
