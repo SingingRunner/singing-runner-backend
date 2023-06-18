@@ -16,7 +16,7 @@ export class MMRMatchPolicy implements MatchMakingPolicy {
 
   public joinQueue(userGameDto: UserGameDto) {
     const userTier: UserMatchTier = this.transformMMRtoTier(
-      userGameDto.getUserMatchDto().userMMR
+      userGameDto.getUserMatchDto().userMmr
     );
     userGameDto.setQueueEntryTime(Date.now());
     this.tierQueueMap.get(userTier)?.push(userGameDto);
@@ -24,7 +24,7 @@ export class MMRMatchPolicy implements MatchMakingPolicy {
 
   public joinQueueAtFront(userGameDto: UserGameDto) {
     const userTier: UserMatchTier = this.transformMMRtoTier(
-      userGameDto.getUserMatchDto().userMMR
+      userGameDto.getUserMatchDto().userMmr
     );
     this.tierQueueMap.get(userTier)?.unshift(userGameDto);
   }
@@ -45,7 +45,7 @@ export class MMRMatchPolicy implements MatchMakingPolicy {
 
   public isQueueReady(userGameDto: UserGameDto): boolean {
     const userTier: UserMatchTier = this.transformMMRtoTier(
-      userGameDto.getUserMatchDto().userMMR
+      userGameDto.getUserMatchDto().userMmr
     );
     console.log("isQ ready", userTier);
     const readyQueue: UserGameDto[] | undefined =
@@ -60,12 +60,12 @@ export class MMRMatchPolicy implements MatchMakingPolicy {
     if (
       !userGameDto ||
       !userGameDto.getUserMatchDto() ||
-      userGameDto.getUserMatchDto().userMMR == null
+      userGameDto.getUserMatchDto().userMmr == null
     ) {
       throw new Error("Invalid userGameDto or userMMR");
     }
 
-    const userMMR = userGameDto.getUserMatchDto().userMMR;
+    const userMMR = userGameDto.getUserMatchDto().userMmr;
     const userTier: UserMatchTier = this.transformMMRtoTier(userMMR);
 
     const matchQueue = this.tierQueueMap.get(userTier);
