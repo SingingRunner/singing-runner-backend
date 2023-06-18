@@ -1,4 +1,4 @@
-import { IsString } from 'class-validator';
+import { IsString } from "class-validator";
 
 export class MatchCompleteSongDto {
   constructor(songTitle: string, singer: string) {

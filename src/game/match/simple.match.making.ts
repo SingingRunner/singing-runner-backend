@@ -1,7 +1,8 @@
-import { Injectable } from '@nestjs/common';
-import { MatchMakingPolicy } from './match.making.policy';
-import { UserGameDto } from 'src/user/dto/user.game.dto';
-import { Socket } from 'socket.io';
+import { Injectable } from "@nestjs/common";
+import { MatchMakingPolicy } from "./match.making.policy";
+import { UserGameDto } from "src/user/dto/user.game.dto";
+import { Socket } from "socket.io";
+
 
 @Injectable()
 export class SimpleMatchMaking implements MatchMakingPolicy {

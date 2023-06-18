@@ -1,6 +1,6 @@
-import { GameSongDto } from 'src/song/dto/game-song.dto';
-import { GameRoomStatus } from './../utill/game.enum';
-import { plainToClass } from 'class-transformer';
+import { GameSongDto } from "src/song/dto/game-song.dto";
+import { GameRoomStatus } from "./../utill/game.enum";
+import { plainToClass } from "class-transformer";
 export class GameRoom {
   private roomId: number;
   private gameRoomStatus: GameRoomStatus;
@@ -10,7 +10,7 @@ export class GameRoom {
     roomId: number,
     gameRoomStatus: GameRoomStatus,
     acceptCount: number,
-    gameSongDto: GameSongDto,
+    gameSongDto: GameSongDto
   ) {
     this.roomId = roomId;
     this.gameRoomStatus = gameRoomStatus;

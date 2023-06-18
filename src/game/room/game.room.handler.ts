@@ -1,10 +1,10 @@
-import { ConsoleLogger, Injectable } from '@nestjs/common';
-import { Socket } from 'socket.io';
-import { GameRoom } from './game.room';
-import { UserGameDto } from 'src/user/dto/user.game.dto';
-import { GameRoomStatus } from '../utill/game.enum';
-import { SongService } from 'src/song/song.service';
-import { MatchCompleteSongDto } from 'src/song/dto/match-complete-song.dto';
+import { ConsoleLogger, Injectable } from "@nestjs/common";
+import { Socket } from "socket.io";
+import { GameRoom } from "./game.room";
+import { UserGameDto } from "../../user/dto/user.game.dto";
+import { GameRoomStatus } from "../utill/game.enum";
+import { SongService } from "../../song/song.service";
+import { MatchCompleteSongDto } from "../../song/dto/match-complete-song.dto";
 
 @Injectable()
 export class GameRoomHandler {
@@ -40,7 +40,7 @@ export class GameRoomHandler {
       this.roomCount() + 1,
       GameRoomStatus.MATCHING,
       0,
-      gameSongDto,
+      gameSongDto
     );
     this.roomList.set(gameRoom, []);
     return gameRoom;

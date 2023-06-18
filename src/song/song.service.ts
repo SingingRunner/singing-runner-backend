@@ -1,14 +1,14 @@
-import { Injectable } from '@nestjs/common';
-import { Repository } from 'typeorm';
-import { Song } from './entities/song.entity';
-import { InjectRepository } from '@nestjs/typeorm';
-import { GameSongDto } from './dto/game-song.dto';
+import { Injectable } from "@nestjs/common";
+import { Repository } from "typeorm";
+import { Song } from "./entities/song.entity";
+import { InjectRepository } from "@nestjs/typeorm";
+import { GameSongDto } from "./dto/game-song.dto";
 
 @Injectable()
 export class SongService {
   constructor(
     @InjectRepository(Song)
-    private readonly songRepository: Repository<Song>,
+    private readonly songRepository: Repository<Song>
   ) {}
 
   /* DB에서 모든 Song 데이터 가져와서 임의의 노래 반환하는 비동기 함수 */
