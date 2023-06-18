@@ -1,7 +1,7 @@
-import { IsNotEmpty } from '@nestjs/class-validator';
 import { UserGameDto } from 'src/user/dto/user.game.dto';
 import { MatchMakingPolicy } from './match.making.policy';
 import { UserMatchTier } from '../utill/game.enum';
+import { Socket } from 'socket.io';
 export class MMRMatchPolicy implements MatchMakingPolicy {
   private tierQueueMap: Map<UserMatchTier, UserGameDto[]> = new Map();
   constructor() {
@@ -28,15 +28,15 @@ export class MMRMatchPolicy implements MatchMakingPolicy {
     this.tierQueueMap.get(userTier).unshift(userGameDto);
   }
 
-  public leaveQueue(userGameDto: UserGameDto) {
+  public leaveQueue(user: Socket) {
     for (const key of this.tierQueueMap.keys()) {
-      const usersInQueue = this.tierQueueMap.get(key);
+      let usersInQueue = this.tierQueueMap.get(key);
 
-      const index = usersInQueue.indexOf(userGameDto);
-      if (index !== -1) {
-        usersInQueue.splice(index, 1);
-        break;
-      }
+      usersInQueue = usersInQueue.filter(
+        (userInQueue) => userInQueue.getSocket().id !== user.id,
+      );
+
+      this.tierQueueMap.set(key, usersInQueue);
     }
   }
 
