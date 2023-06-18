@@ -12,9 +12,10 @@ import { Server, Socket } from "socket.io";
 import { MatchService } from "./match/match.service";
 import { GameService } from "./game.service";
 import { GameRoom } from "./room/game.room";
-import { UserItemDto } from "./item/dto/escape-item.dto";
+import { UserItemDto } from "./item/dto/user-item.dto";
 import { UserGameDto } from "src/auth/user/dto/user.game.dto";
 import { Item } from "./item/item.enum";
+import { UserScoreDto } from "./dto/user-score.dto";
 
 /**
  * webSocket 통신을 담당하는 Handler
@@ -137,8 +138,11 @@ export class GameGateway
   }
 
   @SubscribeMessage("score")
-  scoreData(@ConnectedSocket() user: Socket, @MessageBody() score) {
-    this.broadCast(user, "score", { user: user.id, score: score });
+  scoreData(
+    @ConnectedSocket() user: Socket,
+    @MessageBody() userScoreDto: UserScoreDto
+  ) {
+    this.broadCast(user, "score", userScoreDto.toJson);
   }
 
   // @SubscribeMessage("game_terminated")
