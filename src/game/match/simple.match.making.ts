@@ -13,10 +13,12 @@ export class SimpleMatchMaking implements MatchMakingPolicy {
     this.readyQueue.unshift(UserGameDto);
   }
   public leaveQueue(userGameDto: UserGameDto) {
-    this.readyQueue.filter((user) => user !== userGameDto);
+    this.readyQueue = this.readyQueue.filter(
+      (user) => user.getSocket().id !== userGameDto.getSocket().id,
+    );
   }
 
-  public isQueueReady(): boolean {
+  public isQueueReady(userGameDto: UserGameDto): boolean {
     return this.readyQueue.length >= 2;
   }
 
