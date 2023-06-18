@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { MatchMakingPolicy } from "./match.making.policy";
-import { UserGameDto } from "src/user/dto/user.game.dto";
 import { Socket } from "socket.io";
+import { UserGameDto } from "src/auth/user/dto/user.game.dto";
 
 @Injectable()
 export class SimpleMatchMaking implements MatchMakingPolicy {
@@ -19,17 +19,11 @@ export class SimpleMatchMaking implements MatchMakingPolicy {
     );
   }
 
-  public isQueueReady(userGameDto: UserGameDto): boolean {
+  public isQueueReady(): boolean {
     return this.readyQueue.length >= 2;
   }
 
   public getAvailableUsers(): UserGameDto[] {
-    const availableUsers: UserGameDto[] = [];
-
-    for (let i = 0; i < 2; i++) {
-      availableUsers.push(this.readyQueue.shift());
-    }
-
-    return availableUsers;
+    return this.readyQueue.splice(0, 2);
   }
 }

@@ -12,8 +12,9 @@ import { Server, Socket } from "socket.io";
 import { MatchService } from "./match/match.service";
 import { GameService } from "./game.service";
 import { GameRoom } from "./room/game.room";
-import { UserGameDto } from "src/user/dto/user.game.dto";
 import { UserItemDto } from "./item/dto/escape-item.dto";
+import { UserGameDto } from "src/auth/user/dto/user.game.dto";
+import { Item } from "./item/item.enum";
 
 /**
  * webSocket 통신을 담당하는 Handler
@@ -119,7 +120,7 @@ export class GameGateway
   getItemData(@ConnectedSocket() user: Socket) {
     console.log("get item");
     const item = this.gameService.getItem();
-    if (item !== null) {
+    if (item !== Item.NULL) {
       this.broadCast(user, "get_item", item);
       return;
     }

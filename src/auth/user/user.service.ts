@@ -1,19 +1,23 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { UserRegisterDTO } from './dto/user.register.dto';
-import { FindOneOptions, Repository } from 'typeorm';
-import { User } from './entity/user.entity';
-import * as bcrypt from 'bcrypt';
+import { Injectable } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { UserRegisterDTO } from "./dto/user.register.dto";
+import { FindOneOptions, Repository } from "typeorm";
+import { User } from "./entity/user.entity";
+import * as bcrypt from "bcrypt";
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
+    private readonly userRepository: Repository<User>
   ) {}
 
   async findByFields(option: FindOneOptions<User>): Promise<User> {
-    return await this.userRepository.findOne(option);
+    const user: User | null = await this.userRepository.findOne(option);
+    if (user === null) {
+      throw new Error("not found User");
+    }
+    return user;
   }
 
   async save(userRegisterDTO: UserRegisterDTO): Promise<UserRegisterDTO> {

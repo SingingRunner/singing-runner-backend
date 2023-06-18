@@ -1,10 +1,12 @@
 import { GameRoom } from "./../room/game.room";
-import { UserGameDto } from "../../user/dto/user.game.dto";
+
 import { Inject, Injectable } from "@nestjs/common";
 import { Socket } from "socket.io";
-import { UserMatchDto } from "../../user/dto/user.match.dto";
+
 import { GameRoomHandler } from "../room/game.room.handler";
 import { MatchMakingPolicy } from "./match.making.policy";
+import { UserMatchDto } from "src/auth/user/dto/user.match.dto";
+import { UserGameDto } from "src/auth/user/dto/user.game.dto";
 
 @Injectable()
 export class MatchService {
