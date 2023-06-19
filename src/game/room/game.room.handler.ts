@@ -1,7 +1,7 @@
 import { ConsoleLogger, Injectable } from '@nestjs/common';
 import { Socket } from 'socket.io';
 import { GameRoom } from './game.room';
-import { UserGameDto } from 'src/user/dto/user.game.dto';
+import { UserGameDto } from 'src/auth/user/dto/user.game.dto';
 import { GameRoomStatus } from '../utill/game.enum';
 import { SongService } from 'src/song/song.service';
 import { MatchCompleteSongDto } from 'src/song/dto/match-complete-song.dto';

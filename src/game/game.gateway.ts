@@ -1,4 +1,4 @@
-import { UserMatchDto } from './../user/dto/user.match.dto';
+import { UserMatchDto } from '../auth/user/dto/user.match.dto';
 import {
   ConnectedSocket,
   MessageBody,

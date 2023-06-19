@@ -1,4 +1,5 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { characterEnum } from '../util/character.enum';
 
 @Entity('user')
 export class User {
@@ -8,11 +9,11 @@ export class User {
   @Column({ type: 'varchar', length: 30 })
   userEmail: string;
 
-  @Column({ type: 'varchar', length: 16 })
+  @Column({ type: 'varchar', length: 64 })
   password: string;
 
   @Column({ type: 'varchar', length: 24 })
-  nickName: string;
+  nickname: string;
 
   @Column({ type: 'tinyint', default: 0 })
   userActive: boolean;
@@ -26,8 +27,8 @@ export class User {
   @Column({ type: 'mediumint', default: 0 })
   userPoint: number;
 
-  @Column({ type: 'varchar', length: 1024 })
-  mainCharacter: string;
+  @Column({ type: 'enum', enum: characterEnum, default: characterEnum.BELUGA })
+  character: characterEnum;
 
   @Column({ type: 'datetime', nullable: true })
   deletedAt: Date;

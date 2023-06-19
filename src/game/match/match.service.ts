@@ -1,8 +1,8 @@
 import { GameRoom } from './../room/game.room';
-import { UserGameDto } from 'src/user/dto/user.game.dto';
+import { UserGameDto } from 'src/auth/user/dto/user.game.dto';
 import { Inject, Injectable } from '@nestjs/common';
 import { Socket } from 'socket.io';
-import { UserMatchDto } from 'src/user/dto/user.match.dto';
+import { UserMatchDto } from 'src/auth/user/dto/user.match.dto';
 import { GameRoomHandler } from '../room/game.room.handler';
 import { MatchMakingPolicy } from './match.making.policy';
 
