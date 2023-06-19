@@ -14,40 +14,37 @@ export class MatchService {
     private matchMakingPolicy: MatchMakingPolicy
   ) {}
 
-  public async matchMaking(user: Socket, userMatchDto: UserMatchDto) {
-    const userGameDto: UserGameDto = new UserGameDto(user, userMatchDto);
-
-    if (this.matchMakingPolicy.isQueueReady(userGameDto)) {
+  public async matchMaking(userGameDto) {
       const userList: Array<UserGameDto> =
         this.matchMakingPolicy.getAvailableUsers(userGameDto);
       userList.push(userGameDto);
       const gameRoom: GameRoom = await this.gameRoomHandler.createRoom();
+      console.log("gameRoom : ", gameRoom);
       this.gameRoomHandler.joinRoom(gameRoom, userList);
-      for (const user of userList) {
-        user
-          .getSocket()
-          .emit("match_making", this.gameRoomHandler.getSongInfo(gameRoom));
-      }
-      return;
+  }
+
+  public async isMatchMade(user: Socket, userMatchDto: UserMatchDto):Promise<boolean>{
+    const userGameDto: UserGameDto = new UserGameDto(user, userMatchDto);
+    if (this.matchMakingPolicy.isQueueReady(userGameDto)) {
+      await this.matchMaking(userGameDto);
+      return true;
     }
     this.matchMakingPolicy.joinQueue(userGameDto);
+    return false;
   }
 
   public matchCancel(user: Socket) {
     this.matchMakingPolicy.leaveQueue(user);
   }
 
-  public matchAccept(user: Socket) {
+  public acceptAllUsers(user: Socket):boolean {
     const gameRoom: GameRoom = this.gameRoomHandler.findRoomBySocket(user);
-    const userList: Array<UserGameDto> =
-      this.gameRoomHandler.findUsersInRoom(gameRoom);
     this.gameRoomHandler.increaseAcceptCount(user);
     if (this.gameRoomHandler.isGameRoomReady(gameRoom)) {
       gameRoom.resetAcceptCount();
-      for (const user of userList) {
-        user.getSocket().emit("accept", true);
-      }
+      return true;
     }
+    return false;
   }
 
   public matchDeny(user: Socket) {
@@ -57,15 +54,27 @@ export class MatchService {
     for (const userInfo of userList) {
       this.joinQueueWithOutDenyUser(userInfo, user);
     }
-    this.gameRoomHandler.deleteRoom(user);
-    const filteredDenyUser: Array<UserGameDto> = userList.filter(
-      (userInfo) => userInfo.getSocket().id !== user.id,
-    );
-    for (const userInfo of filteredDenyUser) {
-      userInfo.getSocket().emit("accept", false);
-    }
-    return;
+    this.gameRoomHandler.leaveRoom(gameRoom, user);
   }
+
+  public findRoomBySocket(user:Socket):GameRoom{
+   return this.gameRoomHandler.findRoomBySocket(user);
+  }
+
+  public findUsersInSameRoom(gameRoom: GameRoom): UserGameDto[]{
+    return this.gameRoomHandler.findUsersInRoom(gameRoom);
+  }
+
+  public getSongInfo(gameRoom:GameRoom){
+    const songTitle: string = gameRoom.getGameSongDto().songTitle;
+    const singer: string = gameRoom.getGameSongDto().singer;
+    return {songTitle, singer} 
+  }
+
+  public deleteRoom(user:Socket){
+    this.gameRoomHandler.deleteRoom(user);
+  }
+
   private joinQueueWithOutDenyUser(userInfo: UserGameDto, user: Socket) {
     if (userInfo.getSocket().id === user.id) {
       return;

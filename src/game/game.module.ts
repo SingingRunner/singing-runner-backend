@@ -16,7 +16,7 @@ import { MMRMatchPolicy } from "./match/mmr.match.policy";
     GameRoomHandler,
     {
       provide: "MatchMakingPolicy",
-      useClass: MMRMatchMaking,
+      useClass: MMRMatchPolicy,
     },
     GameGateway,
     {
