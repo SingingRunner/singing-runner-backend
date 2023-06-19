@@ -25,4 +25,10 @@ export class User {
 
   @Column({ type: 'mediumint', default: 0 })
   userPoint: number;
+
+  @Column({ type: 'varchar', length: 1024 })
+  mainCharacter: string;
+
+  @Column({ type: 'datetime', nullable: true })
+  deletedAt: Date;
 }
