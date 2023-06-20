@@ -1,54 +1,55 @@
-import { GameRoom } from './../room/game.room';
-import { UserGameDto } from 'src/auth/user/dto/user.game.dto';
-import { Inject, Injectable } from '@nestjs/common';
-import { Socket } from 'socket.io';
-import { UserMatchDto } from 'src/auth/user/dto/user.match.dto';
-import { GameRoomHandler } from '../room/game.room.handler';
-import { MatchMakingPolicy } from './match.making.policy';
+import { GameRoom } from "./../room/game.room";
+import { UserGameDto } from "../../user/dto/user.game.dto";
+import { Inject, Injectable } from "@nestjs/common";
+import { Socket } from "socket.io";
+import { UserMatchDto } from "../../user/dto/user.match.dto";
+import { GameRoomHandler } from "../room/game.room.handler";
+import { MatchMakingPolicy } from "./match.making.policy";
 
 @Injectable()
 export class MatchService {
   constructor(
     private gameRoomHandler: GameRoomHandler,
-    @Inject('MatchMakingPolicy')
-    private matchMakingPolicy: MatchMakingPolicy,
+    @Inject("MatchMakingPolicy")
+    private matchMakingPolicy: MatchMakingPolicy
   ) {}
 
-  public async matchMaking(user: Socket, userMatchDto: UserMatchDto) {
-    const userGameDto: UserGameDto = new UserGameDto(user, userMatchDto);
+  public async matchMaking(userGameDto) {
+    const userList: Array<UserGameDto> =
+      this.matchMakingPolicy.getAvailableUsers(userGameDto);
+    userList.push(userGameDto);
+    const gameRoom: GameRoom = await this.gameRoomHandler.createRoom();
+    console.log("gameRoom : ", gameRoom);
+    for (const user of userList) {
+      this.gameRoomHandler.joinRoom(gameRoom, user);
+    }
+  }
 
-    if (this.isMatchingAvailable()) {
-      const userList: Array<UserGameDto> =
-        this.matchMakingPolicy.getAvailableUsers();
-      userList.push(userGameDto);
-      await this.joinRoom(userList);
-      const gameRoom: GameRoom = this.gameRoomHandler.findRoomBySocket(user);
-      for (const user of userList) {
-        user
-          .getSocket()
-          .emit('match_making', this.gameRoomHandler.getSongInfo(gameRoom));
-      }
-      return;
+  public async isMatchMade(
+    user: Socket,
+    userMatchDto: UserMatchDto
+  ): Promise<boolean> {
+    const userGameDto: UserGameDto = new UserGameDto(user, userMatchDto);
+    if (this.matchMakingPolicy.isQueueReady(userGameDto)) {
+      await this.matchMaking(userGameDto);
+      return true;
     }
     this.matchMakingPolicy.joinQueue(userGameDto);
+    return false;
   }
 
-  public matchCancle(user: Socket, userMatchDto: UserMatchDto) {
-    const userGameDto: UserGameDto = new UserGameDto(user, userMatchDto);
-    this.matchMakingPolicy.leaveQueue(userGameDto);
+  public matchCancel(user: Socket) {
+    this.matchMakingPolicy.leaveQueue(user);
   }
 
-  public matchAccept(user: Socket) {
+  public acceptAllUsers(user: Socket): boolean {
     const gameRoom: GameRoom = this.gameRoomHandler.findRoomBySocket(user);
-    const userList: Array<UserGameDto> =
-      this.gameRoomHandler.findUsersInRoom(gameRoom);
     this.gameRoomHandler.increaseAcceptCount(user);
     if (this.gameRoomHandler.isGameRoomReady(gameRoom)) {
       gameRoom.resetAcceptCount();
-      for (const user of userList) {
-        user.getSocket().emit('accept', true);
-      }
+      return true;
     }
+    return false;
   }
 
   public matchDeny(user: Socket) {
@@ -58,33 +59,31 @@ export class MatchService {
     for (const userInfo of userList) {
       this.joinQueueWithOutDenyUser(userInfo, user);
     }
+    this.gameRoomHandler.leaveRoom(gameRoom, user);
+  }
+
+  public findRoomBySocket(user: Socket): GameRoom {
+    return this.gameRoomHandler.findRoomBySocket(user);
+  }
+
+  public findUsersInSameRoom(gameRoom: GameRoom): UserGameDto[] {
+    return this.gameRoomHandler.findUsersInRoom(gameRoom);
+  }
+
+  public getSongInfo(gameRoom: GameRoom) {
+    const songTitle: string = gameRoom.getGameSongDto().songTitle;
+    const singer: string = gameRoom.getGameSongDto().singer;
+    return { songTitle, singer };
+  }
+
+  public deleteRoom(user: Socket) {
     this.gameRoomHandler.deleteRoom(user);
-    const filteredDenyUser: Array<UserGameDto> = userList.filter(
-      (userInfo) => userInfo.getSocket() !== user,
-    );
-    user.disconnect(true);
-    for (const userInfo of filteredDenyUser) {
-      userInfo.getSocket().emit('accept', false);
-    }
-    return;
   }
 
   private joinQueueWithOutDenyUser(userInfo: UserGameDto, user: Socket) {
-    if (userInfo.getSocket() === user) {
+    if (userInfo.getSocket().id === user.id) {
       return;
     }
     this.matchMakingPolicy.joinQueueAtFront(userInfo);
-  }
-
-  private isMatchingAvailable(): boolean {
-    if (this.matchMakingPolicy.isQueueReady()) {
-      return true;
-    }
-    return false;
-  }
-
-  private async joinRoom(userList: Array<UserGameDto>) {
-    const gameRoom: GameRoom = await this.gameRoomHandler.createRoom();
-    this.gameRoomHandler.addUser(gameRoom, userList);
   }
 }

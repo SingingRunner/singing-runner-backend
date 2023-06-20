@@ -1,10 +1,10 @@
-import { ConsoleLogger, Injectable } from '@nestjs/common';
-import { Socket } from 'socket.io';
-import { GameRoom } from './game.room';
-import { UserGameDto } from 'src/auth/user/dto/user.game.dto';
-import { GameRoomStatus } from '../utill/game.enum';
-import { SongService } from 'src/song/song.service';
-import { MatchCompleteSongDto } from 'src/song/dto/match-complete-song.dto';
+import { ConsoleLogger, Injectable } from "@nestjs/common";
+import { Socket } from "socket.io";
+import { GameRoom } from "./game.room";
+import { UserGameDto } from "src/auth/user/dto/user.game.dto";
+import { GameRoomStatus } from "../utill/game.enum";
+import { SongService } from "src/song/song.service";
+import { MatchCompleteSongDto } from "src/song/dto/match-complete-song.dto";
 
 @Injectable()
 export class GameRoomHandler {
@@ -12,10 +12,15 @@ export class GameRoomHandler {
 
   constructor(private songService: SongService) {}
 
-  public addUser(gameRoom: GameRoom, userList: Array<UserGameDto>) {
-    for (const user of userList) {
-      this.roomList.get(gameRoom).push(user);
-    }
+  public joinRoom(gameRoom: GameRoom, user: UserGameDto) {
+    this.roomList.get(gameRoom).push(user);
+  }
+
+  public leaveRoom(gameRoom: GameRoom, user: Socket) {
+    const users: UserGameDto[] = this.roomList
+      .get(gameRoom)
+      .filter((userInfo) => userInfo.getSocket().id !== user.id);
+    this.roomList.set(gameRoom, users);
   }
 
   public isGameRoomReady(gameRoom: GameRoom): boolean {
@@ -40,7 +45,7 @@ export class GameRoomHandler {
       this.roomCount() + 1,
       GameRoomStatus.MATCHING,
       0,
-      gameSongDto,
+      gameSongDto
     );
     this.roomList.set(gameRoom, []);
     return gameRoom;
@@ -62,13 +67,16 @@ export class GameRoomHandler {
     }
   }
 
-  public getSongInfo(gameRoom: GameRoom) {
-    const songTitle: string = gameRoom.getGameSongDto().songTitle;
-    const singer: string = gameRoom.getGameSongDto().singer;
-
-    return { songTitle: songTitle, singer: singer };
+  public findRoomByUserId(userId: string): GameRoom {
+    for (const key of this.roomList.keys()) {
+      const foundUser = this.roomList
+        .get(key)
+        .find((userInRoom) => userInRoom.getUserMatchDto().userId === userId);
+      if (foundUser) {
+        return key;
+      }
+    }
   }
-
   private roomCount(): number {
     return this.roomList.size;
   }

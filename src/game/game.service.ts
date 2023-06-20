@@ -1,103 +1,65 @@
-import { GameRoomHandler } from './room/game.room.handler';
-import { Inject, Injectable } from '@nestjs/common';
-import { Socket } from 'socket.io';
-import { GameRoom } from './room/game.room';
-import { UserGameDto } from 'src/auth/user/dto/user.game.dto';
-import { ItemPolicy } from './item/item.policy';
-import { Item } from './item/item.enum';
-import { GameSongDto } from 'src/song/dto/game-song.dto';
+import { GameRoomHandler } from "./room/game.room.handler";
+import { Inject, Injectable } from "@nestjs/common";
+import { Socket } from "socket.io";
+import { GameRoom } from "./room/game.room";
+import { UserGameDto } from "src/auth/user/dto/user.game.dto";
+import { ItemPolicy } from "./item/item.policy";
+import { GameSongDto } from "src/song/dto/game-song.dto";
 
 @Injectable()
 export class GameService {
   constructor(
     private gameRoomHandler: GameRoomHandler,
-    @Inject('ItemPolicy')
-    private itemPolicy: ItemPolicy,
+    @Inject("ItemPolicy")
+    private itemPolicy: ItemPolicy
   ) {}
 
   public loadData(user: Socket) {
     const gameRoom: GameRoom = this.gameRoomHandler.findRoomBySocket(user);
+    const userList: UserGameDto[] =
+      this.gameRoomHandler.findUsersInRoom(gameRoom);
+    const characterList: any = [];
+    for (const user of userList) {
+      characterList.push({
+        userId: user.getUserMatchDto().userId,
+        character: user.getUserMatchDto().character,
+      });
+    }
     const gameSongdto: GameSongDto = gameRoom.getGameSongDto();
     const gameSong = gameSongdto.toJSON();
-    user.emit('loading', gameSong);
+    user.emit("loading", { gameSong: gameSong, characterList: characterList });
   }
 
-  public gameReady(user: Socket) {
+  public isGameReady(user: Socket): boolean {
     const gameRoom: GameRoom = this.gameRoomHandler.findRoomBySocket(user);
 
     this.gameRoomHandler.increaseAcceptCount(user);
     if (this.gameRoomHandler.isGameRoomReady(gameRoom)) {
+      gameRoom.setStartTime(new Date().getTime());
       gameRoom.resetAcceptCount();
-      this.broadcastGameRoom(gameRoom);
+      return true;
     }
+    return false;
   }
 
-  private broadcastGameRoom(gameRoom: GameRoom) {
+  public findUsersIdInSameRoom(user: Socket): string[] {
+    const gameRoom: GameRoom = this.gameRoomHandler.findRoomBySocket(user);
     const userList: Array<UserGameDto> =
       this.gameRoomHandler.findUsersInRoom(gameRoom);
     const userIdList: string[] = [];
     for (const userInfo of userList) {
-      userIdList.push(userInfo.getSocket().id);
+      userIdList.push(userInfo.getUserMatchDto().userId);
     }
-    for (const userInfo of userList) {
-      userInfo.getSocket().emit('game_ready', userIdList);
-    }
+    return userIdList;
   }
 
-  public broadcastScore(user: Socket, score: number) {
-    const gameRoom: GameRoom = this.gameRoomHandler.findRoomBySocket(user);
-    const userList: Array<UserGameDto> =
-      this.gameRoomHandler.findUsersInRoom(gameRoom);
-    for (const userInfo of userList) {
-      if (user === userInfo.getSocket()) {
-        continue;
-      }
-      userInfo.getSocket().emit('score', { user: user.id, score: score });
-    }
+  public getItem() {
+    return this.itemPolicy.getItems();
   }
 
-  public itemGenerate(user: Socket) {
-    const item = this.itemPolicy.getItems();
-    if (item === null) {
-      return;
-    }
-    console.log(item);
-    const gameRoom: GameRoom = this.gameRoomHandler.findRoomBySocket(user);
-    const userList: Array<UserGameDto> =
-      this.gameRoomHandler.findUsersInRoom(gameRoom);
-    for (const userInfo of userList) {
-      userInfo.getSocket().emit('get_item', item);
-    }
-  }
+  // public gameEvent(){
+  //  GameRoom 마다 replay용 game event 저장.
+  // }
 
-  public useItem(user: Socket, item: Item) {
-    const gameRoom: GameRoom = this.gameRoomHandler.findRoomBySocket(user);
-    const userList: Array<UserGameDto> =
-      this.gameRoomHandler.findUsersInRoom(gameRoom);
-    if (this.itemPolicy.useItemAll(item)) {
-      for (const userInfo of userList) {
-        userInfo.getSocket().emit('use_item', item);
-      }
-      return;
-    }
-    for (const userInfo of userList) {
-      if (userInfo.getSocket() === user) {
-        continue;
-      }
-      userInfo.getSocket().emit('use_item', { user: user.id, item: item });
-    }
-  }
-
-  public escapeItem(user: Socket) {
-    const gameRoom: GameRoom = this.gameRoomHandler.findRoomBySocket(user);
-    const userList: Array<UserGameDto> =
-      this.gameRoomHandler.findUsersInRoom(gameRoom);
-
-    for (const userInfo of userList) {
-      if (user === userInfo.getSocket()) {
-        continue;
-      }
-      userInfo.getSocket().emit('escape_item', user.id);
-    }
-  }
+  //게임종료시 DB에 event 저장
 }

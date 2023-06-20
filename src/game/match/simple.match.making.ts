@@ -1,6 +1,7 @@
-import { Injectable } from '@nestjs/common';
-import { MatchMakingPolicy } from './match.making.policy';
-import { UserGameDto } from 'src/auth/user/dto/user.game.dto';
+import { Injectable } from "@nestjs/common";
+import { MatchMakingPolicy } from "./match.making.policy";
+import { UserGameDto } from "src/user/dto/user.game.dto";
+import { Socket } from "socket.io";
 
 @Injectable()
 export class SimpleMatchMaking implements MatchMakingPolicy {
@@ -12,11 +13,13 @@ export class SimpleMatchMaking implements MatchMakingPolicy {
   public joinQueueAtFront(UserGameDto: UserGameDto) {
     this.readyQueue.unshift(UserGameDto);
   }
-  public leaveQueue(userGameDto: UserGameDto) {
-    this.readyQueue.filter((user) => user !== userGameDto);
+  public leaveQueue(user: Socket) {
+    this.readyQueue = this.readyQueue.filter(
+      (userInQueue) => userInQueue.getSocket().id !== user.id
+    );
   }
 
-  public isQueueReady(): boolean {
+  public isQueueReady(userGameDto: UserGameDto): boolean {
     return this.readyQueue.length >= 2;
   }
 

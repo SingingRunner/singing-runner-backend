@@ -1,4 +1,4 @@
-import { IsString, IsUrl, IsBoolean, IsDate, IsNumber } from 'class-validator';
+import { IsString, IsUrl, IsBoolean, IsDate, IsNumber } from "class-validator";
 
 export class CreateSongDto {
   @IsNumber()
