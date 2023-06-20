@@ -76,7 +76,8 @@ export class GameService {
     return false;
   }
 
-  public caculateRank(gameRoom: GameRoom): GameTerminatedDto[] {
+  public caculateRank(user: Socket): GameTerminatedDto[] {
+    const gameRoom: GameRoom = this.gameRoomHandler.findRoomBySocket(user);
     return this.rankHandler.calculateRank(gameRoom);
   }
   // public gameEvent(){
