@@ -1,5 +1,6 @@
 import { TypeOrmModuleOptions } from "@nestjs/typeorm";
 import { Song } from "src/song/entities/song.entity";
+import { User } from "./auth/user/entity/user.entity";
 
 export const TypeORMConfig: TypeOrmModuleOptions = {
   type: process.env.DB_TYPE as any,
@@ -8,6 +9,6 @@ export const TypeORMConfig: TypeOrmModuleOptions = {
   port: Number(process.env.DB_PORT),
   host: process.env.DB_HOST,
   database: process.env.DB_DATABASE,
-  entities: [Song],
+  entities: [Song, User],
   synchronize: true,
 };
