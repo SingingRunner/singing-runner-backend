@@ -1,10 +1,10 @@
-import { ConsoleLogger, Injectable } from "@nestjs/common";
+import { /*ConsoleLogger*/ Injectable } from "@nestjs/common";
 import { Socket } from "socket.io";
 import { GameRoom } from "./game.room";
 import { UserGameDto } from "../../user/dto/user.game.dto";
 import { GameRoomStatus } from "../utill/game.enum";
 import { SongService } from "../../song/song.service";
-import { MatchCompleteSongDto } from "../../song/dto/match-complete-song.dto";
+// import { MatchCompleteSongDto } from "../../song/dto/match-complete-song.dto";
 
 @Injectable()
 export class GameRoomHandler {
@@ -17,7 +17,9 @@ export class GameRoomHandler {
   }
 
   public leaveRoom(gameRoom: GameRoom, user: Socket) {
-    const users:UserGameDto[] = this.roomList.get(gameRoom).filter((userInfo) => userInfo.getSocket().id !== user.id);
+    const users: UserGameDto[] = this.roomList
+      .get(gameRoom)
+      .filter((userInfo) => userInfo.getSocket().id !== user.id);
     this.roomList.set(gameRoom, users);
   }
 
@@ -64,7 +66,7 @@ export class GameRoomHandler {
       }
     }
   }
-  
+
   public findRoomByUserId(userId: string): GameRoom {
     for (const key of this.roomList.keys()) {
       const foundUser = this.roomList

@@ -11,10 +11,8 @@ import {
 import { Server, Socket } from "socket.io";
 import { MatchService } from "./match/match.service";
 import { GameService } from "./game.service";
-import { Item } from "./item/item.enum";
 import { GameRoom } from "./room/game.room";
 import { UserGameDto } from "src/user/dto/user.game.dto";
-import { subscribe } from "diagnostics_channel";
 import { UserItemDto } from "./item/dto/escape-item.dto";
 
 /**
@@ -33,6 +31,7 @@ export class GameGateway
 
   afterInit(server: Server) {
     console.log("Socket.io server initialized in ");
+    console.log(server);
   }
 
   handleConnection(@ConnectedSocket() user: Socket) {
@@ -58,13 +57,13 @@ export class GameGateway
       this.matchService.matchCancel(user);
       return;
     }
-    if(!(await this.matchService.isMatchMade(user, data.UserMatchDto))){
+    if (!(await this.matchService.isMatchMade(user, data.UserMatchDto))) {
       return;
     }
     const gameRoom: GameRoom = this.matchService.findRoomBySocket(user);
     const responseData = this.matchService.getSongInfo(gameRoom);
     console.log("before broadcast : ");
-    this.broadCast(user, message, responseData);      
+    this.broadCast(user, message, responseData);
     return;
   }
 
@@ -80,7 +79,7 @@ export class GameGateway
     const message = "accept";
 
     if (accept) {
-      if(!this.matchService.acceptAllUsers(user)){
+      if (!this.matchService.acceptAllUsers(user)) {
         return;
       }
       this.broadCast(user, message, true);
@@ -99,15 +98,18 @@ export class GameGateway
 
   @SubscribeMessage("game_ready")
   gameReadyData(@ConnectedSocket() user: Socket) {
-    if(this.gameService.isGameReady(user)){
-      const userIdList: string[] = this.gameService.findUsersIdInSameRoom(user)
+    if (this.gameService.isGameReady(user)) {
+      const userIdList: string[] = this.gameService.findUsersIdInSameRoom(user);
       this.broadCast(user, "game_ready", userIdList);
     }
   }
 
   @SubscribeMessage("use_item")
-  //userId, item 
-  useItemData(@ConnectedSocket() user: Socket, @MessageBody() useItem: UserItemDto) {
+  //userId, item
+  useItemData(
+    @ConnectedSocket() user: Socket,
+    @MessageBody() useItem: UserItemDto
+  ) {
     console.log("use_item : ", useItem);
 
     this.broadCast(user, "use_item", useItem);
@@ -117,14 +119,17 @@ export class GameGateway
   getItemData(@ConnectedSocket() user: Socket) {
     console.log("get item");
     const item = this.gameService.getItem();
-    if (item !== null){
+    if (item !== null) {
       this.broadCast(user, "get_item", item);
       return;
     }
   }
 
   @SubscribeMessage("escape_item")
-  escapeFrozenData(@ConnectedSocket() user: Socket, @MessageBody() escapeItem: UserItemDto) {
+  escapeFrozenData(
+    @ConnectedSocket() user: Socket,
+    @MessageBody() escapeItem: UserItemDto
+  ) {
     const message = "escape_item";
     console.log("escape item");
     this.broadCast(user, message, escapeItem);
@@ -135,24 +140,23 @@ export class GameGateway
     this.broadCast(user, "score", { user: user.id, score: score });
   }
 
-  @SubscribeMessage("game_terminated")
-  gameTermintated(@ConnectedSocket() user: Socket) {
-    /**
-     * 게임종료시 gameRoom안에 인원이 전부(탈주자 예외처리) 
-     * terminated 메시지와 점수, 녹음정보(리플레이용)를 보내면 
-     * 순위, mmr, userId 를 보내줘야함
-     * + 게임이벤트 및 녹음정보를 각 user마다 DB에 저장. 
-     */
-  }
+  // @SubscribeMessage("game_terminated")
+  // gameTermintated(@ConnectedSocket() user: Socket) {
+  /**
+   * 게임종료시 gameRoom안에 인원이 전부(탈주자 예외처리)
+   * terminated 메시지와 점수, 녹음정보(리플레이용)를 보내면
+   * 순위, mmr, userId 를 보내줘야함
+   * + 게임이벤트 및 녹음정보를 각 user마다 DB에 저장.
+   */
+  // }
 
-  private broadCast(user: Socket, message:string, responseData: any){
+  private broadCast(user: Socket, message: string, responseData: any) {
     console.log("in broad cast : ", responseData);
     const gameRoom: GameRoom = this.matchService.findRoomBySocket(user);
-    const userList: UserGameDto[] = this.matchService.findUsersInSameRoom(gameRoom);
+    const userList: UserGameDto[] =
+      this.matchService.findUsersInSameRoom(gameRoom);
     for (const user of userList) {
       user.getSocket().emit(message, responseData);
     }
   }
-
-  
 }

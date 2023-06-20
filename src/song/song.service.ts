@@ -26,7 +26,7 @@ export class SongService {
   public async getAllSong(): Promise<GameSongDto[]> {
     const songs: Song[] = await this.songRepository.find();
     const gameSongDtoList: GameSongDto[] = [];
-    for(const song of songs){
+    for (const song of songs) {
       gameSongDtoList.push(new GameSongDto(song));
     }
     return gameSongDtoList;
