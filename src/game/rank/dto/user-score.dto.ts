@@ -14,11 +14,4 @@ export class UserScoreDto {
   public getScore(): number {
     return this.score;
   }
-
-  public toJson() {
-    return {
-      userId: this.userId,
-      score: this.score,
-    };
-  }
 }
