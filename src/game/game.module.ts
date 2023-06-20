@@ -7,9 +7,11 @@ import { MatchService } from "./match/match.service";
 import { SongModule } from "src/song/song.module";
 import { SimpleItemPolicy } from "./item/simple.item.policy";
 import { MMRMatchPolicy } from "./match/mmr.match.policy";
+import { TypeOrmModule } from "@nestjs/typeorm";
+import { GameReplayEntity } from "./replay/entity/game.replay.entity";
 
 @Module({
-  imports: [SongModule],
+  imports: [SongModule, TypeOrmModule.forFeature([GameReplayEntity])],
   providers: [
     GameService,
     MatchService,

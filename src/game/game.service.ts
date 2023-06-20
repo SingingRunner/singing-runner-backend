@@ -5,13 +5,20 @@ import { GameRoom } from "./room/game.room";
 import { UserGameDto } from "src/auth/user/dto/user.game.dto";
 import { ItemPolicy } from "./item/item.policy";
 import { GameSongDto } from "src/song/dto/game-song.dto";
+import { InjectRepository } from "@nestjs/typeorm";
+import { GameReplayEntity } from "./replay/entity/game.replay.entity";
+import { Repository } from "typeorm";
+import { CreateReplayInput } from "./replay/dto/create-replay.input";
+import { GameEventDto } from "./event/dto/game.event.dto";
 
 @Injectable()
 export class GameService {
   constructor(
     private gameRoomHandler: GameRoomHandler,
     @Inject("ItemPolicy")
-    private itemPolicy: ItemPolicy
+    private itemPolicy: ItemPolicy,
+    @InjectRepository(GameReplayEntity)
+    private gameReplayRepository: Repository<GameReplayEntity>
   ) {}
 
   public loadData(user: Socket) {
@@ -57,9 +64,40 @@ export class GameService {
     return this.itemPolicy.getItems();
   }
 
-  // public gameEvent(){
-  //  GameRoom 마다 replay용 game event 저장.
-  // }
+  public async saveReplay(
+    gameRoom: GameRoom,
+    userId: string,
+    userVocal: Blob[]
+  ) {
+    const songId = gameRoom.getGameSongDto().songId;
+    const gameEventBlob = gameRoom.getGameEvent();
+    console.log(gameEventBlob);
+    const gameReplayEntity: CreateReplayInput = {
+      userId: userId,
+      songId: songId,
+      userVocal: "파일 url",
+      gameEvent: "파일 url",
+      createdAt: new Date(),
+    };
+    console.log(userVocal);
+    return await this.gameReplayRepository.save(
+      this.gameReplayRepository.create(gameReplayEntity)
+    );
+  }
 
-  //게임종료시 DB에 event 저장
+  public putEvent(
+    gameRoom: GameRoom,
+    eventName: string,
+    eventContent: string,
+    user: Socket
+  ) {
+    const currentTime = new Date().getTime() - gameRoom.getStartTime();
+    const gameEvent: GameEventDto = new GameEventDto(
+      currentTime,
+      user.id,
+      eventName,
+      eventContent
+    );
+    gameRoom.putGameEvent(gameEvent);
+  }
 }

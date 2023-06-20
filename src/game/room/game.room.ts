@@ -1,5 +1,6 @@
 import { GameSongDto } from "src/song/dto/game-song.dto";
 import { GameRoomStatus } from "./../utill/game.enum";
+import { GameEventDto } from "../event/dto/game.event.dto";
 
 export class GameRoom {
   private roomId: number;
@@ -8,6 +9,7 @@ export class GameRoom {
   private gameSongDto: GameSongDto;
   private roomMaster: string;
   private songListInCustom: GameSongDto[];
+  private gameEventList: string[];
   private startTime: number;
 
   constructor(
@@ -22,6 +24,7 @@ export class GameRoom {
     this.gameSongDto = gameSongDto;
     this.roomMaster = "";
     this.songListInCustom = [];
+    this.gameEventList = [];
   }
 
   public getRoomId(): number {
@@ -66,5 +69,17 @@ export class GameRoom {
 
   public setStartTime(startTime: number) {
     this.startTime = startTime;
+  }
+
+  public getStartTime(): number {
+    return this.startTime;
+  }
+
+  public putGameEvent(gameEventDto: GameEventDto) {
+    this.gameEventList.push(JSON.stringify(gameEventDto));
+  }
+
+  public getGameEvent(): string[] {
+    return this.gameEventList;
   }
 }
