@@ -22,7 +22,6 @@ describe("RankHandlerImpl", () => {
       rankHandler.setRank(gameRoom);
       rankHandler.pushUserScore(gameRoom, userScoreDto1);
       rankHandler.pushUserScore(gameRoom, userScoreDto2);
-
       // Act
       const result = rankHandler.getUserScoreDto(gameRoom);
 
