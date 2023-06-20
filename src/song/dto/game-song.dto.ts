@@ -3,6 +3,7 @@ import { Song } from "../entities/song.entity";
 // import { plainToClass } from "class-transformer";
 export class GameSongDto {
   constructor(song: Song) {
+    this.songId = song.songId;
     this.songTitle = song.songTitle;
     this.singer = song.singer;
     this.songLyrics = song.songLyrics;
@@ -20,6 +21,8 @@ export class GameSongDto {
     this.vocalFemaleUp = song.vocalFemaleUp;
     this.vocalFemaleDown = song.vocalFemaleDown;
   }
+
+  songId: number;
 
   @IsString()
   songTitle: string;
@@ -74,6 +77,7 @@ export class GameSongDto {
   // }
   toJSON() {
     return {
+      songId: this.songId,
       songTitle: this.songTitle,
       singer: this.singer,
       songLyrics: this.songLyrics,
