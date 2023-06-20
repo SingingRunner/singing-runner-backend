@@ -20,7 +20,9 @@ export class MatchService {
       userList.push(userGameDto);
       const gameRoom: GameRoom = await this.gameRoomHandler.createRoom();
       console.log("gameRoom : ", gameRoom);
-      this.gameRoomHandler.joinRoom(gameRoom, userList);
+      for(const user of userList){
+        this.gameRoomHandler.joinRoom(gameRoom, user);
+      }
   }
 
   public async isMatchMade(user: Socket, userMatchDto: UserMatchDto):Promise<boolean>{

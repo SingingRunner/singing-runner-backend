@@ -1,6 +1,6 @@
 import { Item } from "../item.enum";
 
-export class EscapeItemDto{
+export class UserItemDto{
     private userid:string;
     private item:Item;
 

@@ -6,7 +6,6 @@ export class GameSongDto {
     this.songTitle = song.songTitle;
     this.singer = song.singer;
     this.songLyrics = song.songLyrics;
-    this.songFile = song.songFile;
     this.songGender = song.songGender;
     this.songMale = song.songMale;
     this.songMaleUp = song.songMaleUp;
@@ -30,9 +29,6 @@ export class GameSongDto {
 
   @IsString()
   songLyrics: string;
-
-  @IsString()
-  songFile: string;
 
   @IsBoolean()
   songGender: boolean;
@@ -81,7 +77,6 @@ export class GameSongDto {
       songTitle: this.songTitle,
       singer: this.singer,
       songLyrics: this.songLyrics,
-      songFile: this.songFile,
       songGender: this.songGender,
       songMale: this.songMale,
       songMaleUp: this.songMaleUp,

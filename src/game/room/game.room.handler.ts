@@ -12,10 +12,8 @@ export class GameRoomHandler {
 
   constructor(private songService: SongService) {}
 
-  public joinRoom(gameRoom: GameRoom, userList: Array<UserGameDto>) {
-    for (const user of userList) {
-      this.roomList.get(gameRoom).push(user);
-    }
+  public joinRoom(gameRoom: GameRoom, user: UserGameDto) {
+    this.roomList.get(gameRoom).push(user);
   }
 
   public leaveRoom(gameRoom: GameRoom, user: Socket) {
@@ -66,7 +64,17 @@ export class GameRoomHandler {
       }
     }
   }
-
+  
+  public findRoomByUserId(userId: string): GameRoom {
+    for (const key of this.roomList.keys()) {
+      const foundUser = this.roomList
+        .get(key)
+        .find((userInRoom) => userInRoom.getUserMatchDto().userId === userId);
+      if (foundUser) {
+        return key;
+      }
+    }
+  }
   private roomCount(): number {
     return this.roomList.size;
   }
