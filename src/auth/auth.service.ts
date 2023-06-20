@@ -105,6 +105,22 @@ export class AuthService {
     };
   }
 
+  async createRefreshToken(userLoginDTO: UserLoginDTO): Promise<string> {
+    const userFind: User | null = await this.userService.findByFields({
+      where: { userEmail: userLoginDTO.userEmail },
+    });
+
+    if (!userFind) {
+      throw new UnauthorizedException("유저를 찾을 수 없습니다.");
+    }
+
+    const refreshToken: string = this.generateRefreshToken();
+    userFind.refreshToken = refreshToken;
+    await this.userService.save(userFind);
+
+    return refreshToken;
+  }
+
   async tokenValidateUser(payload: Payload): Promise<User> {
     const userFind: User | null = await this.userService.findByFields({
       where: { userEmail: payload.userEmail },

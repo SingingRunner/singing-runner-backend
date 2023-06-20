@@ -27,4 +27,8 @@ export class UserService {
     userRegister.password = await bcrypt.hash(userRegister.password, 10);
     return Promise.resolve();
   }
+
+  async update(user: User): Promise<User> {
+    return await this.userRepository.save(user);
+  }
 }
