@@ -1,11 +1,11 @@
 import { Item } from "../item.enum";
 
 export class UserItemDto {
-  private userid: string;
+  private userId: string;
   private item: Item;
 
   public getUserId(): string {
-    return this.userid;
+    return this.userId;
   }
 
   public getItem(): Item {

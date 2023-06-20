@@ -6,7 +6,7 @@ export class UserMatchDto {
   userId: string;
 
   @IsNotEmpty()
-  userMMR: number;
+  userMmr: number;
 
   @IsNotEmpty()
   nickName: string;

@@ -61,7 +61,6 @@ export class MatchService {
     for (const userInfo of userList) {
       this.joinQueueWithOutDenyUser(userInfo, user);
     }
-    this.gameRoomHandler.leaveRoom(gameRoom, user);
   }
 
   public findRoomBySocket(user: Socket): GameRoom {
