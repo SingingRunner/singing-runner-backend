@@ -13,6 +13,7 @@ import * as bcrypt from "bcrypt";
 import { Payload } from "./security/payload.interface";
 import { JwtService } from "@nestjs/jwt";
 import { characterEnum } from "./user/util/character.enum";
+import * as crypto from "crypto";
 
 @Injectable()
 export class AuthService {
@@ -57,9 +58,14 @@ export class AuthService {
     return user;
   }
 
+  // 랜덤으로 refresh token 생성
+  generateRefreshToken(): string {
+    return crypto.randomBytes(16).toString("hex");
+  }
+
   async validateUser(
     UserLoginDTO: UserLoginDTO
-  ): Promise<{ accessToken: string; user: User }> {
+  ): Promise<{ accessToken: string; refreshToken: string; user: User }> {
     const userFind: User | null = await this.userService.findByFields({
       where: { userEmail: UserLoginDTO.userEmail },
     });
@@ -88,8 +94,13 @@ export class AuthService {
       character: userFind.character,
     };
 
+    const refreshToken: string = this.generateRefreshToken();
+    userFind.refreshToken = refreshToken;
+    await this.userService.save(userFind);
+
     return {
       accessToken: this.jwtService.sign(payload),
+      refreshToken: refreshToken,
       user: userFind,
     };
   }
@@ -121,5 +132,28 @@ export class AuthService {
     } catch (err) {
       throw new UnauthorizedException("토큰이 유효하지 않습니다.");
     }
+  }
+
+  async refreshAccessToken(token: string): Promise<{ accessToken: string }> {
+    const user: User | null = await this.userService.findByFields({
+      where: { refreshToken: token }, // refreshToken 필드로 유저 검색
+    });
+
+    if (!user) {
+      throw new UnauthorizedException("유저를 찾을 수 없습니다.");
+    }
+
+    const payload: Payload = {
+      userId: user.userId,
+      userEmail: user.userEmail,
+      nickname: user.nickname,
+      userActive: user.userActive,
+      userKeynote: user.userKeynote,
+      userMmr: user.userMmr,
+      userPoint: user.userPoint,
+      character: user.character,
+    };
+
+    return { accessToken: this.jwtService.sign(payload) };
   }
 }

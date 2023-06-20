@@ -13,6 +13,7 @@ type User {
   userPoint: Float!
   character: String!
   deletedAt: DateTime
+  refreshToken: String
 }
 
 """
