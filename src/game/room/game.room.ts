@@ -1,8 +1,6 @@
 import { GameSongDto } from "src/song/dto/game-song.dto";
 import { GameRoomStatus } from "./../utill/game.enum";
-import { plainToClass } from "class-transformer";
-import { publicDecrypt } from "crypto";
-import { GameEventDto } from "../replay/dto/game-event.dto";
+
 export class GameRoom {
   private roomId: number;
   private gameRoomStatus: GameRoomStatus;
@@ -10,7 +8,6 @@ export class GameRoom {
   private gameSongDto: GameSongDto;
   private roomMaster: string;
   private songListInCustom: GameSongDto[];
-  private gameEvent: GameEventDto[];
   private startTime: number;
 
   constructor(

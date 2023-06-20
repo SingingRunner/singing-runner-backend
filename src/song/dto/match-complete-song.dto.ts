@@ -2,8 +2,8 @@ import { IsString } from "class-validator";
 
 export class MatchCompleteSongDto {
   constructor(songTitle: string, singer: string) {
-    songTitle = this.songTitle;
-    singer = this.singer;
+    this.songTitle = songTitle;
+    this.singer = singer;
   }
   @IsString()
   songTitle: string;

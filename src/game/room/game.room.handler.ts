@@ -1,10 +1,9 @@
-import { ConsoleLogger, Injectable } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { Socket } from "socket.io";
 import { GameRoom } from "./game.room";
 import { UserGameDto } from "src/auth/user/dto/user.game.dto";
 import { GameRoomStatus } from "../utill/game.enum";
 import { SongService } from "src/song/song.service";
-import { MatchCompleteSongDto } from "src/song/dto/match-complete-song.dto";
 
 @Injectable()
 export class GameRoomHandler {
@@ -13,13 +12,16 @@ export class GameRoomHandler {
   constructor(private songService: SongService) {}
 
   public joinRoom(gameRoom: GameRoom, user: UserGameDto) {
-    this.roomList.get(gameRoom).push(user);
+    this.roomList.get(gameRoom)?.push(user);
   }
 
   public leaveRoom(gameRoom: GameRoom, user: Socket) {
-    const users: UserGameDto[] = this.roomList
+    const users: UserGameDto[] | undefined = this.roomList
       .get(gameRoom)
-      .filter((userInfo) => userInfo.getSocket().id !== user.id);
+      ?.filter((userInfo) => userInfo.getSocket().id !== user.id);
+    if (users === undefined) {
+      throw new Error("User not found in the game room");
+    }
     this.roomList.set(gameRoom, users);
   }
 
@@ -35,8 +37,12 @@ export class GameRoomHandler {
     gameRoom.increaseAcceptCount();
   }
 
-  public findUsersInRoom(gameRoom: GameRoom): Array<UserGameDto> {
-    return this.roomList.get(gameRoom);
+  public findUsersInRoom(gameRoom: GameRoom): UserGameDto[] {
+    const users = this.roomList.get(gameRoom)?.slice();
+    if (users === undefined) {
+      throw new Error("User not found in the game room");
+    }
+    return users;
   }
 
   public async createRoom(): Promise<GameRoom> {
@@ -58,24 +64,26 @@ export class GameRoomHandler {
 
   public findRoomBySocket(user: Socket): GameRoom {
     for (const key of this.roomList.keys()) {
-      const foundUser = this.roomList
+      const foundUser: UserGameDto | undefined = this.roomList
         .get(key)
-        .find((userInRoom) => userInRoom.getSocket() === user);
-      if (foundUser) {
+        ?.find((userInRoom) => userInRoom.getSocket() === user);
+      if (foundUser !== undefined) {
         return key;
       }
     }
+    throw new Error("Room not found");
   }
 
   public findRoomByUserId(userId: string): GameRoom {
     for (const key of this.roomList.keys()) {
-      const foundUser = this.roomList
+      const foundUser: UserGameDto | undefined = this.roomList
         .get(key)
-        .find((userInRoom) => userInRoom.getUserMatchDto().userId === userId);
-      if (foundUser) {
+        ?.find((userInRoom) => userInRoom.getUserMatchDto().userId === userId);
+      if (foundUser !== undefined) {
         return key;
       }
     }
+    throw new Error("Room not found");
   }
   private roomCount(): number {
     return this.roomList.size;

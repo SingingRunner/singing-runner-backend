@@ -1,7 +1,8 @@
-import { UserGameDto } from "src/user/dto/user.game.dto";
 import { MatchMakingPolicy } from "./match.making.policy";
 import { UserMatchTier } from "../utill/game.enum";
 import { Socket } from "socket.io";
+import { UserGameDto } from "src/auth/user/dto/user.game.dto";
+
 export class MMRMatchPolicy implements MatchMakingPolicy {
   private tierQueueMap: Map<UserMatchTier, UserGameDto[]> = new Map();
   constructor() {
@@ -56,14 +57,23 @@ export class MMRMatchPolicy implements MatchMakingPolicy {
   }
 
   public getAvailableUsers(userGameDto: UserGameDto): UserGameDto[] {
-    const availableUsers: UserGameDto[] = [];
-    const userTier: UserMatchTier = this.transformMMRtoTier(
-      userGameDto.getUserMatchDto().userMMR
-    );
-    for (let i = 0; i < 2; i++) {
-      availableUsers.push(this.tierQueueMap.get(userTier).shift());
+    if (
+      !userGameDto ||
+      !userGameDto.getUserMatchDto() ||
+      userGameDto.getUserMatchDto().userMMR == null
+    ) {
+      throw new Error("Invalid userGameDto or userMMR");
     }
-    return availableUsers;
+
+    const userMMR = userGameDto.getUserMatchDto().userMMR;
+    const userTier: UserMatchTier = this.transformMMRtoTier(userMMR);
+
+    const matchQueue = this.tierQueueMap.get(userTier);
+    if (!matchQueue || matchQueue.length < 2) {
+      throw new Error("Not enough available users");
+    }
+
+    return matchQueue.splice(0, 2);
   }
 
   //   private checkStarvationUser() {

@@ -5,4 +5,5 @@ export enum Item {
   FROZEN = "frozen",
   CLOUD = "cloud",
   SHIELD = "shield",
+  NULL = "empty",
 }

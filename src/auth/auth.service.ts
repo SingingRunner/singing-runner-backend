@@ -3,20 +3,20 @@ import {
   HttpStatus,
   Injectable,
   UnauthorizedException,
-} from '@nestjs/common';
-import { UserRegisterDTO } from './user/dto/user.register.dto';
-import { UserService } from './user/user.service';
-import { UserLoginDTO } from './user/dto/user.login.dto';
-import { User } from './user/entity/user.entity';
-import * as bcrypt from 'bcrypt';
-import { Payload } from './security/payload.interface';
-import { JwtService } from '@nestjs/jwt';
+} from "@nestjs/common";
+import { UserRegisterDTO } from "./user/dto/user.register.dto";
+import { UserService } from "./user/user.service";
+import { UserLoginDTO } from "./user/dto/user.login.dto";
+import { User } from "./user/entity/user.entity";
+import * as bcrypt from "bcrypt";
+import { Payload } from "./security/payload.interface";
+import { JwtService } from "@nestjs/jwt";
 
 @Injectable()
 export class AuthService {
   constructor(
     private userService: UserService,
-    private jwtService: JwtService,
+    private jwtService: JwtService
   ) {}
 
   async registerUser(newUser: UserRegisterDTO): Promise<UserRegisterDTO> {
@@ -26,8 +26,8 @@ export class AuthService {
 
     if (userFind) {
       throw new HttpException(
-        '이미 존재하는 이메일입니다.',
-        HttpStatus.BAD_REQUEST,
+        "이미 존재하는 이메일입니다.",
+        HttpStatus.BAD_REQUEST
       );
     }
 
@@ -35,17 +35,17 @@ export class AuthService {
   }
 
   async validateUser(
-    UserLoginDTO: UserLoginDTO,
+    UserLoginDTO: UserLoginDTO
   ): Promise<{ accessToken: string }> {
     const userFind: User = await this.userService.findByFields({
       where: { userEmail: UserLoginDTO.userEmail },
     });
     const validatePassword = await bcrypt.compare(
       UserLoginDTO.password,
-      userFind.password,
+      userFind.password
     );
     if (!userFind || !validatePassword) {
-      throw new UnauthorizedException('이메일 또는 비밀번호가 틀렸습니다.');
+      throw new UnauthorizedException("이메일 또는 비밀번호가 틀렸습니다.");
     }
     const payload: Payload = {
       userId: userFind.userId,
