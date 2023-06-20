@@ -65,7 +65,7 @@ export class AuthService {
 
   async validateUser(
     UserLoginDTO: UserLoginDTO
-  ): Promise<{ accessToken: string; refreshToken: string; user: User }> {
+  ): Promise<{ accessToken: string; user: User }> {
     const userFind: User | null = await this.userService.findByFields({
       where: { userEmail: UserLoginDTO.userEmail },
     });
@@ -94,15 +94,26 @@ export class AuthService {
       character: userFind.character,
     };
 
+    return {
+      accessToken: this.jwtService.sign(payload),
+      user: userFind,
+    };
+  }
+
+  async createRefreshToken(userLoginDTO: UserLoginDTO): Promise<string> {
+    const userFind: User | null = await this.userService.findByFields({
+      where: { userEmail: userLoginDTO.userEmail },
+    });
+
+    if (!userFind) {
+      throw new UnauthorizedException("유저를 찾을 수 없습니다.");
+    }
+
     const refreshToken: string = this.generateRefreshToken();
     userFind.refreshToken = refreshToken;
     await this.userService.save(userFind);
 
-    return {
-      accessToken: this.jwtService.sign(payload),
-      refreshToken: refreshToken,
-      user: userFind,
-    };
+    return refreshToken;
   }
 
   async tokenValidateUser(payload: Payload): Promise<User> {

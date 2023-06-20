@@ -26,6 +26,10 @@ type Auth {
   user: User!
 }
 
+type Token {
+  accessToken: String!
+}
+
 type Query {
   isAuthenticated(token: String!): String!
 }
@@ -33,6 +37,7 @@ type Query {
 type Mutation {
   registerUser(newUser: UserRegisterDTO!): User!
   loginUser(userLoginDTO: UserLoginDTO!): Auth!
+  getRefreshToken(userLoginDTO: UserLoginDTO!): Token!
 }
 
 input UserRegisterDTO {

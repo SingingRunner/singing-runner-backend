@@ -12,6 +12,7 @@ import { UserRegisterDTO } from "./user/dto/user.register.dto";
 import { UserLoginDTO } from "./user/dto/user.login.dto";
 import { AuthGuard } from "@nestjs/passport";
 import { User } from "./user/entity/user.entity";
+import { UserService } from "./user/user.service";
 
 @ObjectType()
 class Auth {
@@ -22,9 +23,18 @@ class Auth {
   user: User;
 }
 
+@ObjectType()
+class Token {
+  @Field(() => String)
+  accessToken: string;
+}
+
 @Resolver()
 export class AuthResolver {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private userService: UserService
+  ) {}
 
   @Mutation(() => User)
   async registerUser(@Args("newUser") newUser: UserRegisterDTO): Promise<User> {
@@ -43,6 +53,19 @@ export class AuthResolver {
       accessToken: jwt.accessToken,
       user: jwt.user,
     };
+  }
+
+  @Mutation(() => Token)
+  async getRefreshToken(
+    @Args("userLoginDTO") userLoginDTO: UserLoginDTO
+  ): Promise<Token> {
+    const { user } = await this.authService.validateUser(userLoginDTO);
+    const refreshToken = this.authService.generateRefreshToken();
+
+    user.refreshToken = refreshToken;
+    await this.userService.update(user);
+
+    return { accessToken: refreshToken };
   }
 
   @Query(() => String)
