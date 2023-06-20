@@ -5,6 +5,7 @@ import { GameRoom } from "./room/game.room";
 import { UserGameDto } from "src/auth/user/dto/user.game.dto";
 import { ItemPolicy } from "./item/item.policy";
 import { GameSongDto } from "src/song/dto/game-song.dto";
+import { UserScoreDto } from "./rank/dto/user-score.dto";
 
 @Injectable()
 export class GameService {
@@ -57,6 +58,15 @@ export class GameService {
     return this.itemPolicy.getItems();
   }
 
+  public determineRank(user: Socket, userScoreDto: UserScoreDto) {
+    // 50/20/-10
+    this.gameRoomHandler.increaseAcceptCount(user);
+    const gameRoom: GameRoom = this.gameRoomHandler.findRoomBySocket(user);
+    if (this.gameRoomHandler.isGameRoomReady(gameRoom)) {
+      //
+      return;
+    }
+  }
   // public gameEvent(){
   //  GameRoom 마다 replay용 game event 저장.
   // }

@@ -15,7 +15,7 @@ import { GameRoom } from "./room/game.room";
 import { UserItemDto } from "./item/dto/user-item.dto";
 import { UserGameDto } from "src/auth/user/dto/user.game.dto";
 import { Item } from "./item/item.enum";
-import { UserScoreDto } from "./dto/user-score.dto";
+import { UserScoreDto } from "./rank/user-score.dto";
 
 /**
  * webSocket 통신을 담당하는 Handler
@@ -123,7 +123,6 @@ export class GameGateway
     const item = this.gameService.getItem();
     if (item !== Item.NULL) {
       this.broadCast(user, "get_item", item);
-      return;
     }
   }
 
@@ -145,15 +144,19 @@ export class GameGateway
     this.broadCast(user, "score", userScoreDto.toJson);
   }
 
-  // @SubscribeMessage("game_terminated")
-  // gameTermintated(@ConnectedSocket() user: Socket) {
-  /**
-   * 게임종료시 gameRoom안에 인원이 전부(탈주자 예외처리)
-   * terminated 메시지와 점수, 녹음정보(리플레이용)를 보내면
-   * 순위, mmr, userId 를 보내줘야함
-   * + 게임이벤트 및 녹음정보를 각 user마다 DB에 저장.
-   */
-  // }
+  @SubscribeMessage("game_terminated")
+  gameTermintated(
+    @ConnectedSocket() user: Socket,
+    @MessageBody() usereScoreDto: UserScoreDto
+  ) {
+    /**
+     * 게임종료시 gameRoom안에 인원이 전부(탈주자 예외처리)
+     * terminated 메시지와 점수, 녹음정보(리플레이용)를 보내면
+     * 순위, mmr, userId 를 보내줘야함
+     * + 게임이벤트 및 녹음정보를 각 user마다 DB에 저장.
+     */
+
+  }
 
   private broadCast(user: Socket, message: string, responseData: any) {
     console.log("in broad cast : ", responseData);
