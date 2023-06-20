@@ -44,4 +44,8 @@ export class User {
   @Field(() => Date, { nullable: true })
   @Column({ type: "datetime", nullable: true })
   deletedAt: Date;
+
+  @Field(() => String, { nullable: true })
+  @Column({ type: "varchar", length: 255, nullable: true })
+  refreshToken: string;
 }
