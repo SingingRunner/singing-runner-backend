@@ -2,6 +2,7 @@ import { GameSongDto } from "src/song/dto/game-song.dto";
 import { GameRoomStatus } from "./../utill/game.enum";
 import { plainToClass } from "class-transformer";
 import { publicDecrypt } from "crypto";
+import { GameEventDto } from "../replay/dto/game-event.dto";
 export class GameRoom {
   private roomId: number;
   private gameRoomStatus: GameRoomStatus;
@@ -9,7 +10,9 @@ export class GameRoom {
   private gameSongDto: GameSongDto;
   private roomMaster: string;
   private songListInCustom: GameSongDto[];
-  //private gameEvent: GameEvent[]
+  private gameEvent: GameEventDto[];
+  private startTime: number;
+
   constructor(
     roomId: number,
     gameRoomStatus: GameRoomStatus,
@@ -39,24 +42,32 @@ export class GameRoom {
   public getGameSongDto(): GameSongDto {
     return this.gameSongDto;
   }
-  public setGameSongDto(song: GameSongDto){
+
+  public setGameSongDto(song: GameSongDto) {
     this.gameSongDto = song;
   }
+
   public increaseAcceptCount() {
     this.acceptCount += 1;
   }
+
   public resetAcceptCount() {
     this.acceptCount = 0;
   }
-  public setRoomMaster(userId:string) {
+
+  public setRoomMaster(userId: string) {
     this.roomMaster = userId;
   }
-  public setSongListInCustom(gameSongDtoList: GameSongDto[]){
+
+  public setSongListInCustom(gameSongDtoList: GameSongDto[]) {
     this.songListInCustom = gameSongDtoList;
   }
 
-  public getSongListinCustom(): GameSongDto[]{
+  public getSongListinCustom(): GameSongDto[] {
     return this.songListInCustom;
   }
- 
+
+  public setStartTime(startTime: number) {
+    this.startTime = startTime;
+  }
 }

@@ -15,17 +15,20 @@ export class MatchService {
   ) {}
 
   public async matchMaking(userGameDto) {
-      const userList: Array<UserGameDto> =
-        this.matchMakingPolicy.getAvailableUsers(userGameDto);
-      userList.push(userGameDto);
-      const gameRoom: GameRoom = await this.gameRoomHandler.createRoom();
-      console.log("gameRoom : ", gameRoom);
-      for(const user of userList){
-        this.gameRoomHandler.joinRoom(gameRoom, user);
-      }
+    const userList: Array<UserGameDto> =
+      this.matchMakingPolicy.getAvailableUsers(userGameDto);
+    userList.push(userGameDto);
+    const gameRoom: GameRoom = await this.gameRoomHandler.createRoom();
+    console.log("gameRoom : ", gameRoom);
+    for (const user of userList) {
+      this.gameRoomHandler.joinRoom(gameRoom, user);
+    }
   }
 
-  public async isMatchMade(user: Socket, userMatchDto: UserMatchDto):Promise<boolean>{
+  public async isMatchMade(
+    user: Socket,
+    userMatchDto: UserMatchDto
+  ): Promise<boolean> {
     const userGameDto: UserGameDto = new UserGameDto(user, userMatchDto);
     if (this.matchMakingPolicy.isQueueReady(userGameDto)) {
       await this.matchMaking(userGameDto);
@@ -39,7 +42,7 @@ export class MatchService {
     this.matchMakingPolicy.leaveQueue(user);
   }
 
-  public acceptAllUsers(user: Socket):boolean {
+  public acceptAllUsers(user: Socket): boolean {
     const gameRoom: GameRoom = this.gameRoomHandler.findRoomBySocket(user);
     this.gameRoomHandler.increaseAcceptCount(user);
     if (this.gameRoomHandler.isGameRoomReady(gameRoom)) {
@@ -59,21 +62,21 @@ export class MatchService {
     this.gameRoomHandler.leaveRoom(gameRoom, user);
   }
 
-  public findRoomBySocket(user:Socket):GameRoom{
-   return this.gameRoomHandler.findRoomBySocket(user);
+  public findRoomBySocket(user: Socket): GameRoom {
+    return this.gameRoomHandler.findRoomBySocket(user);
   }
 
-  public findUsersInSameRoom(gameRoom: GameRoom): UserGameDto[]{
+  public findUsersInSameRoom(gameRoom: GameRoom): UserGameDto[] {
     return this.gameRoomHandler.findUsersInRoom(gameRoom);
   }
 
-  public getSongInfo(gameRoom:GameRoom){
+  public getSongInfo(gameRoom: GameRoom) {
     const songTitle: string = gameRoom.getGameSongDto().songTitle;
     const singer: string = gameRoom.getGameSongDto().singer;
-    return {songTitle, singer} 
+    return { songTitle, singer };
   }
 
-  public deleteRoom(user:Socket){
+  public deleteRoom(user: Socket) {
     this.gameRoomHandler.deleteRoom(user);
   }
 

@@ -3,7 +3,6 @@ import { MatchMakingPolicy } from "./match.making.policy";
 import { UserGameDto } from "src/user/dto/user.game.dto";
 import { Socket } from "socket.io";
 
-
 @Injectable()
 export class SimpleMatchMaking implements MatchMakingPolicy {
   private readyQueue: Array<UserGameDto> = [];
@@ -16,7 +15,7 @@ export class SimpleMatchMaking implements MatchMakingPolicy {
   }
   public leaveQueue(user: Socket) {
     this.readyQueue = this.readyQueue.filter(
-      (userInQueue) => userInQueue.getSocket().id !== user.id,
+      (userInQueue) => userInQueue.getSocket().id !== user.id
     );
   }
 

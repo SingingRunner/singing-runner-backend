@@ -1,7 +1,7 @@
-import { UserGameDto } from 'src/user/dto/user.game.dto';
-import { MatchMakingPolicy } from './match.making.policy';
-import { UserMatchTier } from '../utill/game.enum';
-import { Socket } from 'socket.io';
+import { UserGameDto } from "src/user/dto/user.game.dto";
+import { MatchMakingPolicy } from "./match.making.policy";
+import { UserMatchTier } from "../utill/game.enum";
+import { Socket } from "socket.io";
 export class MMRMatchPolicy implements MatchMakingPolicy {
   private tierQueueMap: Map<UserMatchTier, UserGameDto[]> = new Map();
   constructor() {
@@ -15,38 +15,41 @@ export class MMRMatchPolicy implements MatchMakingPolicy {
 
   public joinQueue(userGameDto: UserGameDto) {
     const userTier: UserMatchTier = this.transformMMRtoTier(
-      userGameDto.getUserMatchDto().userMMR,
+      userGameDto.getUserMatchDto().userMMR
     );
     userGameDto.setQueueEntryTime(Date.now());
-    this.tierQueueMap.get(userTier).push(userGameDto);
+    this.tierQueueMap.get(userTier)?.push(userGameDto);
   }
 
   public joinQueueAtFront(userGameDto: UserGameDto) {
     const userTier: UserMatchTier = this.transformMMRtoTier(
-      userGameDto.getUserMatchDto().userMMR,
+      userGameDto.getUserMatchDto().userMMR
     );
-    this.tierQueueMap.get(userTier).unshift(userGameDto);
+    this.tierQueueMap.get(userTier)?.unshift(userGameDto);
   }
 
   public leaveQueue(user: Socket) {
     for (const key of this.tierQueueMap.keys()) {
       let usersInQueue = this.tierQueueMap.get(key);
 
-      usersInQueue = usersInQueue.filter(
-        (userInQueue) => userInQueue.getSocket().id !== user.id,
-      );
+      if (usersInQueue !== undefined) {
+        usersInQueue = usersInQueue.filter(
+          (userInQueue) => userInQueue.getSocket().id !== user.id
+        );
 
-      this.tierQueueMap.set(key, usersInQueue);
+        this.tierQueueMap.set(key, usersInQueue);
+      }
     }
   }
 
   public isQueueReady(userGameDto: UserGameDto): boolean {
     const userTier: UserMatchTier = this.transformMMRtoTier(
-      userGameDto.getUserMatchDto().userMMR,
+      userGameDto.getUserMatchDto().userMMR
     );
-    console.log('isQ ready', userTier);
-    const readyQueue: UserGameDto[] = this.tierQueueMap.get(userTier);
-    if (readyQueue.length >= 2) {
+    console.log("isQ ready", userTier);
+    const readyQueue: UserGameDto[] | undefined =
+      this.tierQueueMap.get(userTier);
+    if (readyQueue !== undefined && readyQueue.length >= 2) {
       return true;
     }
     return false;
@@ -55,7 +58,7 @@ export class MMRMatchPolicy implements MatchMakingPolicy {
   public getAvailableUsers(userGameDto: UserGameDto): UserGameDto[] {
     const availableUsers: UserGameDto[] = [];
     const userTier: UserMatchTier = this.transformMMRtoTier(
-      userGameDto.getUserMatchDto().userMMR,
+      userGameDto.getUserMatchDto().userMMR
     );
     for (let i = 0; i < 2; i++) {
       availableUsers.push(this.tierQueueMap.get(userTier).shift());
