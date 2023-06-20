@@ -7,6 +7,7 @@ import { MatchService } from "./match/match.service";
 import { SongModule } from "src/song/song.module";
 import { SimpleItemPolicy } from "./item/simple.item.policy";
 import { MMRMatchPolicy } from "./match/mmr.match.policy";
+import { RankHandlerImpl } from "./rank/rank.handler.impl";
 
 @Module({
   imports: [SongModule],
@@ -22,6 +23,10 @@ import { MMRMatchPolicy } from "./match/mmr.match.policy";
     {
       provide: "ItemPolicy",
       useClass: SimpleItemPolicy,
+    },
+    {
+      provide: "RankHandler",
+      useClass: RankHandlerImpl,
     },
   ],
 })
