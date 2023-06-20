@@ -12,11 +12,8 @@ export class UserService {
     private readonly userRepository: Repository<User>
   ) {}
 
-  async findByFields(option: FindOneOptions<User>): Promise<User> {
+  async findByFields(option: FindOneOptions<User>): Promise<User | null> {
     const user: User | null = await this.userRepository.findOne(option);
-    if (user === null) {
-      throw new Error("not found User");
-    }
     return user;
   }
 
