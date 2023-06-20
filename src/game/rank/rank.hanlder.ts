@@ -3,5 +3,6 @@ import { UserScoreDto } from "./dto/user-score.dto";
 export interface RankHandler {
   getUserScoreDto(gameRoom: GameRoom): UserScoreDto[];
   pushUserScore(gameRoom: GameRoom, userScoreDto: UserScoreDto);
+  setRank(gameRoom: GameRoom);
   calculateRank(gameRoom: GameRoom);
 }

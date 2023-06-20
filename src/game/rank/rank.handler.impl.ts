@@ -21,7 +21,7 @@ export class RankHandlerImpl implements RankHandler {
     this.getUserScoreDto(gameRoom).push(userScoreDto);
   }
 
-  public setRankMap(gameRoom: GameRoom) {
+  public setRank(gameRoom: GameRoom) {
     this.rankMap.set(gameRoom, []);
   }
 
