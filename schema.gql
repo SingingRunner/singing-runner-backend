@@ -1,0 +1,46 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type User {
+  userId: String!
+  userEmail: String!
+  password: String!
+  nickname: String!
+  userActive: Boolean!
+  userKeynote: Boolean!
+  userMmr: Float!
+  userPoint: Float!
+  character: String!
+  deletedAt: DateTime
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type Auth {
+  accessToken: String!
+  user: User!
+}
+
+type Query {
+  isAuthenticated(token: String!): String!
+}
+
+type Mutation {
+  registerUser(newUser: UserRegisterDTO!): User!
+  loginUser(userLoginDTO: UserLoginDTO!): Auth!
+}
+
+input UserRegisterDTO {
+  userEmail: String!
+  password: String!
+  nickname: String!
+}
+
+input UserLoginDTO {
+  userEmail: String!
+  password: String!
+}
