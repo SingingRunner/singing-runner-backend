@@ -6,13 +6,17 @@ import { UserGameDto } from "src/auth/user/dto/user.game.dto";
 import { ItemPolicy } from "./item/item.policy";
 import { GameSongDto } from "src/song/dto/game-song.dto";
 import { UserScoreDto } from "./rank/dto/user-score.dto";
+import { RankHandler } from "./rank/rank.hanlder";
+import { GameTerminatedDto } from "./rank/game-terminated.dto";
 
 @Injectable()
 export class GameService {
   constructor(
     private gameRoomHandler: GameRoomHandler,
     @Inject("ItemPolicy")
-    private itemPolicy: ItemPolicy
+    private itemPolicy: ItemPolicy,
+    @Inject("RankHandler")
+    private rankHandler: RankHandler
   ) {}
 
   public loadData(user: Socket) {
@@ -58,14 +62,22 @@ export class GameService {
     return this.itemPolicy.getItems();
   }
 
-  public determineRank(user: Socket, userScoreDto: UserScoreDto) {
+  public allUsersTerminated(user: Socket, userScoreDto: UserScoreDto): boolean {
     // 50/20/-10
-    this.gameRoomHandler.increaseAcceptCount(user);
     const gameRoom: GameRoom = this.gameRoomHandler.findRoomBySocket(user);
-    if (this.gameRoomHandler.isGameRoomReady(gameRoom)) {
-      //
-      return;
+    this.gameRoomHandler.increaseAcceptCount(user);
+    if (gameRoom.getAcceptCount() == 1) {
+      this.rankHandler.setRank(gameRoom);
     }
+    if (this.gameRoomHandler.isGameRoomReady(gameRoom)) {
+      return true;
+    }
+    this.rankHandler.pushUserScore(gameRoom, userScoreDto);
+    return false;
+  }
+
+  public caculateRank(gameRoom: GameRoom): GameTerminatedDto[] {
+    return this.rankHandler.calculateRank(gameRoom);
   }
   // public gameEvent(){
   //  GameRoom 마다 replay용 game event 저장.
