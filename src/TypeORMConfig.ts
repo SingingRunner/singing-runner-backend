@@ -1,5 +1,5 @@
-import { TypeOrmModuleOptions } from '@nestjs/typeorm';
-import { Song } from 'src/song/entities/song.entity';
+import { TypeOrmModuleOptions } from "@nestjs/typeorm";
+import { Song } from "src/song/entities/song.entity";
 
 export const TypeORMConfig: TypeOrmModuleOptions = {
   type: process.env.DB_TYPE as any,

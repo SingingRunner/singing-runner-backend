@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
-import { Item } from './item.enum';
-import { ItemPolicy } from './item.policy';
+import { Injectable } from "@nestjs/common";
+import { Item } from "./item.enum";
+import { ItemPolicy } from "./item.policy";
 
 @Injectable()
 export class SimpleItemPolicy implements ItemPolicy {
@@ -11,7 +11,7 @@ export class SimpleItemPolicy implements ItemPolicy {
   getItems(): Item {
     this.itemCount++;
     if (this.itemCount < 3) {
-      return null;
+      return Item.NULL;
     }
     if (this.itemIndex >= this.items.length) {
       this.itemIndex = 0;
