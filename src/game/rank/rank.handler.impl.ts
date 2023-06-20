@@ -1,13 +1,15 @@
+import { Injectable } from "@nestjs/common";
 import { GameRoom } from "../room/game.room";
 import { UserScoreDto } from "./dto/user-score.dto";
 import { GameTerminatedDto } from "./game-terminated.dto";
 import { RankHandler } from "./rank.hanlder";
 
+@Injectable()
 export class RankHandlerImpl implements RankHandler {
   private rankMap: Map<GameRoom, UserScoreDto[]> = new Map();
 
   public getUserScoreDto(gameRoom: GameRoom): UserScoreDto[] {
-    const userScoreList = this.rankMap.get(gameRoom)?.slice();
+    const userScoreList = this.rankMap.get(gameRoom);
     if (userScoreList === undefined) {
       throw new Error("UserScore not found in game room");
     }
