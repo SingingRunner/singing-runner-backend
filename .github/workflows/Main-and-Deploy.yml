@@ -21,7 +21,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Install dependencies
-        run: npm install
+        run: yarn install
 
       - name: Extract version from PR message
         id: extract-version
