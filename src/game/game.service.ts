@@ -73,12 +73,17 @@ export class GameService {
     const gameEvent = gameRoom.getGameEvent();
     const gameEventJson = JSON.stringify(gameEvent);
     console.log(gameEventJson);
+    // 같이 게임한 유저 정보 및 유저 캐릭터 정보도 추가해야함
     const gameReplayEntity: CreateReplayInput = {
       userId: userId,
+      userCharacter: "userCharacter",
       songId: songId,
       userVocal: "파일 url",
       gameEvent: "파일 url",
-      createdAt: new Date(),
+      player1Id: "player1Id",
+      player1Character: "player1Character",
+      player2Id: "player2Id",
+      player2Character: "player2Character",
     };
     console.log(userVocal);
     return await this.gameReplayRepository.save(

@@ -5,6 +5,9 @@ export class CreateReplayInput {
   @Field(() => String)
   userId: string;
 
+  @Field(() => String)
+  userCharacter: string;
+
   @Field(() => Int)
   songId: number;
 
@@ -14,6 +17,15 @@ export class CreateReplayInput {
   @Field(() => String)
   gameEvent: string;
 
-  @Field(() => Date)
-  createdAt: Date;
+  @Field(() => String)
+  player1Id: string;
+
+  @Field(() => String)
+  player1Character: string;
+
+  @Field(() => String)
+  player2Id: string;
+
+  @Field(() => String)
+  player2Character: string;
 }
