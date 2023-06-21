@@ -2,7 +2,7 @@ import { User } from "src/user/entity/user.entity";
 import { Column, Entity, ManyToOne, JoinColumn, PrimaryColumn } from "typeorm";
 
 @Entity("user_notification")
-export class Social {
+export class UserNotification {
   @PrimaryColumn()
   userId: string;
 
@@ -15,7 +15,7 @@ export class Social {
 
   @ManyToOne(() => User)
   @JoinColumn({ name: "friendId" })
-  friend: User;
+  sender: User;
 
   @Column({ type: "varchar" })
   content: string;
