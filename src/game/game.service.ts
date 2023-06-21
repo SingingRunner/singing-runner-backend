@@ -153,12 +153,19 @@ export class GameService {
     gameRoom: GameRoom,
     eventName: string,
     eventContent: string,
-    user: Socket
+    userSocket: Socket
   ) {
     const currentTime = new Date().getTime() - gameRoom.getStartTime();
+    const users = this.gameRoomHandler.findUsersInRoom(gameRoom);
+    let userId = users[0].getUserMatchDto().userId;
+    users.forEach((user) => {
+      if (user.getSocket().id === userSocket.id) {
+        userId = user.getUserMatchDto().userId;
+      }
+    });
     const gameEvent: GameEventDto = new GameEventDto(
       currentTime,
-      user.id,
+      userId,
       eventName,
       eventContent
     );
