@@ -1,12 +1,9 @@
-import { Injectable, UnauthorizedException } from "@nestjs/common";
 import { PassportStrategy } from "@nestjs/passport";
-import { ExtractJwt, Strategy, VerifiedCallback } from "passport-jwt";
-import { AuthService } from "../auth.service";
+import { ExtractJwt, Strategy } from "passport-jwt";
 import { Payload } from "./payload.interface";
 
-@Injectable()
-export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor(private authService: AuthService) {
+export class JwtAccessStrategy extends PassportStrategy(Strategy, "access") {
+  constructor() {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: true, // 토큰 만료 여부 확인
@@ -14,13 +11,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: Payload, done: VerifiedCallback): Promise<void> {
-    const user = await this.authService.tokenValidateUser(payload);
-    if (!user) {
-      return done(
-        new UnauthorizedException({ message: "유저가 존재하지 않습니다." })
-      );
-    }
-    return done(null, user);
+  // 토큰이 유효한지 확인 -> console에 payload 출력
+  validate(payload: Payload) {
+    console.log(payload);
+    return {
+      userId: payload.userId,
+    };
   }
 }
