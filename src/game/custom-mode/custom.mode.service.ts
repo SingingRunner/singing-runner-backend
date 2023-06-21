@@ -1,5 +1,5 @@
-import { GameRoom } from "./room/game.room";
-import { GameRoomHandler } from "./room/game.room.handler";
+import { GameRoom } from "../room/game.room";
+import { GameRoomHandler } from "../room/game.room.handler";
 import { Injectable } from "@nestjs/common";
 import { Socket } from "socket.io";
 import { UserGameDto } from "src/auth/user/dto/user.game.dto";
