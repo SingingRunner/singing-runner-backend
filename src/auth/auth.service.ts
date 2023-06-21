@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { v4 as uuidv4 } from "uuid";
 import {
   HttpException,
@@ -5,9 +6,9 @@ import {
   Injectable,
   UnauthorizedException,
 } from "@nestjs/common";
-import { UserRegisterDTO } from "./user/dto/user.register.dto";
+import { UserRegisterDto } from "./user/dto/user.register.dto";
 import { UserService } from "./user/user.service";
-import { UserLoginDTO } from "./user/dto/user.login.dto";
+import { UserLoginDto } from "./user/dto/user.login.dto";
 import { User } from "./user/entity/user.entity";
 import * as bcrypt from "bcrypt";
 import { Payload } from "./security/payload.interface";
@@ -21,7 +22,7 @@ export class AuthService {
     private jwtService: JwtService
   ) {}
 
-  async registerUser(newUser: UserRegisterDTO): Promise<User> {
+  async registerUser(newUser: UserRegisterDto): Promise<User> {
     const userFind: User | null = await this.userService.findByFields({
       where: { userEmail: newUser.userEmail },
     });
@@ -33,21 +34,21 @@ export class AuthService {
       );
     }
 
-    const userRegisterDTO: UserRegisterDTO = {
+    const userRegisterDto: UserRegisterDto = {
       userEmail: newUser.userEmail,
       password: newUser.password,
       nickname: newUser.nickname,
     };
 
-    const savedUserDTO: UserRegisterDTO = await this.userService.save(
-      userRegisterDTO
+    const savedUserDto: UserRegisterDto = await this.userService.save(
+      userRegisterDto
     );
 
     const user: User = new User();
     user.userId = uuidv4();
-    user.userEmail = savedUserDTO.userEmail;
-    user.password = savedUserDTO.password;
-    user.nickname = savedUserDTO.nickname;
+    user.userEmail = savedUserDto.userEmail;
+    user.password = savedUserDto.password;
+    user.nickname = savedUserDto.nickname;
     user.userActive = false;
     user.userKeynote = false;
     user.userMmr = 0;
@@ -71,10 +72,10 @@ export class AuthService {
   }
 
   async validateUser(
-    UserLoginDTO: UserLoginDTO
+    UserLoginDto: UserLoginDto
   ): Promise<{ accessToken: string; user: Omit<User, "refreshToken"> }> {
     const userFind: User | null = await this.userService.findByFields({
-      where: { userEmail: UserLoginDTO.userEmail },
+      where: { userEmail: UserLoginDto.userEmail },
     });
 
     if (!userFind) {
@@ -82,7 +83,7 @@ export class AuthService {
     }
 
     const validatePassword = await bcrypt.compare(
-      UserLoginDTO.password,
+      UserLoginDto.password,
       userFind.password
     );
 
@@ -112,9 +113,9 @@ export class AuthService {
     };
   }
 
-  async createRefreshToken(userLoginDTO: UserLoginDTO): Promise<string> {
+  async createRefreshToken(userLoginDto: UserLoginDto): Promise<string> {
     const userFind: User | null = await this.userService.findByFields({
-      where: { userEmail: userLoginDTO.userEmail },
+      where: { userEmail: userLoginDto.userEmail },
     });
 
     if (!userFind) {
