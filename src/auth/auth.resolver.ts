@@ -106,16 +106,16 @@ export class AuthResolver {
     const authUser = new AuthUser();
     if (!context.req.user) {
       throw new UnauthorizedException("유저 정보가 없습니다.");
-    } else {
-      authUser.userId = context.req.user.userId ?? "No User ID";
-      authUser.userEmail = context.req.user.userEmail ?? "No User Email";
-      authUser.nickname = context.req.user.nickname ?? "No Nickname";
-      authUser.userActive = context.req.user.userActive ?? 0;
-      authUser.userKeynote = context.req.user.userKeynote ?? 0;
-      authUser.userMmr = context.req.user.userMmr ?? 0;
-      authUser.userPoint = context.req.user.userPoint ?? 0;
-      authUser.character = context.req.user.character ?? "beluga";
     }
+    authUser.userId = context.req.user.userId ?? "No User ID";
+    authUser.userEmail = context.req.user.userEmail ?? "No User Email";
+    authUser.nickname = context.req.user.nickname ?? "No Nickname";
+    authUser.userActive = context.req.user.userActive ?? 0;
+    authUser.userKeynote = context.req.user.userKeynote ?? 0;
+    authUser.userMmr = context.req.user.userMmr ?? 0;
+    authUser.userPoint = context.req.user.userPoint ?? 0;
+    authUser.character = context.req.user.character ?? "beluga";
+
     return authUser;
   }
 }
