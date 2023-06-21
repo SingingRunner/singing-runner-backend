@@ -21,7 +21,7 @@ export class GameService {
     @Inject("ItemPolicy")
     private itemPolicy: ItemPolicy,
     @InjectRepository(GameReplayEntity)
-    private gameReplayRepository: Repository<GameReplayEntity>
+    private gameReplayRepository: Repository<GameReplayEntity>,
     @Inject("RankHandler")
     private rankHandler: RankHandler
   ) {}
