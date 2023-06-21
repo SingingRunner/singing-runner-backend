@@ -9,7 +9,7 @@ export class GameEventDto {
   private timestamp: number;
   private userId: string;
   private eventName: string;
-  private eventContent: string;
+  private eventContent: any;
 
   constructor(timestamp, userId, eventName, eventContent) {
     this.timestamp = timestamp;

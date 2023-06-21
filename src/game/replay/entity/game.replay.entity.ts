@@ -25,6 +25,9 @@ export class GameReplayEntity extends BaseEntity {
   @Column({ type: "datetime", nullable: true })
   deletedAt: Date | null;
 
+  @Column({ type: "tinyint", default: 0 })
+  keynote: number;
+
   @ManyToOne(() => User)
   userId: string;
 

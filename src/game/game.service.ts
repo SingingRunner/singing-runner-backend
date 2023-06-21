@@ -5,14 +5,12 @@ import { GameRoom } from "./room/game.room";
 import { UserGameDto } from "src/auth/user/dto/user.game.dto";
 import { ItemPolicy } from "./item/item.policy";
 import { GameSongDto } from "src/song/dto/game-song.dto";
-import { InjectRepository } from "@nestjs/typeorm";
-import { GameReplayEntity } from "./replay/entity/game.replay.entity";
-import { Repository } from "typeorm";
 import { CreateReplayInput } from "./replay/dto/create-replay.input";
 import { GameEventDto } from "./event/dto/game.event.dto";
 import { UserScoreDto } from "./rank/dto/user-score.dto";
 import { RankHandler } from "./rank/rank.hanlder";
 import { GameTerminatedDto } from "./rank/game-terminated.dto";
+import { GameReplayService } from "./replay/game.replay.service";
 
 @Injectable()
 export class GameService {
@@ -20,10 +18,9 @@ export class GameService {
     private gameRoomHandler: GameRoomHandler,
     @Inject("ItemPolicy")
     private itemPolicy: ItemPolicy,
-    @InjectRepository(GameReplayEntity)
-    private gameReplayRepository: Repository<GameReplayEntity>,
     @Inject("RankHandler")
-    private rankHandler: RankHandler
+    private rankHandler: RankHandler,
+    private gameReplayService: GameReplayService
   ) {}
 
   public loadData(user: Socket) {
@@ -94,37 +91,74 @@ export class GameService {
     userVocal: Blob[]
   ) {
     const songId = gameRoom.getGameSongDto().songId;
+    const filename = `${userId}_${songId}_${new Date().getTime()}`;
     const gameEvent = gameRoom.getGameEvent();
     const gameEventJson = JSON.stringify(gameEvent);
+    const users = this.gameRoomHandler.findUsersInRoom(gameRoom);
+
+    let mainUser = users[0].getUserMatchDto().userId;
+    let subUser1 = users[1].getUserMatchDto().userId;
+    let subUser2 = users[2].getUserMatchDto().userId;
+    let mainCharacter = users[0].getUserMatchDto().character;
+    let subCharacter1 = users[1].getUserMatchDto().character;
+    let subCharacter2 = users[2].getUserMatchDto().character;
+    let userKeynote = users[0].getUserMatchDto().userKeynote;
+
+    users.forEach((user, i) => {
+      if (user.getUserMatchDto().userId === userId) {
+        mainUser = user.getUserMatchDto().userId;
+        userKeynote = user.getUserMatchDto().userKeynote;
+        subUser1 = users[(i + 1) % 3].getUserMatchDto().userId;
+        subUser2 = users[(i + 2) % 3].getUserMatchDto().userId;
+        mainCharacter = user.getUserMatchDto().character;
+        subCharacter1 = users[(i + 1) % 3].getUserMatchDto().userId;
+        subCharacter2 = users[(i + 2) % 3].getUserMatchDto().userId;
+      }
+    });
+
+    const eventUrl = await this.gameReplayService.saveGameEvent(
+      gameEventJson,
+      filename
+    );
+    const vocalUrl = await this.gameReplayService.saveVocal(
+      userVocal,
+      filename
+    );
     console.log(gameEventJson);
     // 같이 게임한 유저 정보 및 유저 캐릭터 정보도 추가해야함
     const gameReplayEntity: CreateReplayInput = {
-      userId: userId,
-      userCharacter: "userCharacter",
+      userId: mainUser,
+      userCharacter: mainCharacter,
       songId: songId,
-      userVocal: "파일 url",
-      gameEvent: "파일 url",
-      player1Id: "player1Id",
-      player1Character: "player1Character",
-      player2Id: "player2Id",
-      player2Character: "player2Character",
+      userVocal: vocalUrl,
+      gameEvent: eventUrl,
+      player1Id: subUser1,
+      player1Character: subCharacter1,
+      player2Id: subUser2,
+      player2Character: subCharacter2,
+      keynote: userKeynote,
     };
     console.log(userVocal);
-    return await this.gameReplayRepository.save(
-      this.gameReplayRepository.create(gameReplayEntity)
-    );
+    return await this.gameReplayService.saveReplay(gameReplayEntity);
   }
 
   public putEvent(
     gameRoom: GameRoom,
     eventName: string,
     eventContent: string,
-    user: Socket
+    userSocket: Socket
   ) {
     const currentTime = new Date().getTime() - gameRoom.getStartTime();
+    const users = this.gameRoomHandler.findUsersInRoom(gameRoom);
+    let userId = users[0].getUserMatchDto().userId;
+    users.forEach((user) => {
+      if (user.getSocket().id === userSocket.id) {
+        userId = user.getUserMatchDto().userId;
+      }
+    });
     const gameEvent: GameEventDto = new GameEventDto(
       currentTime,
-      user.id,
+      userId,
       eventName,
       eventContent
     );

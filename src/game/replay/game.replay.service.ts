@@ -6,11 +6,14 @@ import { Socket } from "socket.io";
 import { GameSongDto } from "src/song/dto/game-song.dto";
 import * as AWS from "aws-sdk";
 import { GameEventDto } from "../event/dto/game.event.dto";
+import { CreateReplayInput } from "./dto/create-replay.input";
+import { InjectRepository } from "@nestjs/typeorm";
 
 const BUCKET_NAME: string = process.env.S3_BUCKET_NAME as string;
 const BUCKET_REGION: string = process.env.S3_BUCKET_REGION as string;
 const BUCKET_ACCESS_KEY: string = process.env.S3_ACCESS_KEY as string;
 const BUCKET_SECRET_KEY: string = process.env.S3_SECRET_KEY as string;
+const BUCKET_URL: string = `https://${BUCKET_NAME}.s3.amazonaws.com/` as string;
 
 const s3 = new AWS.S3();
 AWS.config.update({
@@ -23,12 +26,18 @@ AWS.config.update({
 export class GameReplayService {
   constructor(
     private songService: SongService,
+    @InjectRepository(GameReplayEntity)
     private gameReplayRepository: Repository<GameReplayEntity>
   ) {}
 
-  public async saveVocal(chunks: Blob[], filename: string) {
+  public async saveReplay(gameReplayEntity: CreateReplayInput) {
+    return await this.gameReplayRepository.save(
+      this.gameReplayRepository.create(gameReplayEntity)
+    );
+  }
+
+  public async saveVocal(chunks: Blob[], filename: string): Promise<string> {
     const filebuffer = new Blob(chunks, { type: "audio/wav" });
-    // const fileName = `${Date.now().toString()}-${nickname}.wav`;
     const params = {
       Bucket: BUCKET_NAME,
       Key: `${filename}.wav`,
@@ -41,10 +50,13 @@ export class GameReplayService {
       }
       console.log(data);
     });
+    return `${BUCKET_URL}${filename}.wav`;
   }
 
-  public async saveGameEvent(gameEvent: string, filename: string) {
-    // const fileName = `${Date.now().toString()}-${nickname}.json`;
+  public async saveGameEvent(
+    gameEvent: string,
+    filename: string
+  ): Promise<string> {
     const params = {
       Bucket: BUCKET_NAME,
       Key: `${filename}.json`,
@@ -57,6 +69,7 @@ export class GameReplayService {
       }
       console.log(data);
     });
+    return `${BUCKET_URL}${filename}.json`;
   }
 
   public async loadData(user: Socket, replayId: number) {
@@ -90,8 +103,8 @@ export class GameReplayService {
     }
   }
 
-  public async replayGame(user: Socket, replayId: number) {
-    const gameEvent: string = await this.gameReplayRepository
+  public async replayGame(user: Socket, replayId: number, userId: string) {
+    const gameEventUrl: string = await this.gameReplayRepository
       .findOne({
         where: { replayId: replayId },
       })
@@ -102,7 +115,7 @@ export class GameReplayService {
     // fetch 과정이 조금 걸릴 수도 있으니 서버에서 파일 로드가 완료될 때까지 클라이언트 대기하게끔 소켓 이벤트 추가해야할듯
     const params = {
       Bucket: BUCKET_NAME,
-      Key: gameEvent,
+      Key: gameEventUrl,
     };
     let gameEventList: GameEventDto[] = [];
     s3.getObject(params, (err, data) => {
@@ -113,34 +126,20 @@ export class GameReplayService {
         gameEventList = JSON.parse(data.Body.toString()).data;
       }
     });
+    user.emit("start_replay");
     if (gameEventList.length > 0) {
       gameEventList.forEach((gameEvent: GameEventDto) => {
         const eventName = gameEvent.getEventName();
-        setTimeout(() => {
-          if (
-            eventName === "use_item" ||
-            eventName === "get_item" ||
-            eventName === "escape_item"
-          ) {
-            user.emit(eventName, {
-              userId: gameEvent.getUserId(),
-              item: gameEvent.getEventContent(),
-            });
-          } else if (eventName === "score") {
-            user.emit(eventName, {
-              userId: gameEvent.getUserId(),
-              score: Number(gameEvent.getEventContent()),
-            });
-          } else if (eventName === "game_terminated") {
-            user.emit(eventName, {
-              Rank: gameEvent.getEventContent(),
-            });
+        if (eventName === "get_item") {
+          if (gameEvent.getUserId() !== userId) {
+            return;
           }
+        }
+        setTimeout(() => {
+          user.emit(eventName, gameEvent.getEventContent());
         }, gameEvent.getTimestamp());
       });
-
-      user.emit("start_replay");
-      console.log(gameEvent);
+      console.log(gameEventUrl);
     }
   }
 }

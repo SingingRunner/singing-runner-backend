@@ -167,6 +167,7 @@ export class GameGateway
   private broadCast(user: Socket, message: string, responseData: any) {
     console.log("in broad cast : ", responseData);
     const gameRoom: GameRoom = this.matchService.findRoomBySocket(user);
+    this.gameService.putEvent(gameRoom, message, responseData, user);
     const userList: UserGameDto[] =
       this.matchService.findUsersInSameRoom(gameRoom);
     for (const user of userList) {

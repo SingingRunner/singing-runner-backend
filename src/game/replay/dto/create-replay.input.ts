@@ -28,4 +28,7 @@ export class CreateReplayInput {
 
   @Field(() => String)
   player2Character: string;
+
+  @Field(() => Int)
+  keynote: number;
 }
