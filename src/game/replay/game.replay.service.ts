@@ -7,6 +7,7 @@ import { GameSongDto } from "src/song/dto/game-song.dto";
 import * as AWS from "aws-sdk";
 import { GameEventDto } from "../event/dto/game.event.dto";
 import { CreateReplayInput } from "./dto/create-replay.input";
+import { InjectRepository } from "@nestjs/typeorm";
 
 const BUCKET_NAME: string = process.env.S3_BUCKET_NAME as string;
 const BUCKET_REGION: string = process.env.S3_BUCKET_REGION as string;
@@ -25,6 +26,7 @@ AWS.config.update({
 export class GameReplayService {
   constructor(
     private songService: SongService,
+    @InjectRepository(GameReplayEntity)
     private gameReplayRepository: Repository<GameReplayEntity>
   ) {}
 

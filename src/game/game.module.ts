@@ -10,12 +10,14 @@ import { MMRMatchPolicy } from "./match/mmr.match.policy";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { GameReplayEntity } from "./replay/entity/game.replay.entity";
 import { RankHandlerImpl } from "./rank/rank.handler.impl";
+import { GameReplayService } from "./replay/game.replay.service";
 
 @Module({
   imports: [SongModule, TypeOrmModule.forFeature([GameReplayEntity])],
   providers: [
     GameService,
     MatchService,
+    GameReplayService,
     GameRoomHandler,
     {
       provide: "MatchMakingPolicy",
