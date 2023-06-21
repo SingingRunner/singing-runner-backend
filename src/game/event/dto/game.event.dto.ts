@@ -17,6 +17,23 @@ export class GameEventDto {
     this.eventName = eventName;
     this.eventContent = eventContent;
   }
+
+  public getTimestamp() {
+    return this.timestamp;
+  }
+
+  public getUserId() {
+    return this.userId;
+  }
+
+  public getEventName() {
+    return this.eventName;
+  }
+
+  public getEventContent() {
+    return this.eventContent;
+  }
+
   toJSON() {
     return {
       timestamp: this.timestamp,
