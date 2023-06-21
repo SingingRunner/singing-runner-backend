@@ -6,6 +6,7 @@ import {
   Args,
   ObjectType,
   Field,
+  Context,
 } from "@nestjs/graphql";
 import { AuthService } from "./auth.service";
 import { UserRegisterDto } from "./user/dto/user.register.dto";
@@ -46,9 +47,16 @@ export class AuthResolver {
 
   @Mutation(() => Auth)
   async loginUser(
-    @Args("userLoginDto") userLoginDto: UserLoginDto
+    @Args("userLoginDto") userLoginDto: UserLoginDto,
+    @Context() context: any
   ): Promise<Auth> {
-    const jwt = await this.authService.validateUser(userLoginDto);
+    console.log(context);
+
+    const jwt = await this.authService.validateUserAndSetCookie(
+      userLoginDto,
+      context.res
+    );
+
     return {
       accessToken: jwt.accessToken,
       user: jwt.user,
@@ -66,6 +74,24 @@ export class AuthResolver {
 
     return { accessToken: refreshToken };
   }
+
+  // @Mutation(() => Token)
+  // async refreshAccessToken(
+  //   @Args("refreshToken") refreshToken: string
+  // ): Promise<Token> {
+  //   const accessToken = await this.authService.refreshAccessToken(refreshToken);
+  //   return { accessToken: accessToken.accessToken };
+  // }
+
+  // @Mutation(() => Token)
+  // async getNewRefreshToken(
+  //   @Args("accessToken") accessToken: string
+  // ): Promise<Token> {
+  //   const user = await this.authService.validateToken(accessToken);
+  //   const refreshToken = this.authService.generateRefreshToken(user.userId);
+  //   await this.userService.updateRefreshToken(user.userId, refreshToken);
+  //   return { accessToken: refreshToken };
+  // }
 
   @Query(() => String)
   @UseGuards(AuthGuard("jwt"))
