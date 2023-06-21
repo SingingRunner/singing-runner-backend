@@ -4,6 +4,19 @@ import { Repository } from "typeorm";
 import { GameReplayEntity } from "./entity/game.replay.entity";
 import { Socket } from "socket.io";
 import { GameSongDto } from "src/song/dto/game-song.dto";
+import * as AWS from "aws-sdk";
+
+const BUCKET_NAME: string = process.env.S3_BUCKET_NAME as string;
+const BUCKET_REGION: string = process.env.S3_BUCKET_REGION as string;
+const BUCKET_ACCESS_KEY: string = process.env.S3_ACCESS_KEY as string;
+const BUCKET_SECRET_KEY: string = process.env.S3_SECRET_KEY as string;
+
+const s3 = new AWS.S3();
+AWS.config.update({
+  accessKeyId: BUCKET_ACCESS_KEY,
+  secretAccessKey: BUCKET_SECRET_KEY,
+  region: BUCKET_REGION,
+});
 
 @Injectable()
 export class GameReplayService {
@@ -11,6 +24,39 @@ export class GameReplayService {
     private songService: SongService,
     private gameReplayRepository: Repository<GameReplayEntity>
   ) {}
+
+  public async saveVocal(chunks: Blob[], filename: string) {
+    const filebuffer = new Blob(chunks, { type: "audio/wav" });
+    // const fileName = `${Date.now().toString()}-${nickname}.wav`;
+    const params = {
+      Bucket: BUCKET_NAME,
+      Key: `${filename}.wav`,
+      Body: filebuffer,
+      ContentType: "audio/wav",
+    };
+    s3.upload(params, (err, data) => {
+      if (err) {
+        console.log(err);
+      }
+      console.log(data);
+    });
+  }
+
+  public async saveGameEvent(gameEvent: string, filename: string) {
+    // const fileName = `${Date.now().toString()}-${nickname}.json`;
+    const params = {
+      Bucket: BUCKET_NAME,
+      Key: `${filename}.json`,
+      Body: gameEvent,
+      ContentType: "application/json",
+    };
+    s3.upload(params, (err, data) => {
+      if (err) {
+        console.log(err);
+      }
+      console.log(data);
+    });
+  }
 
   public async loadData(user: Socket, replayId: number) {
     const gameReplay: GameReplayEntity | null =
