@@ -11,6 +11,7 @@ const BUCKET_NAME: string = process.env.S3_BUCKET_NAME as string;
 const BUCKET_REGION: string = process.env.S3_BUCKET_REGION as string;
 const BUCKET_ACCESS_KEY: string = process.env.S3_ACCESS_KEY as string;
 const BUCKET_SECRET_KEY: string = process.env.S3_SECRET_KEY as string;
+const BUCKET_URL: string = `https://${BUCKET_NAME}.s3.amazonaws.com/` as string;
 
 const s3 = new AWS.S3();
 AWS.config.update({
@@ -26,9 +27,8 @@ export class GameReplayService {
     private gameReplayRepository: Repository<GameReplayEntity>
   ) {}
 
-  public async saveVocal(chunks: Blob[], filename: string) {
+  public async saveVocal(chunks: Blob[], filename: string): Promise<string> {
     const filebuffer = new Blob(chunks, { type: "audio/wav" });
-    // const fileName = `${Date.now().toString()}-${nickname}.wav`;
     const params = {
       Bucket: BUCKET_NAME,
       Key: `${filename}.wav`,
@@ -41,10 +41,13 @@ export class GameReplayService {
       }
       console.log(data);
     });
+    return `${BUCKET_URL}${filename}.wav`;
   }
 
-  public async saveGameEvent(gameEvent: string, filename: string) {
-    // const fileName = `${Date.now().toString()}-${nickname}.json`;
+  public async saveGameEvent(
+    gameEvent: string,
+    filename: string
+  ): Promise<string> {
     const params = {
       Bucket: BUCKET_NAME,
       Key: `${filename}.json`,
@@ -57,6 +60,7 @@ export class GameReplayService {
       }
       console.log(data);
     });
+    return `${BUCKET_URL}${filename}.json`;
   }
 
   public async loadData(user: Socket, replayId: number) {
