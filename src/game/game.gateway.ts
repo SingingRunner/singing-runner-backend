@@ -15,7 +15,8 @@ import { GameRoom } from "./room/game.room";
 import { UserItemDto } from "./item/dto/user-item.dto";
 import { UserGameDto } from "src/auth/user/dto/user.game.dto";
 import { Item } from "./item/item.enum";
-import { UserScoreDto } from "./dto/user-score.dto";
+import { UserScoreDto } from "./rank/dto/user-score.dto";
+import { GameTerminatedDto } from "./rank/game-terminated.dto";
 
 /**
  * webSocket 통신을 담당하는 Handler
@@ -123,7 +124,6 @@ export class GameGateway
     const item = this.gameService.getItem();
     if (item !== Item.NULL) {
       this.broadCast(user, "get_item", item);
-      return;
     }
   }
 
@@ -142,22 +142,32 @@ export class GameGateway
     @ConnectedSocket() user: Socket,
     @MessageBody() userScoreDto: UserScoreDto
   ) {
-    this.broadCast(user, "score", userScoreDto.toJson);
+    this.broadCast(user, "score", userScoreDto);
   }
 
-  // @SubscribeMessage("game_terminated")
-  // gameTermintated(@ConnectedSocket() user: Socket) {
-  /**
-   * 게임종료시 gameRoom안에 인원이 전부(탈주자 예외처리)
-   * terminated 메시지와 점수, 녹음정보(리플레이용)를 보내면
-   * 순위, mmr, userId 를 보내줘야함
-   * + 게임이벤트 및 녹음정보를 각 user마다 DB에 저장.
-   */
-  // }
+  @SubscribeMessage("game_terminated")
+  gameTermintated(
+    @ConnectedSocket() user: Socket,
+    @MessageBody() userScoreDto: UserScoreDto
+  ) {
+    /**
+     * 게임종료시 gameRoom안에 인원이 전부(탈주자 예외처리)
+     * terminated 메시지와 점수, 녹음정보(리플레이용)를 보내면
+     * 순위, mmr, userId 를 보내줘야함
+     * + 게임이벤트 및 녹음정보를 각 user마다 DB에 저장.
+     */
+    if (!this.gameService.allUsersTerminated(user, userScoreDto)) {
+      return;
+    }
+    const gameTermintaedList: GameTerminatedDto[] =
+      this.gameService.caculateRank(user);
+    this.broadCast(user, "game_terminated", gameTermintaedList);
+  }
 
   private broadCast(user: Socket, message: string, responseData: any) {
     console.log("in broad cast : ", responseData);
     const gameRoom: GameRoom = this.matchService.findRoomBySocket(user);
+    this.gameService.putEvent(gameRoom, message, responseData, user);
     const userList: UserGameDto[] =
       this.matchService.findUsersInSameRoom(gameRoom);
     for (const user of userList) {

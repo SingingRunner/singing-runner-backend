@@ -2,7 +2,7 @@ import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
 export class Song {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn("uuid")
   songId: number;
 
   @Column()
@@ -13,9 +13,6 @@ export class Song {
 
   @Column()
   songLyrics: string;
-
-  @Column()
-  songFile: string;
 
   @Column()
   songGender: boolean;

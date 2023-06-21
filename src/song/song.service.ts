@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { Repository } from "typeorm";
+import { Like, Repository } from "typeorm";
 import { Song } from "./entities/song.entity";
 import { InjectRepository } from "@nestjs/typeorm";
 import { GameSongDto } from "./dto/game-song.dto";
@@ -30,5 +30,57 @@ export class SongService {
       gameSongDtoList.push(new GameSongDto(song));
     }
     return gameSongDtoList;
+  }
+
+  public async searchSong(
+    keyword: string,
+    page: number
+  ): Promise<GameSongDto[]> {
+    const take = 10;
+    const skip = (page - 1) * take;
+    const searchResult: Song[] = await this.songRepository.find({
+      where: [
+        { songTitle: Like(`%${keyword}%`) },
+        { singer: Like(`%${keyword}%`) },
+      ],
+      take: take,
+      skip: skip,
+    });
+    const gameSongDtoList: GameSongDto[] = [];
+    for (const result of searchResult) {
+      gameSongDtoList.push(new GameSongDto(result));
+    }
+    return gameSongDtoList;
+  }
+
+  public async getSongById(songId: number): Promise<GameSongDto> {
+    const song: Song | null = await this.songRepository.findOne({
+      where: { songId: songId },
+    });
+    if (song !== null) {
+      return new GameSongDto(song);
+    } else {
+      const song: Song = {
+        songId: -1,
+        songTitle: "not found",
+        singer: "not found",
+        songLyrics: "not found",
+        songGender: false,
+        songMale: "not found",
+        songMaleUp: "not found",
+        songMaleDown: "not found",
+        songFemale: "not found",
+        songFemaleUp: "not found",
+        songFemaleDown: "not found",
+        vocalMale: "not found",
+        vocalMaleUp: "not found",
+        vocalMaleDown: "not found",
+        vocalFemale: "not found",
+        vocalFemaleUp: "not found",
+        vocalFemaleDown: "not found",
+        createdAt: new Date(),
+      };
+      return new GameSongDto(song);
+    }
   }
 }

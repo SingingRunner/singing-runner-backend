@@ -14,6 +14,7 @@ import { ApolloDriver } from "@nestjs/apollo";
     GraphQLModule.forRoot({
       driver: ApolloDriver,
       autoSchemaFile: "schema.gql",
+      context: ({ req, res }) => ({ req, res }),
     }),
     TypeOrmModule.forRoot(TypeORMConfig),
     GameModule,

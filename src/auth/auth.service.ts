@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { v4 as uuidv4 } from "uuid";
 import {
   HttpException,
@@ -5,15 +6,15 @@ import {
   Injectable,
   UnauthorizedException,
 } from "@nestjs/common";
-import { UserRegisterDTO } from "./user/dto/user.register.dto";
+import { UserRegisterDto } from "./user/dto/user.register.dto";
 import { UserService } from "./user/user.service";
-import { UserLoginDTO } from "./user/dto/user.login.dto";
+import { UserLoginDto } from "./user/dto/user.login.dto";
 import { User } from "./user/entity/user.entity";
 import * as bcrypt from "bcrypt";
 import { Payload } from "./security/payload.interface";
 import { JwtService } from "@nestjs/jwt";
 import { characterEnum } from "./user/util/character.enum";
-import * as crypto from "crypto";
+import { Response } from "express";
 
 @Injectable()
 export class AuthService {
@@ -22,7 +23,7 @@ export class AuthService {
     private jwtService: JwtService
   ) {}
 
-  async registerUser(newUser: UserRegisterDTO): Promise<User> {
+  async registerUser(newUser: UserRegisterDto): Promise<User> {
     const userFind: User | null = await this.userService.findByFields({
       where: { userEmail: newUser.userEmail },
     });
@@ -34,23 +35,23 @@ export class AuthService {
       );
     }
 
-    const userRegisterDTO: UserRegisterDTO = {
+    const userRegisterDto: UserRegisterDto = {
       userEmail: newUser.userEmail,
       password: newUser.password,
       nickname: newUser.nickname,
     };
 
-    const savedUserDTO: UserRegisterDTO = await this.userService.save(
-      userRegisterDTO
+    const savedUserDto: UserRegisterDto = await this.userService.save(
+      userRegisterDto
     );
 
     const user: User = new User();
     user.userId = uuidv4();
-    user.userEmail = savedUserDTO.userEmail;
-    user.password = savedUserDTO.password;
-    user.nickname = savedUserDTO.nickname;
-    user.userActive = false;
-    user.userKeynote = false;
+    user.userEmail = savedUserDto.userEmail;
+    user.password = savedUserDto.password;
+    user.nickname = savedUserDto.nickname;
+    user.userActive = 0;
+    user.userKeynote = 0;
     user.userMmr = 0;
     user.userPoint = 0;
     user.character = characterEnum.BELUGA;
@@ -59,15 +60,24 @@ export class AuthService {
   }
 
   // 랜덤으로 refresh token 생성
-  generateRefreshToken(): string {
-    return crypto.randomBytes(16).toString("hex");
+  generateRefreshToken(userId: string): string {
+    const jwtConstants = {
+      SECRET_KEY: "SECRET_KEY",
+    };
+
+    const expiresIn = "14d";
+    const secret = jwtConstants.SECRET_KEY;
+    const payload = { userId: userId };
+
+    return this.jwtService.sign(payload, { expiresIn });
   }
 
-  async validateUser(
-    UserLoginDTO: UserLoginDTO
-  ): Promise<{ accessToken: string; refreshToken: string; user: User }> {
+  async validateUserAndSetCookie(
+    UserLoginDto: UserLoginDto,
+    res: Response
+  ): Promise<{ accessToken: string; user: Omit<User, "refreshToken"> }> {
     const userFind: User | null = await this.userService.findByFields({
-      where: { userEmail: UserLoginDTO.userEmail },
+      where: { userEmail: UserLoginDto.userEmail },
     });
 
     if (!userFind) {
@@ -75,7 +85,7 @@ export class AuthService {
     }
 
     const validatePassword = await bcrypt.compare(
-      UserLoginDTO.password,
+      UserLoginDto.password,
       userFind.password
     );
 
@@ -94,27 +104,71 @@ export class AuthService {
       character: userFind.character,
     };
 
-    const refreshToken: string = this.generateRefreshToken();
-    userFind.refreshToken = refreshToken;
-    await this.userService.save(userFind);
+    const refreshToken: string = this.generateRefreshToken(userFind.userId);
+    await this.userService.updateRefreshToken(userFind.userId, refreshToken);
+
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      path: "/refresh_token",
+    });
+
+    const { refreshToken: _, ...userWithoutRefreshToken } = userFind;
 
     return {
-      accessToken: this.jwtService.sign(payload),
-      refreshToken: refreshToken,
-      user: userFind,
+      accessToken: this.jwtService.sign(payload, { expiresIn: "1h" }),
+      user: userWithoutRefreshToken as User,
     };
   }
 
-  async createRefreshToken(userLoginDTO: UserLoginDTO): Promise<string> {
+  async validateUser(
+    UserLoginDto: UserLoginDto
+  ): Promise<{ accessToken: string; user: Omit<User, "refreshToken"> }> {
     const userFind: User | null = await this.userService.findByFields({
-      where: { userEmail: userLoginDTO.userEmail },
+      where: { userEmail: UserLoginDto.userEmail },
     });
 
     if (!userFind) {
       throw new UnauthorizedException("유저를 찾을 수 없습니다.");
     }
 
-    const refreshToken: string = this.generateRefreshToken();
+    const validatePassword = await bcrypt.compare(
+      UserLoginDto.password,
+      userFind.password
+    );
+
+    if (!validatePassword) {
+      throw new UnauthorizedException("비밀번호가 틀렸습니다.");
+    }
+
+    const payload: Payload = {
+      userId: userFind.userId,
+      userEmail: userFind.userEmail,
+      nickname: userFind.nickname,
+      userActive: userFind.userActive,
+      userKeynote: userFind.userKeynote,
+      userMmr: userFind.userMmr,
+      userPoint: userFind.userPoint,
+      character: userFind.character,
+    };
+
+    const { refreshToken: _, ...userWithoutRefreshToken } = userFind;
+
+    return {
+      accessToken: this.jwtService.sign(payload, { expiresIn: "1h" }),
+      user: userWithoutRefreshToken as User,
+    };
+  }
+
+  async createRefreshToken(userLoginDto: UserLoginDto): Promise<string> {
+    const userFind: User | null = await this.userService.findByFields({
+      where: { userEmail: userLoginDto.userEmail },
+    });
+
+    if (!userFind) {
+      throw new UnauthorizedException("유저를 찾을 수 없습니다.");
+    }
+
+    const refreshToken: string = this.generateRefreshToken(userFind.userId);
     userFind.refreshToken = refreshToken;
     await this.userService.save(userFind);
 

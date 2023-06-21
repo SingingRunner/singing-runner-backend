@@ -4,8 +4,8 @@ export interface Payload {
   userId: string;
   userEmail: string;
   nickname: string;
-  userActive: boolean;
-  userKeynote: boolean;
+  userActive: number;
+  userKeynote: number;
   userMmr: number;
   userPoint: number;
   character: characterEnum;

@@ -1,6 +1,6 @@
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 import { characterEnum } from "../util/character.enum";
-import { Field, ObjectType } from "@nestjs/graphql";
+import { Field, Int, ObjectType } from "@nestjs/graphql";
 
 @ObjectType()
 @Entity("user")
@@ -21,19 +21,19 @@ export class User {
   @Column({ type: "varchar", length: 24 })
   nickname: string;
 
-  @Field(() => Boolean)
+  @Field(() => Int)
   @Column({ type: "tinyint", default: 0 })
-  userActive: boolean;
+  userActive: number;
 
-  @Field(() => Boolean)
+  @Field(() => Int)
   @Column({ type: "tinyint", default: 0 })
-  userKeynote: boolean;
+  userKeynote: number;
 
-  @Field(() => Number)
+  @Field(() => Int)
   @Column({ type: "smallint", default: 0 })
   userMmr: number;
 
-  @Field(() => Number)
+  @Field(() => Int)
   @Column({ type: "mediumint", default: 0 })
   userPoint: number;
 
@@ -47,5 +47,5 @@ export class User {
 
   @Field(() => String, { nullable: true })
   @Column({ type: "varchar", length: 255, nullable: true })
-  refreshToken: string;
+  refreshToken?: string;
 }

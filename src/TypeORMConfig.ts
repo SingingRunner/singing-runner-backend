@@ -1,6 +1,7 @@
 import { TypeOrmModuleOptions } from "@nestjs/typeorm";
 import { Song } from "src/song/entities/song.entity";
 import { User } from "./auth/user/entity/user.entity";
+import { GameReplayEntity } from "./game/replay/entity/game.replay.entity";
 
 export const TypeORMConfig: TypeOrmModuleOptions = {
   type: process.env.DB_TYPE as any,
@@ -9,6 +10,6 @@ export const TypeORMConfig: TypeOrmModuleOptions = {
   port: Number(process.env.DB_PORT),
   host: process.env.DB_HOST,
   database: process.env.DB_DATABASE,
-  entities: [Song, User],
+  entities: [Song, User, GameReplayEntity],
   synchronize: true,
 };
