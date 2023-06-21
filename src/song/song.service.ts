@@ -31,4 +31,35 @@ export class SongService {
     }
     return gameSongDtoList;
   }
+
+  public async getSongById(songId: number): Promise<GameSongDto> {
+    const song: Song | null = await this.songRepository.findOne({
+      where: { songId: songId },
+    });
+    if (song !== null) {
+      return new GameSongDto(song);
+    } else {
+      const song: Song = {
+        songId: -1,
+        songTitle: "not found",
+        singer: "not found",
+        songLyrics: "not found",
+        songGender: false,
+        songMale: "not found",
+        songMaleUp: "not found",
+        songMaleDown: "not found",
+        songFemale: "not found",
+        songFemaleUp: "not found",
+        songFemaleDown: "not found",
+        vocalMale: "not found",
+        vocalMaleUp: "not found",
+        vocalMaleDown: "not found",
+        vocalFemale: "not found",
+        vocalFemaleUp: "not found",
+        vocalFemaleDown: "not found",
+        createdAt: new Date(),
+      };
+      return new GameSongDto(song);
+    }
+  }
 }

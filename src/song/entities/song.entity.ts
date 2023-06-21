@@ -15,9 +15,6 @@ export class Song {
   songLyrics: string;
 
   @Column()
-  songFile: string;
-
-  @Column()
   songGender: boolean;
 
   @Column()

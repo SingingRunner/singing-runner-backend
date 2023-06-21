@@ -5,6 +5,11 @@ import { GameRoom } from "./room/game.room";
 import { UserGameDto } from "src/auth/user/dto/user.game.dto";
 import { ItemPolicy } from "./item/item.policy";
 import { GameSongDto } from "src/song/dto/game-song.dto";
+import { InjectRepository } from "@nestjs/typeorm";
+import { GameReplayEntity } from "./replay/entity/game.replay.entity";
+import { Repository } from "typeorm";
+import { CreateReplayInput } from "./replay/dto/create-replay.input";
+import { GameEventDto } from "./event/dto/game.event.dto";
 import { UserScoreDto } from "./rank/dto/user-score.dto";
 import { RankHandler } from "./rank/rank.hanlder";
 import { GameTerminatedDto } from "./rank/game-terminated.dto";
@@ -15,6 +20,8 @@ export class GameService {
     private gameRoomHandler: GameRoomHandler,
     @Inject("ItemPolicy")
     private itemPolicy: ItemPolicy,
+    @InjectRepository(GameReplayEntity)
+    private gameReplayRepository: Repository<GameReplayEntity>
     @Inject("RankHandler")
     private rankHandler: RankHandler
   ) {}
@@ -80,9 +87,47 @@ export class GameService {
     const gameRoom: GameRoom = this.gameRoomHandler.findRoomBySocket(user);
     return this.rankHandler.calculateRank(gameRoom);
   }
-  // public gameEvent(){
-  //  GameRoom 마다 replay용 game event 저장.
-  // }
 
-  //게임종료시 DB에 event 저장
+  public async saveReplay(
+    gameRoom: GameRoom,
+    userId: string,
+    userVocal: Blob[]
+  ) {
+    const songId = gameRoom.getGameSongDto().songId;
+    const gameEvent = gameRoom.getGameEvent();
+    const gameEventJson = JSON.stringify(gameEvent);
+    console.log(gameEventJson);
+    // 같이 게임한 유저 정보 및 유저 캐릭터 정보도 추가해야함
+    const gameReplayEntity: CreateReplayInput = {
+      userId: userId,
+      userCharacter: "userCharacter",
+      songId: songId,
+      userVocal: "파일 url",
+      gameEvent: "파일 url",
+      player1Id: "player1Id",
+      player1Character: "player1Character",
+      player2Id: "player2Id",
+      player2Character: "player2Character",
+    };
+    console.log(userVocal);
+    return await this.gameReplayRepository.save(
+      this.gameReplayRepository.create(gameReplayEntity)
+    );
+  }
+
+  public putEvent(
+    gameRoom: GameRoom,
+    eventName: string,
+    eventContent: string,
+    user: Socket
+  ) {
+    const currentTime = new Date().getTime() - gameRoom.getStartTime();
+    const gameEvent: GameEventDto = new GameEventDto(
+      currentTime,
+      user.id,
+      eventName,
+      eventContent
+    );
+    gameRoom.putGameEvent(gameEvent);
+  }
 }
