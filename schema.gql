@@ -7,8 +7,8 @@ type User {
   userEmail: String!
   password: String!
   nickname: String!
-  userActive: Boolean!
-  userKeynote: Boolean!
+  userActive: Float!
+  userKeynote: Float!
   userMmr: Float!
   userPoint: Float!
   character: String!

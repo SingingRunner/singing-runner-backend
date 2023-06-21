@@ -21,13 +21,13 @@ export class User {
   @Column({ type: "varchar", length: 24 })
   nickname: string;
 
-  @Field(() => Boolean)
+  @Field(() => Number)
   @Column({ type: "tinyint", default: 0 })
-  userActive: boolean;
+  userActive: number;
 
-  @Field(() => Boolean)
+  @Field(() => Number)
   @Column({ type: "tinyint", default: 0 })
-  userKeynote: boolean;
+  userKeynote: number;
 
   @Field(() => Number)
   @Column({ type: "smallint", default: 0 })
