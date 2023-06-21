@@ -19,10 +19,13 @@ export class Invite {
   }
 
   public cancleInvite(userId: string, host: HostUserDto) {
-    const inviteQueue = this.inviteMap.get(userId);
+    let inviteQueue = this.inviteMap.get(userId);
     if (inviteQueue === null || inviteQueue === undefined) {
       throw new Error("userID is undefined or null");
     }
-    inviteQueue.filter((hostInfo) => hostInfo.getUserId() !== host.getUserId());
+    inviteQueue = inviteQueue.filter(
+      (hostInfo) => hostInfo.getUserId() !== host.getUserId()
+    );
+    this.inviteMap.set(userId, inviteQueue);
   }
 }
