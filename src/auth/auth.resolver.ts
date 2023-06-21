@@ -1,4 +1,4 @@
-import { UseGuards } from "@nestjs/common";
+import { UnauthorizedException, UseGuards } from "@nestjs/common";
 import {
   Resolver,
   Query,
@@ -64,23 +64,25 @@ export class AuthResolver {
   }
 
   @Mutation(() => Token)
-  async getRefreshToken(
-    @Args("userLoginDto") userLoginDto: UserLoginDto
-  ): Promise<Token> {
-    const { user } = await this.authService.validateUser(userLoginDto);
-    const refreshToken = this.authService.generateRefreshToken(user.userId);
-
-    await this.userService.updateRefreshToken(user.userId, refreshToken);
-
-    return { accessToken: refreshToken };
+  async refreshAccessToken(@Context() context: any): Promise<Token> {
+    const refreshToken = context.req.cookies["refreshToken"];
+    if (!refreshToken) {
+      throw new UnauthorizedException("리프레시 토큰을 찾을 수 없습니다.");
+    }
+    const accessToken = await this.authService.refreshAccessToken(refreshToken);
+    return { accessToken: accessToken.accessToken };
   }
 
   // @Mutation(() => Token)
-  // async refreshAccessToken(
-  //   @Args("refreshToken") refreshToken: string
+  // async getRefreshToken(
+  //   @Args("userLoginDto") userLoginDto: UserLoginDto
   // ): Promise<Token> {
-  //   const accessToken = await this.authService.refreshAccessToken(refreshToken);
-  //   return { accessToken: accessToken.accessToken };
+  //   const { user } = await this.authService.validateUser(userLoginDto);
+  //   const refreshToken = this.authService.generateRefreshToken(user.userId);
+
+  //   await this.userService.updateRefreshToken(user.userId, refreshToken);
+
+  //   return { accessToken: refreshToken };
   // }
 
   // @Mutation(() => Token)
