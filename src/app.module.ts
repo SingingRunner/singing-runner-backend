@@ -9,6 +9,7 @@ import { AuthModule } from "./auth/auth.module";
 import { GraphQLModule } from "@nestjs/graphql";
 import { ApolloDriver } from "@nestjs/apollo";
 import { MyRoomModule } from "./myroom/myroom.module";
+import { SocialService } from './social/social.service';
 
 @Module({
   imports: [
@@ -24,6 +25,6 @@ import { MyRoomModule } from "./myroom/myroom.module";
     MyRoomModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, SocialService],
 })
 export class AppModule {}
