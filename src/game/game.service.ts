@@ -38,7 +38,7 @@ export class GameService {
       });
     }
     const gameSongdto: GameSongDto = gameRoom.getGameSongDto();
-    const gameSong = gameSongdto.toJSON();
+    const gameSong = gameSongdto;
     user.emit("loading", { gameSong: gameSong, characterList: characterList });
   }
 
