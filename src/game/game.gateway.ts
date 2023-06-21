@@ -155,7 +155,7 @@ export class GameGateway
      * + 게임이벤트 및 녹음정보를 각 user마다 DB에 저장.
      */
     this.gameService.saveReplay(
-      userResultDto.getUserid(),
+      userResultDto.getUserId(),
       userResultDto.getUserVocal()
     );
     if (!this.gameService.allUsersTerminated(user, userResultDto)) {
