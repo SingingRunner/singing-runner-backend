@@ -13,6 +13,7 @@ import { GameEventDto } from "./event/dto/game.event.dto";
 import { UserScoreDto } from "./rank/dto/user-score.dto";
 import { RankHandler } from "./rank/rank.hanlder";
 import { GameTerminatedDto } from "./rank/game-terminated.dto";
+import { GameReplayService } from "./replay/game.replay.service";
 
 @Injectable()
 export class GameService {
@@ -23,7 +24,8 @@ export class GameService {
     @InjectRepository(GameReplayEntity)
     private gameReplayRepository: Repository<GameReplayEntity>,
     @Inject("RankHandler")
-    private rankHandler: RankHandler
+    private rankHandler: RankHandler,
+    private gameReplayService: GameReplayService
   ) {}
 
   public loadData(user: Socket) {
@@ -94,20 +96,52 @@ export class GameService {
     userVocal: Blob[]
   ) {
     const songId = gameRoom.getGameSongDto().songId;
+    const filename = `${userId}_${songId}_${new Date().getTime()}`;
     const gameEvent = gameRoom.getGameEvent();
     const gameEventJson = JSON.stringify(gameEvent);
+    const users = this.gameRoomHandler.findUsersInRoom(gameRoom);
+
+    let mainUser = users[0].getUserMatchDto().userId;
+    let subUser1 = users[1].getUserMatchDto().userId;
+    let subUser2 = users[2].getUserMatchDto().userId;
+    let mainCharacter = users[0].getUserMatchDto().character;
+    let subCharacter1 = users[1].getUserMatchDto().character;
+    let subCharacter2 = users[2].getUserMatchDto().character;
+    let userKeynote = users[0].getUserMatchDto().userKeynote;
+
+    users.forEach((user, i) => {
+      if (user.getUserMatchDto().userId === userId) {
+        mainUser = user.getUserMatchDto().userId;
+        userKeynote = user.getUserMatchDto().userKeynote;
+        subUser1 = users[(i + 1) % 3].getUserMatchDto().userId;
+        subUser2 = users[(i + 2) % 3].getUserMatchDto().userId;
+        mainCharacter = user.getUserMatchDto().character;
+        subCharacter1 = users[(i + 1) % 3].getUserMatchDto().userId;
+        subCharacter2 = users[(i + 2) % 3].getUserMatchDto().userId;
+      }
+    });
+
+    const eventUrl = await this.gameReplayService.saveGameEvent(
+      gameEventJson,
+      filename
+    );
+    const vocalUrl = await this.gameReplayService.saveVocal(
+      userVocal,
+      filename
+    );
     console.log(gameEventJson);
     // 같이 게임한 유저 정보 및 유저 캐릭터 정보도 추가해야함
     const gameReplayEntity: CreateReplayInput = {
-      userId: userId,
-      userCharacter: "userCharacter",
+      userId: mainUser,
+      userCharacter: mainCharacter,
       songId: songId,
-      userVocal: "파일 url",
-      gameEvent: "파일 url",
-      player1Id: "player1Id",
-      player1Character: "player1Character",
-      player2Id: "player2Id",
-      player2Character: "player2Character",
+      userVocal: vocalUrl,
+      gameEvent: eventUrl,
+      player1Id: subUser1,
+      player1Character: subCharacter1,
+      player2Id: subUser2,
+      player2Character: subCharacter2,
+      keynote: userKeynote,
     };
     console.log(userVocal);
     return await this.gameReplayRepository.save(
