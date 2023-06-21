@@ -41,10 +41,10 @@ type AuthUser {
   userId: String!
   userEmail: String!
   nickname: String!
-  userActive: Float!
-  userKeynote: Float!
-  userMmr: Float!
-  userPoint: Float!
+  userActive: Int!
+  userKeynote: Int!
+  userMmr: Int!
+  userPoint: Int!
   character: String!
 }
 

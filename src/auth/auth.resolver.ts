@@ -7,6 +7,7 @@ import {
   ObjectType,
   Field,
   Context,
+  Int,
 } from "@nestjs/graphql";
 import { AuthService } from "./auth.service";
 import { UserRegisterDto } from "./user/dto/user.register.dto";
@@ -18,28 +19,28 @@ import { UserContext } from "src/commons/context";
 @ObjectType()
 class AuthUser {
   // Define the fields that you want to return to the client
-  @Field()
+  @Field(() => String)
   userId: string;
 
-  @Field()
+  @Field(() => String)
   userEmail: string;
 
-  @Field()
+  @Field(() => String)
   nickname: string;
 
-  @Field()
+  @Field(() => Int)
   userActive: number;
 
-  @Field()
+  @Field(() => Int)
   userKeynote: number;
 
-  @Field()
+  @Field(() => Int)
   userMmr: number;
 
-  @Field()
+  @Field(() => Int)
   userPoint: number;
 
-  @Field()
+  @Field(() => String)
   character: string;
 }
 
