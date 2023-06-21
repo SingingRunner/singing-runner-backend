@@ -9,7 +9,7 @@ export class UserMatchDto {
   userMmr: number;
 
   @IsNotEmpty()
-  nickName: string;
+  nickname: string;
 
   @IsNotEmpty()
   userActive: userActiveStatus;
