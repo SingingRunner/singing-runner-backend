@@ -4,10 +4,10 @@ import { Column, Entity, ManyToOne, JoinColumn, PrimaryColumn } from "typeorm";
 @Entity("social")
 export class Social {
   @PrimaryColumn()
-  userId: number;
+  userId: string;
 
   @PrimaryColumn()
-  friendId: number;
+  friendId: string;
 
   @ManyToOne(() => User)
   @JoinColumn({ name: "userId" })
@@ -18,5 +18,5 @@ export class Social {
   friend: User;
 
   @Column({ type: "datetime" })
-  deletedAt: number;
+  deletedAt: Date;
 }

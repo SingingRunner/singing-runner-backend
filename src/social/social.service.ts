@@ -12,7 +12,7 @@ export class SocialService {
     private readonly socialRepository: Repository<Social>
   ) {}
 
-  public async addFreind(userId: string, friendId: string) {
+  public async addFriend(userId: string, friendId: string) {
     const user = await this.userService.findUserById(userId);
     const friend = await this.userService.findUserById(friendId);
     if (user === null || friend === null) {
@@ -22,6 +22,18 @@ export class SocialService {
     social.user = user;
     social.friend = friend;
 
+    await this.socialRepository.save(social);
+  }
+
+  public async removeFriend(userId: string, friendId: string, date: Date) {
+    const social = await this.socialRepository.findOne({
+      where: [{ userId: userId }, { friendId: friendId }],
+    });
+
+    if (!social) {
+      throw new Error("해당 친구 관계가 존재하지 않습니다.");
+    }
+    social.deletedAt = date;
     await this.socialRepository.save(social);
   }
 }
