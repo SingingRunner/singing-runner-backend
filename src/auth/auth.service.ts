@@ -14,6 +14,7 @@ import * as bcrypt from "bcrypt";
 import { Payload } from "./security/payload.interface";
 import { JwtService } from "@nestjs/jwt";
 import { characterEnum } from "./user/util/character.enum";
+import { Response } from "express";
 
 @Injectable()
 export class AuthService {
@@ -71,8 +72,9 @@ export class AuthService {
     return this.jwtService.sign(payload, { expiresIn });
   }
 
-  async validateUser(
-    UserLoginDto: UserLoginDto
+  async validateUserAndSetCookie(
+    UserLoginDto: UserLoginDto,
+    res: Response
   ): Promise<{ accessToken: string; user: Omit<User, "refreshToken"> }> {
     const userFind: User | null = await this.userService.findByFields({
       where: { userEmail: UserLoginDto.userEmail },
@@ -104,6 +106,50 @@ export class AuthService {
 
     const refreshToken: string = this.generateRefreshToken(userFind.userId);
     await this.userService.updateRefreshToken(userFind.userId, refreshToken);
+
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      path: "/refresh_token",
+    });
+
+    const { refreshToken: _, ...userWithoutRefreshToken } = userFind;
+
+    return {
+      accessToken: this.jwtService.sign(payload, { expiresIn: "1h" }),
+      user: userWithoutRefreshToken as User,
+    };
+  }
+
+  async validateUser(
+    UserLoginDto: UserLoginDto
+  ): Promise<{ accessToken: string; user: Omit<User, "refreshToken"> }> {
+    const userFind: User | null = await this.userService.findByFields({
+      where: { userEmail: UserLoginDto.userEmail },
+    });
+
+    if (!userFind) {
+      throw new UnauthorizedException("유저를 찾을 수 없습니다.");
+    }
+
+    const validatePassword = await bcrypt.compare(
+      UserLoginDto.password,
+      userFind.password
+    );
+
+    if (!validatePassword) {
+      throw new UnauthorizedException("비밀번호가 틀렸습니다.");
+    }
+
+    const payload: Payload = {
+      userId: userFind.userId,
+      userEmail: userFind.userEmail,
+      nickname: userFind.nickname,
+      userActive: userFind.userActive,
+      userKeynote: userFind.userKeynote,
+      userMmr: userFind.userMmr,
+      userPoint: userFind.userPoint,
+      character: userFind.character,
+    };
 
     const { refreshToken: _, ...userWithoutRefreshToken } = userFind;
 

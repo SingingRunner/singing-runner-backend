@@ -1,6 +1,8 @@
 import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./app.module";
 import { IoAdapter } from "@nestjs/platform-socket.io";
+import cookieParser from "cookie-parser";
+
 class MyIoAdapter extends IoAdapter {
   createIOServer(port: number, options?: any): any {
     options = {
@@ -16,6 +18,8 @@ class MyIoAdapter extends IoAdapter {
 }
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.use(cookieParser());
+
   app.useWebSocketAdapter(new MyIoAdapter(app));
   app.enableCors({
     origin: true,
