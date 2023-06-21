@@ -72,7 +72,7 @@ export class AuthService {
 
   async validateUser(
     UserLoginDTO: UserLoginDTO
-  ): Promise<{ accessToken: string; refreshToken: string; user: User }> {
+  ): Promise<{ accessToken: string; user: User }> {
     const userFind: User | null = await this.userService.findByFields({
       where: { userEmail: UserLoginDTO.userEmail },
     });
@@ -101,7 +101,7 @@ export class AuthService {
       character: userFind.character,
     };
 
-    const refreshToken: string = this.generateRefreshToken();
+    const refreshToken: string = this.generateRefreshToken(userFind.userId);
     userFind.refreshToken = refreshToken;
     await this.userService.save(userFind);
 
