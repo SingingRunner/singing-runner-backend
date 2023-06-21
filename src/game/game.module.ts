@@ -9,6 +9,7 @@ import { SimpleItemPolicy } from "./item/simple.item.policy";
 import { MMRMatchPolicy } from "./match/mmr.match.policy";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { GameReplayEntity } from "./replay/entity/game.replay.entity";
+import { RankHandlerImpl } from "./rank/rank.handler.impl";
 
 @Module({
   imports: [SongModule, TypeOrmModule.forFeature([GameReplayEntity])],
@@ -24,6 +25,10 @@ import { GameReplayEntity } from "./replay/entity/game.replay.entity";
     {
       provide: "ItemPolicy",
       useClass: SimpleItemPolicy,
+    },
+    {
+      provide: "RankHandler",
+      useClass: RankHandlerImpl,
     },
   ],
 })

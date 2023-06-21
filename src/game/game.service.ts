@@ -10,6 +10,9 @@ import { GameReplayEntity } from "./replay/entity/game.replay.entity";
 import { Repository } from "typeorm";
 import { CreateReplayInput } from "./replay/dto/create-replay.input";
 import { GameEventDto } from "./event/dto/game.event.dto";
+import { UserScoreDto } from "./rank/dto/user-score.dto";
+import { RankHandler } from "./rank/rank.hanlder";
+import { GameTerminatedDto } from "./rank/game-terminated.dto";
 
 @Injectable()
 export class GameService {
@@ -19,6 +22,8 @@ export class GameService {
     private itemPolicy: ItemPolicy,
     @InjectRepository(GameReplayEntity)
     private gameReplayRepository: Repository<GameReplayEntity>
+    @Inject("RankHandler")
+    private rankHandler: RankHandler
   ) {}
 
   public loadData(user: Socket) {
@@ -62,6 +67,25 @@ export class GameService {
 
   public getItem() {
     return this.itemPolicy.getItems();
+  }
+
+  public allUsersTerminated(user: Socket, userScoreDto: UserScoreDto): boolean {
+    // 50/20/-10
+    const gameRoom: GameRoom = this.gameRoomHandler.findRoomBySocket(user);
+    this.gameRoomHandler.increaseAcceptCount(user);
+    if (gameRoom.getAcceptCount() == 1) {
+      this.rankHandler.setRank(gameRoom);
+    }
+    if (this.gameRoomHandler.isGameRoomReady(gameRoom)) {
+      return true;
+    }
+    this.rankHandler.pushUserScore(gameRoom, userScoreDto);
+    return false;
+  }
+
+  public caculateRank(user: Socket): GameTerminatedDto[] {
+    const gameRoom: GameRoom = this.gameRoomHandler.findRoomBySocket(user);
+    return this.rankHandler.calculateRank(gameRoom);
   }
 
   public async saveReplay(
