@@ -7,10 +7,10 @@ type User {
   userEmail: String!
   password: String!
   nickname: String!
-  userActive: Boolean!
-  userKeynote: Boolean!
-  userMmr: Float!
-  userPoint: Float!
+  userActive: Int!
+  userKeynote: Int!
+  userMmr: Int!
+  userPoint: Int!
   character: String!
   deletedAt: DateTime
   refreshToken: String

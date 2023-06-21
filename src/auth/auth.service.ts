@@ -49,8 +49,8 @@ export class AuthService {
     user.userEmail = savedUserDto.userEmail;
     user.password = savedUserDto.password;
     user.nickname = savedUserDto.nickname;
-    user.userActive = false;
-    user.userKeynote = false;
+    user.userActive = 0;
+    user.userKeynote = 0;
     user.userMmr = 0;
     user.userPoint = 0;
     user.character = characterEnum.BELUGA;
