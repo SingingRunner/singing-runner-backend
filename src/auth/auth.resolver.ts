@@ -62,8 +62,7 @@ export class AuthResolver {
     const { user } = await this.authService.validateUser(userLoginDTO);
     const refreshToken = this.authService.generateRefreshToken(user.userId);
 
-    user.refreshToken = refreshToken;
-    await this.userService.update(user);
+    await this.userService.updateRefreshToken(user.userId, refreshToken);
 
     return { accessToken: refreshToken };
   }
