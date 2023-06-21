@@ -5,9 +5,6 @@ import { GameRoom } from "./room/game.room";
 import { UserGameDto } from "src/auth/user/dto/user.game.dto";
 import { ItemPolicy } from "./item/item.policy";
 import { GameSongDto } from "src/song/dto/game-song.dto";
-import { InjectRepository } from "@nestjs/typeorm";
-import { GameReplayEntity } from "./replay/entity/game.replay.entity";
-import { Repository } from "typeorm";
 import { CreateReplayInput } from "./replay/dto/create-replay.input";
 import { GameEventDto } from "./event/dto/game.event.dto";
 import { UserScoreDto } from "./rank/dto/user-score.dto";
@@ -21,8 +18,6 @@ export class GameService {
     private gameRoomHandler: GameRoomHandler,
     @Inject("ItemPolicy")
     private itemPolicy: ItemPolicy,
-    @InjectRepository(GameReplayEntity)
-    private gameReplayRepository: Repository<GameReplayEntity>,
     @Inject("RankHandler")
     private rankHandler: RankHandler,
     private gameReplayService: GameReplayService
@@ -144,9 +139,7 @@ export class GameService {
       keynote: userKeynote,
     };
     console.log(userVocal);
-    return await this.gameReplayRepository.save(
-      this.gameReplayRepository.create(gameReplayEntity)
-    );
+    return await this.gameReplayService.saveReplay(gameReplayEntity);
   }
 
   public putEvent(
