@@ -120,35 +120,6 @@ export class AuthService {
     };
   }
 
-  async tokenValidateUser(payload: Payload): Promise<User> {
-    const userFind: User | null = await this.userService.findByFields({
-      where: { userEmail: payload.userEmail },
-    });
-
-    if (!userFind) {
-      throw new UnauthorizedException("유저를 찾을 수 없습니다.");
-    }
-
-    return userFind;
-  }
-
-  async validateToken(token: string): Promise<User> {
-    try {
-      const payload: Payload = this.jwtService.verify(token);
-      const userFind: User | null = await this.userService.findByFields({
-        where: { userEmail: payload.userEmail },
-      });
-
-      if (!userFind) {
-        throw new UnauthorizedException("유저를 찾을 수 없습니다.");
-      }
-
-      return userFind;
-    } catch (err) {
-      throw new UnauthorizedException("토큰이 유효하지 않습니다.");
-    }
-  }
-
   async refreshAccessToken(token: string): Promise<{ accessToken: string }> {
     const user: User | null = await this.userService.findByFields({
       where: { refreshToken: token }, // refreshToken 필드로 유저 검색
