@@ -28,11 +28,20 @@ export class GameReplayEntity extends BaseEntity {
   @ManyToOne(() => User)
   userId: string;
 
+  @Column({ type: "varchar", length: 1024 })
+  userCharacter: string;
+
   @ManyToOne(() => User)
   player1Id: string;
 
+  @Column({ type: "varchar", length: 1024 })
+  player1Character: string;
+
   @ManyToOne(() => User)
   player2Id: string;
+
+  @Column({ type: "varchar", length: 1024 })
+  player2Character: string;
 
   @ManyToOne(() => Song)
   songId: number;
