@@ -85,11 +85,8 @@ export class GameService {
     return this.rankHandler.calculateRank(gameRoom);
   }
 
-  public async saveReplay(
-    gameRoom: GameRoom,
-    userId: string,
-    userVocal: Blob[]
-  ) {
+  public async saveReplay(userId: string, userVocal: Blob[]) {
+    const gameRoom: GameRoom = this.gameRoomHandler.findRoomByUserId(userId);
     const songId = gameRoom.getGameSongDto().songId;
     const filename = `${userId}_${songId}_${new Date().getTime()}`;
     const gameEvent = gameRoom.getGameEvent();
