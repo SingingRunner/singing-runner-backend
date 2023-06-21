@@ -142,7 +142,7 @@ export class GameGateway
     @ConnectedSocket() user: Socket,
     @MessageBody() userScoreDto: UserScoreDto
   ) {
-    this.broadCast(user, "score", userScoreDto.toJson);
+    this.broadCast(user, "score", userScoreDto);
   }
 
   @SubscribeMessage("game_terminated")
