@@ -13,7 +13,6 @@ import * as bcrypt from "bcrypt";
 import { Payload } from "./security/payload.interface";
 import { JwtService } from "@nestjs/jwt";
 import { characterEnum } from "./user/util/character.enum";
-import * as crypto from "crypto";
 
 @Injectable()
 export class AuthService {
@@ -59,8 +58,16 @@ export class AuthService {
   }
 
   // 랜덤으로 refresh token 생성
-  generateRefreshToken(): string {
-    return crypto.randomBytes(16).toString("hex");
+  generateRefreshToken(userId: string): string {
+    const jwtConstants = {
+      SECRET_KEY: "SECRET_KEY",
+    };
+
+    const expiresIn = "14d";
+    const secret = jwtConstants.SECRET_KEY;
+    const payload = { userId: userId };
+
+    return this.jwtService.sign(payload, { expiresIn });
   }
 
   async validateUser(
@@ -95,7 +102,7 @@ export class AuthService {
     };
 
     return {
-      accessToken: this.jwtService.sign(payload),
+      accessToken: this.jwtService.sign(payload, { expiresIn: "1h" }),
       user: userFind,
     };
   }
@@ -109,7 +116,7 @@ export class AuthService {
       throw new UnauthorizedException("유저를 찾을 수 없습니다.");
     }
 
-    const refreshToken: string = this.generateRefreshToken();
+    const refreshToken: string = this.generateRefreshToken(userFind.userId);
     userFind.refreshToken = refreshToken;
     await this.userService.save(userFind);
 
