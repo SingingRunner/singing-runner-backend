@@ -1,14 +1,22 @@
 import { IsNotEmpty } from "class-validator";
 
 export class HostUserDto {
-  constructor(userId: string, nickName: string) {
+  constructor(userId: string, nickname: string) {
     this.userId = userId;
-    this.nickName = nickName;
+    this.nickname = nickname;
   }
 
   @IsNotEmpty()
-  userId: string;
+  private userId: string;
 
   @IsNotEmpty()
-  nickName: string;
+  private nickname: string;
+
+  public getUserId(): string {
+    return this.userId;
+  }
+
+  public getNickname(): string {
+    return this.nickname;
+  }
 }
