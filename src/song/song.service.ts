@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { Repository } from "typeorm";
+import { Like, Repository } from "typeorm";
 import { Song } from "./entities/song.entity";
 import { InjectRepository } from "@nestjs/typeorm";
 import { GameSongDto } from "./dto/game-song.dto";
@@ -28,6 +28,27 @@ export class SongService {
     const gameSongDtoList: GameSongDto[] = [];
     for (const song of songs) {
       gameSongDtoList.push(new GameSongDto(song));
+    }
+    return gameSongDtoList;
+  }
+
+  public async searchSong(
+    keyword: string,
+    page: number
+  ): Promise<GameSongDto[]> {
+    const take = 10;
+    const skip = (page - 1) * take;
+    const searchResult: Song[] = await this.songRepository.find({
+      where: [
+        { songTitle: Like(`%${keyword}%`) },
+        { singer: Like(`%${keyword}%`) },
+      ],
+      take: take,
+      skip: skip,
+    });
+    const gameSongDtoList: GameSongDto[] = [];
+    for (const result of searchResult) {
+      gameSongDtoList.push(new GameSongDto(result));
     }
     return gameSongDtoList;
   }
