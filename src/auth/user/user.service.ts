@@ -18,7 +18,9 @@ export class UserService {
   }
 
   async save(userRegisterDTO: UserRegisterDTO): Promise<UserRegisterDTO> {
-    await this.transformPassword(userRegisterDTO);
+    if (userRegisterDTO.password) {
+      await this.transformPassword(userRegisterDTO);
+    }
     console.log(userRegisterDTO);
     return await this.userRepository.save(userRegisterDTO);
   }

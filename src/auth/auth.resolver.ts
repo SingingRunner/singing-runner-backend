@@ -60,7 +60,7 @@ export class AuthResolver {
     @Args("userLoginDTO") userLoginDTO: UserLoginDTO
   ): Promise<Token> {
     const { user } = await this.authService.validateUser(userLoginDTO);
-    const refreshToken = this.authService.generateRefreshToken();
+    const refreshToken = this.authService.generateRefreshToken(user.userId);
 
     user.refreshToken = refreshToken;
     await this.userService.update(user);
