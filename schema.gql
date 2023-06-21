@@ -35,18 +35,18 @@ type Query {
 }
 
 type Mutation {
-  registerUser(newUser: UserRegisterDTO!): User!
-  loginUser(userLoginDTO: UserLoginDTO!): Auth!
-  getRefreshToken(userLoginDTO: UserLoginDTO!): Token!
+  registerUser(newUser: UserRegisterDto!): User!
+  loginUser(userLoginDto: UserLoginDto!): Auth!
+  getRefreshToken(userLoginDto: UserLoginDto!): Token!
 }
 
-input UserRegisterDTO {
+input UserRegisterDto {
   userEmail: String!
   password: String!
   nickname: String!
 }
 
-input UserLoginDTO {
+input UserLoginDto {
   userEmail: String!
   password: String!
 }

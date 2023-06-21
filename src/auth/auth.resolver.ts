@@ -8,8 +8,8 @@ import {
   Field,
 } from "@nestjs/graphql";
 import { AuthService } from "./auth.service";
-import { UserRegisterDTO } from "./user/dto/user.register.dto";
-import { UserLoginDTO } from "./user/dto/user.login.dto";
+import { UserRegisterDto } from "./user/dto/user.register.dto";
+import { UserLoginDto } from "./user/dto/user.login.dto";
 import { AuthGuard } from "@nestjs/passport";
 import { User } from "./user/entity/user.entity";
 import { UserService } from "./user/user.service";
@@ -37,7 +37,7 @@ export class AuthResolver {
   ) {}
 
   @Mutation(() => User)
-  async registerUser(@Args("newUser") newUser: UserRegisterDTO): Promise<User> {
+  async registerUser(@Args("newUser") newUser: UserRegisterDto): Promise<User> {
     if (!newUser) {
       throw new Error("데이터가 없습니다.");
     }
@@ -46,9 +46,9 @@ export class AuthResolver {
 
   @Mutation(() => Auth)
   async loginUser(
-    @Args("userLoginDTO") userLoginDTO: UserLoginDTO
+    @Args("userLoginDto") userLoginDto: UserLoginDto
   ): Promise<Auth> {
-    const jwt = await this.authService.validateUser(userLoginDTO);
+    const jwt = await this.authService.validateUser(userLoginDto);
     return {
       accessToken: jwt.accessToken,
       user: jwt.user,
@@ -57,9 +57,9 @@ export class AuthResolver {
 
   @Mutation(() => Token)
   async getRefreshToken(
-    @Args("userLoginDTO") userLoginDTO: UserLoginDTO
+    @Args("userLoginDto") userLoginDto: UserLoginDto
   ): Promise<Token> {
-    const { user } = await this.authService.validateUser(userLoginDTO);
+    const { user } = await this.authService.validateUser(userLoginDto);
     const refreshToken = this.authService.generateRefreshToken(user.userId);
 
     await this.userService.updateRefreshToken(user.userId, refreshToken);
