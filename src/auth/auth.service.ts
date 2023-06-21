@@ -72,7 +72,7 @@ export class AuthService {
 
   async validateUser(
     UserLoginDTO: UserLoginDTO
-  ): Promise<{ accessToken: string; user: User }> {
+  ): Promise<{ accessToken: string; refreshToken: string; user: User }> {
     const userFind: User | null = await this.userService.findByFields({
       where: { userEmail: UserLoginDTO.userEmail },
     });
@@ -100,6 +100,10 @@ export class AuthService {
       userPoint: userFind.userPoint,
       character: userFind.character,
     };
+
+    const refreshToken: string = this.generateRefreshToken();
+    userFind.refreshToken = refreshToken;
+    await this.userService.save(userFind);
 
     return {
       accessToken: this.jwtService.sign(payload, { expiresIn: "1h" }),
