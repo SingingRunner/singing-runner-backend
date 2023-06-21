@@ -2,6 +2,22 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type GameSongDto {
+  songTitle: String!
+  singer: String!
+  songLyrics: String!
+  songGender: Boolean!
+  songMale: String!
+  songMaleUp: String!
+  songMaleDown: String!
+  songFemale: String!
+  songFemaleUp: String!
+  songFemaleDown: String!
+  vocalMale: String!
+  vocalMaleUp: String!
+  vocalMaleDown: String!
+}
+
 type User {
   userId: String!
   userEmail: String!
@@ -31,6 +47,7 @@ type Token {
 }
 
 type Query {
+  searchSong(keyword: String!, page: Int!): [GameSongDto!]!
   isAuthenticated(token: String!): String!
 }
 

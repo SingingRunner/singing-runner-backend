@@ -10,11 +10,4 @@ export class MatchCompleteSongDto {
 
   @IsString()
   singer: string;
-
-  toJSON() {
-    return {
-      songTitle: this.songTitle,
-      singer: this.singer,
-    };
-  }
 }

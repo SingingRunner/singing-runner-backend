@@ -68,7 +68,7 @@ export class GameReplayService {
       const gameSongdto: GameSongDto | null =
         await this.songService.getSongById(gameReplay.songId);
       if (gameSongdto !== null) {
-        const gameSong = gameSongdto.toJSON();
+        const gameSong = gameSongdto;
         const characterList: any = [];
         characterList.push({
           userId: gameReplay.userId,
