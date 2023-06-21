@@ -1,3 +1,4 @@
+import { v4 as uuidv4 } from "uuid";
 import {
   HttpException,
   HttpStatus,
@@ -11,6 +12,8 @@ import { User } from "./user/entity/user.entity";
 import * as bcrypt from "bcrypt";
 import { Payload } from "./security/payload.interface";
 import { JwtService } from "@nestjs/jwt";
+import { characterEnum } from "./user/util/character.enum";
+import * as crypto from "crypto";
 
 @Injectable()
 export class AuthService {
@@ -19,8 +22,8 @@ export class AuthService {
     private jwtService: JwtService
   ) {}
 
-  async registerUser(newUser: UserRegisterDTO): Promise<UserRegisterDTO> {
-    const userFind: UserRegisterDTO = await this.userService.findByFields({
+  async registerUser(newUser: UserRegisterDTO): Promise<User> {
+    const userFind: User | null = await this.userService.findByFields({
       where: { userEmail: newUser.userEmail },
     });
 
@@ -31,22 +34,55 @@ export class AuthService {
       );
     }
 
-    return await this.userService.save(newUser);
+    const userRegisterDTO: UserRegisterDTO = {
+      userEmail: newUser.userEmail,
+      password: newUser.password,
+      nickname: newUser.nickname,
+    };
+
+    const savedUserDTO: UserRegisterDTO = await this.userService.save(
+      userRegisterDTO
+    );
+
+    const user: User = new User();
+    user.userId = uuidv4();
+    user.userEmail = savedUserDTO.userEmail;
+    user.password = savedUserDTO.password;
+    user.nickname = savedUserDTO.nickname;
+    user.userActive = false;
+    user.userKeynote = false;
+    user.userMmr = 0;
+    user.userPoint = 0;
+    user.character = characterEnum.BELUGA;
+
+    return user;
+  }
+
+  // 랜덤으로 refresh token 생성
+  generateRefreshToken(): string {
+    return crypto.randomBytes(16).toString("hex");
   }
 
   async validateUser(
     UserLoginDTO: UserLoginDTO
-  ): Promise<{ accessToken: string }> {
-    const userFind: User = await this.userService.findByFields({
+  ): Promise<{ accessToken: string; user: User }> {
+    const userFind: User | null = await this.userService.findByFields({
       where: { userEmail: UserLoginDTO.userEmail },
     });
+
+    if (!userFind) {
+      throw new UnauthorizedException("유저를 찾을 수 없습니다.");
+    }
+
     const validatePassword = await bcrypt.compare(
       UserLoginDTO.password,
       userFind.password
     );
-    if (!userFind || !validatePassword) {
-      throw new UnauthorizedException("이메일 또는 비밀번호가 틀렸습니다.");
+
+    if (!validatePassword) {
+      throw new UnauthorizedException("비밀번호가 틀렸습니다.");
     }
+
     const payload: Payload = {
       userId: userFind.userId,
       userEmail: userFind.userEmail,
@@ -60,13 +96,75 @@ export class AuthService {
 
     return {
       accessToken: this.jwtService.sign(payload),
+      user: userFind,
     };
   }
 
+  async createRefreshToken(userLoginDTO: UserLoginDTO): Promise<string> {
+    const userFind: User | null = await this.userService.findByFields({
+      where: { userEmail: userLoginDTO.userEmail },
+    });
+
+    if (!userFind) {
+      throw new UnauthorizedException("유저를 찾을 수 없습니다.");
+    }
+
+    const refreshToken: string = this.generateRefreshToken();
+    userFind.refreshToken = refreshToken;
+    await this.userService.save(userFind);
+
+    return refreshToken;
+  }
+
   async tokenValidateUser(payload: Payload): Promise<User> {
-    const userFind = await this.userService.findByFields({
+    const userFind: User | null = await this.userService.findByFields({
       where: { userEmail: payload.userEmail },
     });
+
+    if (!userFind) {
+      throw new UnauthorizedException("유저를 찾을 수 없습니다.");
+    }
+
     return userFind;
+  }
+
+  async validateToken(token: string): Promise<User> {
+    try {
+      const payload: Payload = this.jwtService.verify(token);
+      const userFind: User | null = await this.userService.findByFields({
+        where: { userEmail: payload.userEmail },
+      });
+
+      if (!userFind) {
+        throw new UnauthorizedException("유저를 찾을 수 없습니다.");
+      }
+
+      return userFind;
+    } catch (err) {
+      throw new UnauthorizedException("토큰이 유효하지 않습니다.");
+    }
+  }
+
+  async refreshAccessToken(token: string): Promise<{ accessToken: string }> {
+    const user: User | null = await this.userService.findByFields({
+      where: { refreshToken: token }, // refreshToken 필드로 유저 검색
+    });
+
+    if (!user) {
+      throw new UnauthorizedException("유저를 찾을 수 없습니다.");
+    }
+
+    const payload: Payload = {
+      userId: user.userId,
+      userEmail: user.userEmail,
+      nickname: user.nickname,
+      userActive: user.userActive,
+      userKeynote: user.userKeynote,
+      userMmr: user.userMmr,
+      userPoint: user.userPoint,
+      character: user.character,
+    };
+
+    return { accessToken: this.jwtService.sign(payload) };
   }
 }
