@@ -1,4 +1,4 @@
-import { User } from "src/auth/user/entity/user.entity";
+import { User } from "src/user/entity/user.entity";
 import { Song } from "src/song/entities/song.entity";
 import {
   BaseEntity,

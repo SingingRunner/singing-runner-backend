@@ -10,9 +10,9 @@ import {
   Int,
 } from "@nestjs/graphql";
 import { AuthService } from "./auth.service";
-import { UserRegisterDto } from "./user/dto/user.register.dto";
-import { UserLoginDto } from "./user/dto/user.login.dto";
-import { User } from "./user/entity/user.entity";
+import { UserRegisterDto } from "../user/dto/user.register.dto";
+import { UserLoginDto } from "../user/dto/user.login.dto";
+import { User } from "../user/entity/user.entity";
 import { GqlAuthAccessGuard } from "./security/auth.guard";
 import { UserContext } from "src/commons/context";
 

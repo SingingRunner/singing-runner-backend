@@ -1,7 +1,7 @@
 import { MatchMakingPolicy } from "./match.making.policy";
 import { UserMatchTier } from "../utill/game.enum";
 import { Socket } from "socket.io";
-import { UserGameDto } from "src/auth/user/dto/user.game.dto";
+import { UserGameDto } from "src/user/dto/user.game.dto";
 
 export class MMRMatchPolicy implements MatchMakingPolicy {
   private tierQueueMap: Map<UserMatchTier, UserGameDto[]> = new Map();

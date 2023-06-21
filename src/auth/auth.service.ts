@@ -6,14 +6,14 @@ import {
   Injectable,
   UnauthorizedException,
 } from "@nestjs/common";
-import { UserRegisterDto } from "./user/dto/user.register.dto";
-import { UserService } from "./user/user.service";
-import { UserLoginDto } from "./user/dto/user.login.dto";
-import { User } from "./user/entity/user.entity";
+import { UserRegisterDto } from "../user/dto/user.register.dto";
+import { UserService } from "../user/user.service";
+import { UserLoginDto } from "../user/dto/user.login.dto";
+import { User } from "../user/entity/user.entity";
 import * as bcrypt from "bcrypt";
 import { Payload } from "./security/payload.interface";
 import { JwtService } from "@nestjs/jwt";
-import { characterEnum } from "./user/util/character.enum";
+import { characterEnum } from "../user/util/character.enum";
 import { Response } from "express";
 
 @Injectable()

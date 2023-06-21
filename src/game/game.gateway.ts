@@ -13,7 +13,7 @@ import { MatchService } from "./match/match.service";
 import { GameService } from "./game.service";
 import { GameRoom } from "./room/game.room";
 import { UserItemDto } from "./item/dto/user-item.dto";
-import { UserGameDto } from "src/auth/user/dto/user.game.dto";
+import { UserGameDto } from "src/user/dto/user.game.dto";
 import { Item } from "./item/item.enum";
 import { UserScoreDto } from "./rank/dto/user-score.dto";
 import { GameTerminatedDto } from "./rank/game-terminated.dto";

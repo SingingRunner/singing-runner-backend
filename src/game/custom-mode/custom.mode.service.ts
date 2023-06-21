@@ -2,9 +2,9 @@ import { GameRoom } from "../room/game.room";
 import { GameRoomHandler } from "../room/game.room.handler";
 import { Injectable } from "@nestjs/common";
 import { Socket } from "socket.io";
-import { HostUserDto } from "src/auth/user/dto/host-user.dto";
-import { UserGameDto } from "src/auth/user/dto/user.game.dto";
-import { UserMatchDto } from "src/auth/user/dto/user.match.dto";
+import { HostUserDto } from "src/user/dto/host-user.dto";
+import { UserGameDto } from "src/user/dto/user.game.dto";
+import { UserMatchDto } from "src/user/dto/user.match.dto";
 
 @Injectable()
 export class CustomModeService {

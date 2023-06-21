@@ -5,8 +5,8 @@ import { Socket } from "socket.io";
 
 import { GameRoomHandler } from "../room/game.room.handler";
 import { MatchMakingPolicy } from "./match.making.policy";
-import { UserMatchDto } from "src/auth/user/dto/user.match.dto";
-import { UserGameDto } from "src/auth/user/dto/user.game.dto";
+import { UserMatchDto } from "src/user/dto/user.match.dto";
+import { UserGameDto } from "src/user/dto/user.game.dto";
 
 @Injectable()
 export class MatchService {

@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { HostUserDto } from "src/auth/user/dto/host-user.dto";
+import { HostUserDto } from "src/user/dto/host-user.dto";
 
 @Injectable()
 export class Invite {
