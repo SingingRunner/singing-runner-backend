@@ -1,6 +1,5 @@
 import { IsString, IsBoolean } from "class-validator";
 import { Song } from "../entities/song.entity";
-// import { plainToClass } from "class-transformer";
 export class GameSongDto {
   constructor(song: Song) {
     this.songId = song.songId;
@@ -71,29 +70,4 @@ export class GameSongDto {
 
   @IsString()
   vocalFemaleDown: string;
-
-  // toJSON() {
-  //   return plainToClass(GameSongDto, this);
-  // }
-  toJSON() {
-    return {
-      songId: this.songId,
-      songTitle: this.songTitle,
-      singer: this.singer,
-      songLyrics: this.songLyrics,
-      songGender: this.songGender,
-      songMale: this.songMale,
-      songMaleUp: this.songMaleUp,
-      songMaleDown: this.songMaleDown,
-      songFemale: this.songFemale,
-      songFemaleUp: this.songFemaleUp,
-      songFemaleDown: this.songFemaleDown,
-      vocalMale: this.vocalMale,
-      vocalMaleUp: this.vocalMaleUp,
-      vocalMaleDown: this.vocalMaleDown,
-      vocalFemale: this.vocalFemale,
-      vocalFemaleUp: this.vocalFemaleUp,
-      vocalFemaleDown: this.vocalFemaleDown,
-    };
-  }
 }

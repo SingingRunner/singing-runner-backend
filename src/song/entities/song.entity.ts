@@ -2,7 +2,7 @@ import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
 export class Song {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn("uuid")
   songId: number;
 
   @Column()
