@@ -24,4 +24,21 @@ export class Notification {
 
     await this.userNotificationRepository.save(notification);
   }
+
+  public async removeNotification(
+    userId: string,
+    senderId: string,
+    date: Date
+  ) {
+    const notification = await this.userNotificationRepository.findOne({
+      where: [{ userId: userId }, { senderId: senderId }],
+    });
+
+    if (!notification) {
+      throw new Error("해당 친구 관계가 존재하지 않습니다.");
+    }
+
+    notification.deletedAt = date;
+    await this.userNotificationRepository.save(notification);
+  }
 }
