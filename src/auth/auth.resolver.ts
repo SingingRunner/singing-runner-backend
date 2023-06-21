@@ -13,7 +13,6 @@ import { UserRegisterDto } from "./user/dto/user.register.dto";
 import { UserLoginDto } from "./user/dto/user.login.dto";
 import { AuthGuard } from "@nestjs/passport";
 import { User } from "./user/entity/user.entity";
-import { UserService } from "./user/user.service";
 
 @ObjectType()
 class Auth {
@@ -32,10 +31,7 @@ class Token {
 
 @Resolver()
 export class AuthResolver {
-  constructor(
-    private authService: AuthService,
-    private userService: UserService
-  ) {}
+  constructor(private authService: AuthService) {}
 
   @Mutation(() => User)
   async registerUser(@Args("newUser") newUser: UserRegisterDto): Promise<User> {
@@ -72,28 +68,6 @@ export class AuthResolver {
     const accessToken = await this.authService.refreshAccessToken(refreshToken);
     return { accessToken: accessToken.accessToken };
   }
-
-  // @Mutation(() => Token)
-  // async getRefreshToken(
-  //   @Args("userLoginDto") userLoginDto: UserLoginDto
-  // ): Promise<Token> {
-  //   const { user } = await this.authService.validateUser(userLoginDto);
-  //   const refreshToken = this.authService.generateRefreshToken(user.userId);
-
-  //   await this.userService.updateRefreshToken(user.userId, refreshToken);
-
-  //   return { accessToken: refreshToken };
-  // }
-
-  // @Mutation(() => Token)
-  // async getNewRefreshToken(
-  //   @Args("accessToken") accessToken: string
-  // ): Promise<Token> {
-  //   const user = await this.authService.validateToken(accessToken);
-  //   const refreshToken = this.authService.generateRefreshToken(user.userId);
-  //   await this.userService.updateRefreshToken(user.userId, refreshToken);
-  //   return { accessToken: refreshToken };
-  // }
 
   @Query(() => String)
   @UseGuards(AuthGuard("jwt"))
