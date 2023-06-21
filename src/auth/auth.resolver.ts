@@ -11,8 +11,37 @@ import {
 import { AuthService } from "./auth.service";
 import { UserRegisterDto } from "./user/dto/user.register.dto";
 import { UserLoginDto } from "./user/dto/user.login.dto";
-import { AuthGuard } from "@nestjs/passport";
 import { User } from "./user/entity/user.entity";
+import { GqlAuthAccessGuard } from "./security/auth.guard";
+import { UserContext } from "src/commons/context";
+
+@ObjectType()
+class AuthUser {
+  // Define the fields that you want to return to the client
+  @Field()
+  userId: string;
+
+  @Field()
+  userEmail: string;
+
+  @Field()
+  nickname: string;
+
+  @Field()
+  userActive: number;
+
+  @Field()
+  userKeynote: number;
+
+  @Field()
+  userMmr: number;
+
+  @Field()
+  userPoint: number;
+
+  @Field()
+  character: string;
+}
 
 @ObjectType()
 class Auth {
@@ -69,10 +98,26 @@ export class AuthResolver {
     return { accessToken: accessToken.accessToken };
   }
 
-  @Query(() => String)
-  @UseGuards(AuthGuard("jwt"))
-  isAuthenticated(@Args("token") token: string) {
-    const user = this.authService.validateToken(token);
-    return user;
+  @UseGuards(GqlAuthAccessGuard)
+  @Query(() => AuthUser)
+  fetchUser(@Context() context: UserContext): AuthUser {
+    console.log("================");
+    console.log(context.req.user);
+    console.log("================");
+
+    const authUser = new AuthUser();
+    if (!context.req.user) {
+      throw new UnauthorizedException("유저 정보가 없습니다.");
+    } else {
+      authUser.userId = context.req.user.userId ?? "No User ID";
+      authUser.userEmail = context.req.user.userEmail ?? "No User Email";
+      authUser.nickname = context.req.user.nickname ?? "No Nickname";
+      authUser.userActive = context.req.user.userActive ?? 0;
+      authUser.userKeynote = context.req.user.userKeynote ?? 0;
+      authUser.userMmr = context.req.user.userMmr ?? 0;
+      authUser.userPoint = context.req.user.userPoint ?? 0;
+      authUser.character = context.req.user.character ?? "beluga";
+    }
+    return authUser;
   }
 }
