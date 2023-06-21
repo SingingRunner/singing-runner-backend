@@ -1,5 +1,8 @@
 import { IsString, IsBoolean } from "class-validator";
 import { Song } from "../entities/song.entity";
+import { Field, ObjectType } from "@nestjs/graphql";
+
+@ObjectType()
 export class GameSongDto {
   constructor(song: Song) {
     this.songId = song.songId;
@@ -24,42 +27,55 @@ export class GameSongDto {
   songId: number;
 
   @IsString()
+  @Field()
   songTitle: string;
 
   @IsString()
+  @Field()
   singer: string;
 
   @IsString()
+  @Field()
   songLyrics: string;
 
   @IsBoolean()
+  @Field()
   songGender: boolean;
 
   @IsString()
+  @Field()
   songMale: string;
 
   @IsString()
+  @Field()
   songMaleUp: string;
 
   @IsString()
+  @Field()
   songMaleDown: string;
 
   @IsString()
+  @Field()
   songFemale: string;
 
   @IsString()
+  @Field()
   songFemaleUp: string;
 
   @IsString()
+  @Field()
   songFemaleDown: string;
 
   @IsString()
+  @Field()
   vocalMale: string;
 
   @IsString()
+  @Field()
   vocalMaleUp: string;
 
   @IsString()
+  @Field()
   vocalMaleDown: string;
 
   @IsString()
