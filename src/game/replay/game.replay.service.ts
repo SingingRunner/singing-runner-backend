@@ -139,7 +139,8 @@ export class GameReplayService {
         }, gameEvent.getTimestamp());
       });
 
-    user.emit("start_replay");
-    console.log(gameEvent);
+      user.emit("start_replay");
+      console.log(gameEvent);
+    }
   }
 }
