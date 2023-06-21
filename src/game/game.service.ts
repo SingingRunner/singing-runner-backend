@@ -70,8 +70,9 @@ export class GameService {
     userVocal: Blob[]
   ) {
     const songId = gameRoom.getGameSongDto().songId;
-    const gameEventBlob = gameRoom.getGameEvent();
-    console.log(gameEventBlob);
+    const gameEvent = gameRoom.getGameEvent();
+    const gameEventJson = JSON.stringify(gameEvent);
+    console.log(gameEventJson);
     const gameReplayEntity: CreateReplayInput = {
       userId: userId,
       songId: songId,
