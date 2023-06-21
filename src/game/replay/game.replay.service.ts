@@ -5,6 +5,7 @@ import { GameReplayEntity } from "./entity/game.replay.entity";
 import { Socket } from "socket.io";
 import { GameSongDto } from "src/song/dto/game-song.dto";
 import * as AWS from "aws-sdk";
+import { GameEventDto } from "../event/dto/game.event.dto";
 
 const BUCKET_NAME: string = process.env.S3_BUCKET_NAME as string;
 const BUCKET_REGION: string = process.env.S3_BUCKET_REGION as string;
@@ -99,6 +100,45 @@ export class GameReplayService {
       });
     // aws s3 에서 gameEvent 를 가져와서 setTimeout으로 socket emit event 예약
     // fetch 과정이 조금 걸릴 수도 있으니 서버에서 파일 로드가 완료될 때까지 클라이언트 대기하게끔 소켓 이벤트 추가해야할듯
+    const params = {
+      Bucket: BUCKET_NAME,
+      Key: gameEvent,
+    };
+    let gameEventList: GameEventDto[] = [];
+    s3.getObject(params, (err, data) => {
+      if (err) {
+        console.log(err);
+      }
+      if (data.Body !== null && data.Body !== undefined) {
+        gameEventList = JSON.parse(data.Body.toString()).data;
+      }
+    });
+    if (gameEventList.length > 0) {
+      gameEventList.forEach((gameEvent: GameEventDto) => {
+        const eventName = gameEvent.getEventName();
+        setTimeout(() => {
+          if (
+            eventName === "use_item" ||
+            eventName === "get_item" ||
+            eventName === "escape_item"
+          ) {
+            user.emit(eventName, {
+              userId: gameEvent.getUserId(),
+              item: gameEvent.getEventContent(),
+            });
+          } else if (eventName === "score") {
+            user.emit(eventName, {
+              userId: gameEvent.getUserId(),
+              score: Number(gameEvent.getEventContent()),
+            });
+          } else if (eventName === "game_terminated") {
+            user.emit(eventName, {
+              Rank: gameEvent.getEventContent(),
+            });
+          }
+        }, gameEvent.getTimestamp());
+      });
+
     user.emit("start_replay");
     console.log(gameEvent);
   }
