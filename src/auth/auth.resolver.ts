@@ -92,9 +92,6 @@ export class AuthResolver {
   @Mutation(() => Token)
   async refreshAccessToken(@Context() context: any): Promise<Token> {
     const refreshToken = context.req.cookies["refreshToken"];
-    if (!refreshToken) {
-      throw new UnauthorizedException("리프레시 토큰을 찾을 수 없습니다.");
-    }
     const accessToken = await this.authService.refreshAccessToken(refreshToken);
     return { accessToken: accessToken.accessToken };
   }
