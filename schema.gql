@@ -63,6 +63,15 @@ type AuthTokenDto {
   accessToken: String!
 }
 
+
+type FriendDto {
+  userId: String!
+  nickname: String!
+  userActive: Int!
+  userMmr: Int!
+  character: String!
+  userTier: String!
+
 type UserCharacterResponseDto {
   userId: String!
   character: characterEnum!
@@ -82,12 +91,21 @@ enum characterEnum {
 type UserKeynoteResponseDto {
   userId: String!
   userKeynote: Int!
+
 }
 
 type Query {
   searchSong(keyword: String!, page: Int!): [GameSongDto!]!
   fetchUserGuard: AuthUserDto!
   fetchUser(userId: String!): AuthUserDto!
+  searchFriend(addFriendDto: AddFriendDto!): [User!]!
+  searchUser(nickname: String!, page: Float!): [FriendDto!]!
+  getFriendList(userId: String!, page: Float!): [FriendDto!]!
+}
+
+input AddFriendDto {
+  userId: String!
+  firendId: String!
 }
 
 type Mutation {
@@ -96,8 +114,13 @@ type Mutation {
   loginUser(userLoginDto: UserLoginDto!): AuthDto!
   refreshAccessToken: AuthTokenDto!
   logout(userId: String!): String!
+
+  addFriend(addFriendDto: AddFriendDto!): String!
+  removeFriend(addFriendDto: AddFriendDto!): String!
+
   updateCharacter(userId: String!, character: String!): UserCharacterResponseDto!
   updateUserKeynote(userId: String!, keynote: KeynoteEnum!): UserKeynoteResponseDto!
+
 }
 
 input UserRegisterDto {

@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { UserRegisterDto } from "./dto/user.register.dto";
-import { FindOneOptions, Repository } from "typeorm";
+import { FindOneOptions, Like, Repository } from "typeorm";
 import { User } from "./entity/user.entity";
 import * as bcrypt from "bcrypt";
 
@@ -45,6 +45,16 @@ export class UserService {
     return await this.userRepository.findOne({ where: { userId } });
   }
 
+  public async searchUser(nickname: string, page: number): Promise<User[]> {
+    const take = 10;
+    const skip = (page - 1) * take;
+    const searchResult: User[] = await this.userRepository.find({
+      where: [{ nickname: Like(`%${nickname}%`) }],
+      take: take,
+      skip: skip,
+    });
+    return searchResult;
+
   async saveUser(user: User): Promise<User> {
     return this.userRepository.save(user);
   }
@@ -61,5 +71,6 @@ export class UserService {
     } else {
       return "DIAMOND";
     }
+
   }
 }
