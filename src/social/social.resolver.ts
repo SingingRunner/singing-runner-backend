@@ -4,10 +4,27 @@ import { Args, Mutation, Query, Resolver } from "@nestjs/graphql";
 import { User } from "src/user/entity/user.entity";
 import { FriendDto } from "src/user/dto/friend.dto";
 import { HostUserDto } from "src/user/dto/host-user.dto";
+import { PollingDto } from "./dto/polling.dto";
 
 @Resolver()
 export class SocialResolver {
   constructor(private socialService: SocialService) {}
+
+  @Mutation(() => PollingDto)
+  async longPolling(@Args("userId") userId: string) {
+    let pollingDto: PollingDto = await this.socialService.checkWhilePolling(
+      userId
+    );
+
+    if (pollingDto.hostUserDtoList || pollingDto.userNotificationList) {
+      return pollingDto;
+    }
+
+    await this.socialService.delay(5000);
+    pollingDto = await this.socialService.checkWhilePolling(userId);
+
+    return pollingDto;
+  }
 
   @Query(() => [User])
   async searchFriend(
