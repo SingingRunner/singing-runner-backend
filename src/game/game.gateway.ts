@@ -18,9 +18,6 @@ import { UserGameDto } from "src/user/dto/user.game.dto";
 import { UserScoreDto } from "./rank/dto/user-score.dto";
 import { GameTerminatedDto } from "./rank/game-terminated.dto";
 import { CustomModeService } from "./custom-mode/custom.mode.service";
-import { UserMatchDto } from "src/user/dto/user.match.dto";
-import { HostUserDto } from "src/user/dto/host-user.dto";
-import { subscribe } from "diagnostics_channel";
 
 /**
  * webSocket 통신을 담당하는 Handler
@@ -101,7 +98,8 @@ export class GameGateway
 
   @SubscribeMessage("loading")
   loadSongData(@ConnectedSocket() user: Socket) {
-    this.gameService.loadData(user);
+    const data = this.gameService.loadData(user);
+    user.emit("loading", data);
   }
 
   @SubscribeMessage("game_ready")
