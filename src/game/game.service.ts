@@ -13,8 +13,6 @@ import { UserScoreDto } from "./rank/dto/user-score.dto";
 import { RankHandler } from "./rank/rank.hanlder";
 import { GameTerminatedDto } from "./rank/game-terminated.dto";
 import { GameReplayService } from "./replay/game.replay.service";
-import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
 import { User } from "src/user/entity/user.entity";
 import { userActiveStatus } from "src/user/util/user.enum";
 
@@ -28,9 +26,7 @@ export class GameService {
     private rankHandler: RankHandler,
     private gameReplayService: GameReplayService,
     private userService: UserService,
-    private socialService: SocialService,
-    @InjectRepository(User)
-    private userRepository: Repository<User>
+    private socialService: SocialService
   ) {}
 
   public loadData(user: Socket) {
@@ -140,9 +136,7 @@ export class GameService {
 
   public async saveReplay(userId: string, userVocal: string) {
     const gameRoom: GameRoom = this.gameRoomHandler.findRoomByUserId(userId);
-    const user: User | null = await this.userRepository.findOne({
-      where: { userId: userId },
-    });
+    const user: User | null = await this.userService.findUserById(userId);
     const songId = gameRoom.getGameSongDto().songId;
     const filename = `${userId}_${songId}_${new Date().getTime()}`;
     const gameEvent = gameRoom.getGameEvent();
