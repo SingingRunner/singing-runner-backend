@@ -60,6 +60,7 @@ type AuthTokenDto {
 
 type Query {
   searchSong(keyword: String!, page: Int!): [GameSongDto!]!
+  fetchUserGuard: AuthUserDto!
   fetchUser(userId: String!): AuthUserDto!
 }
 
