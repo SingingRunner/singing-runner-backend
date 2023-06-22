@@ -144,4 +144,14 @@ export class AuthService {
 
     return { accessToken };
   }
+
+  async logout(user: User): Promise<string> {
+    try {
+      user.refreshToken = null;
+      await this.userService.updateRefreshToken(user.userId, null);
+      return "로그아웃 성공";
+    } catch (err) {
+      throw new Error("로그아웃 실패");
+    }
+  }
 }

@@ -18,6 +18,6 @@ import { AuthResolver } from "./auth.resolver";
     PassportModule,
   ],
   providers: [AuthService, UserService, JwtAccessStrategy, AuthResolver],
-  exports: [UserService],
+  exports: [UserService, AuthService],
 })
 export class AuthModule {}
