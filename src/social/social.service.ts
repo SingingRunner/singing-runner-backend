@@ -120,7 +120,12 @@ export class SocialService {
   }
 
   public async friendRequest(userId: string, senderId: string, date: Date) {
-    this.notificationService.addNotification(userId, senderId, date);
+    const user: User | null = await this.userService.findUserById(userId);
+    const sender: User | null = await this.userService.findUserById(senderId);
+    if (user === null || sender === null) {
+      throw new Error("등록되지 않은 유저 또는 친구입니다");
+    }
+    await this.notificationService.addNotification(user, sender, date);
   }
 
   public async deleteNotification(
@@ -128,6 +133,6 @@ export class SocialService {
     senderId: string,
     date: Date
   ) {
-    this.notificationService.removeNotification(userId, senderId, date);
+    await this.notificationService.removeNotification(userId, senderId, date);
   }
 }

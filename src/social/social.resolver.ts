@@ -9,29 +9,14 @@ export class SocialResolver {
   /**
    * 친구추가(mutation)
    * 친구삭제(mutation)
-   * 친구검색(mutation)
-   * 유저전체검색(mutation)
+   * 친구검색(query)
+   * 유저전체검색(query)
    * 친구목록조회(query)
    */
 
   constructor(private socialService: SocialService) {}
 
-  @Mutation()
-  async addFriend(@Args("addFriendDto") addFriendDto: AddFriendDto) {
-    this.socialService.addFriend(addFriendDto.userId, addFriendDto.firendId);
-  }
-
-  @Mutation()
-  async removeFriend(@Args("addFriendDto") addFriendDto: AddFriendDto) {
-    const date = new Date();
-    this.socialService.removeFriend(
-      addFriendDto.userId,
-      addFriendDto.firendId,
-      date
-    );
-  }
-
-  @Mutation(() => [User])
+  @Query(() => [User])
   async searchFriend(
     @Args("addFriendDto") addFriendDto: AddFriendDto
   ): Promise<User[]> {
@@ -42,7 +27,7 @@ export class SocialResolver {
     );
   }
 
-  @Mutation(() => [FriendDto])
+  @Query(() => [FriendDto])
   async searchUser(
     @Args("nickname") nickname: string,
     @Args("page") page: number
@@ -56,5 +41,25 @@ export class SocialResolver {
     @Args("page") page: number
   ): Promise<FriendDto[]> {
     return await this.socialService.getFriendList(userId, page);
+  }
+
+  @Mutation(() => String)
+  async addFriend(@Args("addFriendDto") addFriendDto: AddFriendDto) {
+    await this.socialService.addFriend(
+      addFriendDto.userId,
+      addFriendDto.firendId
+    );
+    return "ok";
+  }
+
+  @Mutation(() => String)
+  async removeFriend(@Args("addFriendDto") addFriendDto: AddFriendDto) {
+    const date = new Date();
+    await this.socialService.removeFriend(
+      addFriendDto.userId,
+      addFriendDto.firendId,
+      date
+    );
+    return "ok";
   }
 }

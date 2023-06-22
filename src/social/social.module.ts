@@ -4,9 +4,15 @@ import { SocialService } from "./social.service";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { Social } from "./entity/social.entity";
 import { SocialResolver } from "./social.resolver";
+import { NotificationService } from "./notification/notification.service";
+import { UserNotification } from "./notification/user.notification.entitiy";
 
 @Module({
-  imports: [UserModule, TypeOrmModule.forFeature([Social])],
-  providers: [SocialService, SocialResolver],
+  imports: [
+    UserModule,
+    TypeOrmModule.forFeature([Social]),
+    TypeOrmModule.forFeature([UserNotification]),
+  ],
+  providers: [SocialService, SocialResolver, NotificationService],
 })
 export class SocialModule {}
