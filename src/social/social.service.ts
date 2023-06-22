@@ -164,7 +164,7 @@ export class SocialService {
     return this.getAllInvitation(userId);
   }
 
-  private async getNotification(
+  public async getNotification(
     userId: string,
     page: number
   ): Promise<UserNotification[]> {

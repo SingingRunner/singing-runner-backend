@@ -5,6 +5,7 @@ import { User } from "src/user/entity/user.entity";
 import { FriendDto } from "src/user/dto/friend.dto";
 import { HostUserDto } from "src/user/dto/host-user.dto";
 import { PollingDto } from "./dto/polling.dto";
+import { UserNotification } from "./notification/user.notification.entitiy";
 
 @Resolver()
 export class SocialResolver {
@@ -24,6 +25,13 @@ export class SocialResolver {
     pollingDto = await this.socialService.checkWhilePolling(userId);
 
     return pollingDto;
+  }
+  @Query(() => [UserNotification])
+  async getNotification(
+    @Args("userId") userId: string,
+    @Args("page") page: number
+  ) {
+    return this.socialService.getNotification(userId, page);
   }
 
   @Query(() => [User])
