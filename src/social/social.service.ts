@@ -113,25 +113,34 @@ export class SocialService {
     const take = 10;
     const skip = (page - 1) * take;
     const notDeleted = new Date("1970-01-01");
+
     const socialList = await this.socialRepository.find({
       where: [{ userId: userId }, { deletedAt: notDeleted }],
       take: take,
       skip: skip,
+      relations: ["friend"],
     });
+
     const userTier = UserMatchTier.BRONZE;
     const friendList: FriendDto[] = [];
+
     for (const social of socialList) {
+      const friend = social.friend;
+      if (!friend) {
+        throw new Error("없는 친구");
+      }
       friendList.push(
         new FriendDto(
-          social.friend.userId,
-          social.friend.nickname,
-          social.friend.userActive,
-          social.friend.character,
-          social.friend.userMmr,
+          friend.userId,
+          friend.nickname,
+          friend.userActive,
+          friend.character,
+          friend.userMmr,
           userTier
         )
       );
     }
+
     return friendList;
   }
 
