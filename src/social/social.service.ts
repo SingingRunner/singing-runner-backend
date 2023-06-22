@@ -7,6 +7,7 @@ import { NotificationService } from "./notification/notification.service";
 import { FriendDto } from "src/user/dto/friend.dto";
 import { UserMatchTier } from "src/game/utill/game.enum";
 import { User } from "src/user/entity/user.entity";
+import { Invite } from "./invite/invite";
 
 @Injectable()
 export class SocialService {
@@ -14,7 +15,8 @@ export class SocialService {
     private userService: UserService,
     private notificationService: NotificationService,
     @InjectRepository(Social)
-    private readonly socialRepository: Repository<Social>
+    private readonly socialRepository: Repository<Social>,
+    private invite: Invite
   ) {}
 
   public async addFriend(userId: string, friendId: string) {
