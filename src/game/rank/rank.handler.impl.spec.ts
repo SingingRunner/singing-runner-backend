@@ -81,9 +81,9 @@ describe("RankHandlerImpl", () => {
         // Assert
         expect(result).toHaveLength(3);
         expect(result[0]).toBeInstanceOf(GameTerminatedDto);
-        expect(result[0].userId).toBe(userScoreDto1.getUserId());
-        expect(result[1].userId).toBe(userScoreDto3.getUserId());
-        expect(result[2].userId).toBe(userScoreDto2.getUserId());
+        expect(result[0].getUserId()).toBe(userScoreDto1.getUserId());
+        expect(result[1].getUserId()).toBe(userScoreDto3.getUserId());
+        expect(result[2].getUserId()).toBe(userScoreDto2.getUserId());
         // Add more assertions based on your specific implementation and requirements
       });
     });

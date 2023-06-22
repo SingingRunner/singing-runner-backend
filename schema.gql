@@ -102,16 +102,6 @@ type ReplayWithSongInfo {
   singer: String!
 }
 
-type UserNotification {
-  userId: String!
-  senderId: String!
-  user: User!
-  sender: User!
-  content: String!
-  receivedAt: DateTime!
-  deletedAt: DateTime!
-}
-
 type HostUserOutput {
   userId: String!
   nickname: String!
