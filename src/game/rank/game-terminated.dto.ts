@@ -34,4 +34,8 @@ export class GameTerminatedDto {
   public setUserSocket(user: Socket) {
     this.user = user;
   }
+
+  public getMmrDiff() {
+    return this.mmrDiff;
+  }
 }

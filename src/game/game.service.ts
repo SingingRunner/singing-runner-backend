@@ -89,7 +89,17 @@ export class GameService {
   public calculateRank(user: Socket): GameTerminatedDto[] {
     const gameRoom: GameRoom = this.gameRoomHandler.findRoomBySocket(user);
     const gameTerminatedList = this.rankHandler.calculateRank(gameRoom);
+    this.updateMmr(gameTerminatedList);
     return gameTerminatedList;
+  }
+
+  private updateMmr(gameTerminiatedDtoList: GameTerminatedDto[]) {
+    for (const gameTerminatedDto of gameTerminiatedDtoList) {
+      this.userService.updateMmr(
+        gameTerminatedDto.getUserId(),
+        gameTerminatedDto.getMmrDiff()
+      );
+    }
   }
 
   public async setGameTerminatedDto(
