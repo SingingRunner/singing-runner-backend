@@ -1,6 +1,6 @@
 import { TypeOrmModuleOptions } from "@nestjs/typeorm";
 import { Song } from "src/song/entities/song.entity";
-import { User } from "./auth/user/entity/user.entity";
+import { User } from "./user/entity/user.entity";
 import { GameReplayEntity } from "./game/replay/entity/game.replay.entity";
 
 export const TypeORMConfig: TypeOrmModuleOptions = {
