@@ -16,6 +16,8 @@ export class NotificationService {
     notification.user = user;
     notification.sender = sender;
     notification.receivedAt = date;
+    notification.content = "친구요청";
+    console.log(notification);
     await this.userNotificationRepository.save(notification);
   }
 

@@ -180,7 +180,7 @@ export class SocialService {
     userId: string,
     page: number
   ): Promise<UserNotification[]> {
-    return await this.getNotification(userId, page);
+    return await this.notificationService.getNotifications(userId, page);
   }
 
   public delay(ms: number) {

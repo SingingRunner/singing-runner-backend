@@ -42,6 +42,16 @@ type Reply {
   code: Int!
 }
 
+type UserNotification {
+  userId: String!
+  senderId: String!
+  user: User!
+  sender: User!
+  content: String!
+  receivedAt: DateTime!
+  deletedAt: DateTime!
+}
+
 type AuthUserDto {
   userId: String!
   userEmail: String!
@@ -82,16 +92,6 @@ enum characterEnum {
 type UserKeynoteResponseDto {
   userId: String!
   userKeynote: Int!
-}
-
-type UserNotification {
-  userId: String!
-  senderId: String!
-  user: User!
-  sender: User!
-  content: String!
-  receivedAt: DateTime!
-  deletedAt: DateTime!
 }
 
 type HostUserOutput {
