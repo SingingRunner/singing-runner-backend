@@ -58,6 +58,22 @@ type AuthTokenDto {
   accessToken: String!
 }
 
+type UserCharacterResponse {
+  userId: String!
+  character: characterEnum!
+}
+
+enum characterEnum {
+  BELUGA
+  PUMA
+  HUSKY
+  HARE
+  LYNX
+  SNOWLEOPARD
+  NARWHAL
+  PUFFIN
+}
+
 type Query {
   searchSong(keyword: String!, page: Int!): [GameSongDto!]!
   fetchUserGuard: AuthUserDto!
@@ -69,6 +85,7 @@ type Mutation {
   loginUser(userLoginDto: UserLoginDto!): AuthDto!
   refreshAccessToken: AuthTokenDto!
   logout(userId: String!): String!
+  updateCharacter(userId: String!, character: String!): UserCharacterResponse!
 }
 
 input UserRegisterDto {
