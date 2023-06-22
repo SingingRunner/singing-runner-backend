@@ -162,12 +162,17 @@ export class GameGateway
       this.gameService.calculateRank(user);
 
     for (const gameTerminatedDto of gameTermintaedList) {
-      this.gameService.setNickname(user, gameTerminatedDto);
+      this.gameService.setNicknameSocket(user, gameTerminatedDto);
       this.gameService.updateUserActive(
         gameTerminatedDto.getUserId(),
         userActiveStatus.CONNECT
       );
     }
+
+    // for (const gameTerminatedDto of gameTermintaedList) {
+    //   getFriendList(gameTerminatedDto.getUserId())
+    //   if frinedList ==
+    // }
 
     this.broadCast(user, "game_terminated", gameTermintaedList);
   }

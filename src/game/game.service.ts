@@ -94,13 +94,16 @@ export class GameService {
     return gameTerminatedList;
   }
 
-  public setNickname(user: Socket, gameTerminatedDto: GameTerminatedDto) {
+  public setNicknameSocket(user: Socket, gameTerminatedDto: GameTerminatedDto) {
     const gameRoom: GameRoom = this.gameRoomHandler.findRoomBySocket(user);
     const userList: UserGameDto[] =
       this.gameRoomHandler.findUsersInRoom(gameRoom);
-    for (const user of userList) {
-      if (user.getUserMatchDto().userId === gameTerminatedDto.getUserId()) {
-        gameTerminatedDto.setNickname(user.getUserMatchDto().nickname);
+    for (const userGameDto of userList) {
+      if (
+        userGameDto.getUserMatchDto().userId === gameTerminatedDto.getUserId()
+      ) {
+        gameTerminatedDto.setNickname(userGameDto.getUserMatchDto().nickname);
+        gameTerminatedDto.setUserSocket(userGameDto.getSocket());
         return;
       }
     }

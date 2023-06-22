@@ -1,3 +1,5 @@
+import { Socket } from "socket.io";
+
 export class GameTerminatedDto {
   constructor(userId: string, mmrDiff: number, userScore: number) {
     this.userId = userId;
@@ -5,6 +7,7 @@ export class GameTerminatedDto {
     this.userScore = userScore;
   }
 
+  private user: Socket;
   private userId: string;
   private nickname: string;
   private mmrDiff: number;
@@ -21,5 +24,9 @@ export class GameTerminatedDto {
 
   public setNickname(nickname: string) {
     this.nickname = nickname;
+  }
+
+  public setUserSocket(user: Socket) {
+    this.user = user;
   }
 }

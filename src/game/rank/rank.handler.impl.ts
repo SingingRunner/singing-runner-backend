@@ -3,6 +3,7 @@ import { GameRoom } from "../room/game.room";
 import { UserScoreDto } from "./dto/user-score.dto";
 import { RankHandler } from "./rank.hanlder";
 import { GameTerminatedDto } from "./game-terminated.dto";
+import { Socket } from "socket.io";
 
 @Injectable()
 export class RankHandlerImpl implements RankHandler {
