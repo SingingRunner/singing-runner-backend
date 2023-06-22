@@ -5,6 +5,7 @@ export class GameTerminatedDto {
     this.userId = userId;
     this.mmrDiff = mmrDiff;
     this.userScore = userScore;
+    this.isFriend = false;
   }
 
   private user: Socket;
@@ -16,6 +17,10 @@ export class GameTerminatedDto {
 
   public getUserId() {
     return this.userId;
+  }
+
+  public getSocket() {
+    return this.user;
   }
 
   public setIsFriend(isFriend: boolean) {

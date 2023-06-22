@@ -169,10 +169,16 @@ export class GameGateway
       );
     }
 
-    // for (const gameTerminatedDto of gameTermintaedList) {
-    //   getFriendList(gameTerminatedDto.getUserId())
-    //   if frinedList ==
-    // }
+    for (const gameTerminatedDto of gameTermintaedList) {
+      const friendList = this.gameService.getFriendList(
+        gameTerminatedDto.getUserId()
+      );
+      for (const friend of friendList) {
+        friend == gameTerminatedDto.getUserId();
+        gameTerminatedDto.setIsFriend(true);
+      }
+      gameTerminatedDto.getSocket().emit("game_terminated", gameTermintaedList);
+    }
 
     this.broadCast(user, "game_terminated", gameTermintaedList);
   }

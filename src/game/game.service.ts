@@ -1,3 +1,4 @@
+import { SocialService } from "./../social/social.service";
 import { UserService } from "src/user/user.service";
 import { GameRoomHandler } from "./room/game.room.handler";
 import { Inject, Injectable } from "@nestjs/common";
@@ -27,6 +28,7 @@ export class GameService {
     private rankHandler: RankHandler,
     private gameReplayService: GameReplayService,
     private userService: UserService,
+    private socialService: SocialService,
     @InjectRepository(User)
     private userRepository: Repository<User>
   ) {}
@@ -111,6 +113,10 @@ export class GameService {
 
   public updateUserActive(userId: string, userActive: userActiveStatus) {
     this.userService.updateUserActive(userId, userActive);
+  }
+
+  public async getFriendList(userId: string): Promise<string[]> {
+    return await this.socialService.getFriendList(userId);
   }
 
   public async saveReplay(userId: string, userVocal: string) {

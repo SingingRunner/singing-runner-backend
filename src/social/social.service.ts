@@ -111,39 +111,15 @@ export class SocialService {
     return friends.map((friend) => friend.friend);
   }
 
-  public async getFriendList(
-    userId: string,
-    page: number
-  ): Promise<FriendDto[]> {
-    const take = 10;
-    const skip = (page - 1) * take;
-    const notDeleted = new Date("1970-01-01");
-
+  public async getFriendList(userId: string): Promise<string[]> {
     const socialList = await this.socialRepository.find({
-      where: [{ userId: userId }, { deletedAt: notDeleted }],
-      take: take,
-      skip: skip,
+      where: [{ userId: userId }],
       relations: ["friend"],
     });
-
-    const userTier = UserMatchTier.BRONZE;
-    const friendList: FriendDto[] = [];
+    const friendList: string[] = [];
 
     for (const social of socialList) {
-      const friend = social.friend;
-      if (!friend) {
-        throw new Error("없는 친구");
-      }
-      friendList.push(
-        new FriendDto(
-          friend.userId,
-          friend.nickname,
-          friend.userActive,
-          friend.character,
-          friend.userMmr,
-          userTier
-        )
-      );
+      friendList.push(social.friendId);
     }
 
     return friendList;
