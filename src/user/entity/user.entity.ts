@@ -1,6 +1,7 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { characterEnum } from "../util/character.enum";
 import { Field, Int, ObjectType } from "@nestjs/graphql";
+import { GameReplayEntity } from "src/game/replay/entity/game.replay.entity";
 
 @ObjectType()
 @Entity("user")
@@ -48,4 +49,10 @@ export class User {
   @Field(() => String, { nullable: true })
   @Column({ type: "varchar", length: 255, nullable: true })
   refreshToken?: string;
+
+  @OneToMany(
+    () => GameReplayEntity,
+    (gameReplayEntity) => gameReplayEntity.user
+  )
+  replays: GameReplayEntity[];
 }

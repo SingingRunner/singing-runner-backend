@@ -86,7 +86,7 @@ export class GameReplayService {
         const gameSong = gameSongdto;
         const characterList: any = [];
         characterList.push({
-          userId: gameReplay.userId,
+          userId: gameReplay.user,
           character: gameReplay.userCharacter,
         });
         characterList.push({

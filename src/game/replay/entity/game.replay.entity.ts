@@ -31,19 +31,19 @@ export class GameReplayEntity extends BaseEntity {
   @Column({ type: "tinyint", default: 0 })
   isPublic: number;
 
-  @ManyToOne(() => User)
-  userId: string;
+  @ManyToOne(() => User, (user) => user.replays)
+  user: User;
 
   @Column({ type: "varchar", length: 1024 })
   userCharacter: string;
 
-  @ManyToOne(() => User)
+  @Column({ type: "varchar", length: 36 })
   player1Id: string;
 
   @Column({ type: "varchar", length: 1024 })
   player1Character: string;
 
-  @ManyToOne(() => User)
+  @Column({ type: "varchar", length: 36 })
   player2Id: string;
 
   @Column({ type: "varchar", length: 1024 })
