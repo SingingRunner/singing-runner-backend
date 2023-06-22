@@ -1,7 +1,8 @@
-import { Field, InputType } from "@nestjs/graphql";
+import { Field, InputType, ObjectType } from "@nestjs/graphql";
 import { IsNotEmpty } from "class-validator";
 
-@InputType()
+@ObjectType("HostUserOutput")
+@InputType("HostUserInput")
 export class HostUserDto {
   constructor(userId: string, nickname: string) {
     this.userId = userId;
@@ -9,19 +10,17 @@ export class HostUserDto {
   }
 
   @IsNotEmpty()
-  @Field()
+  @Field(() => String)
   private userId: string;
 
   @IsNotEmpty()
-  @Field()
+  @Field(() => String)
   private nickname: string;
 
-  @Field()
   public getUserId(): string {
     return this.userId;
   }
 
-  @Field()
   public getNickname(): string {
     return this.nickname;
   }

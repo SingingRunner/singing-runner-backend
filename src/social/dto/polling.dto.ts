@@ -4,9 +4,9 @@ import { HostUserDto } from "src/user/dto/host-user.dto";
 
 @ObjectType()
 export class PollingDto {
-  @Field()
+  @Field(() => [HostUserDto])
   hostUserDtoList: HostUserDto[];
 
-  @Field()
+  @Field(() => [UserNotification])
   userNotificationList: UserNotification[];
 }
