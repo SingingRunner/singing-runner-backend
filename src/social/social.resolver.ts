@@ -28,4 +28,14 @@ export class SocialResolver {
       date
     );
   }
+
+  @Mutation()
+  async searchFriend(@Args("addFriendDto") addFriendDto: AddFriendDto) {
+    const date = new Date();
+    this.socialService.removeFriend(
+      addFriendDto.userId,
+      addFriendDto.firendId,
+      date
+    );
+  }
 }

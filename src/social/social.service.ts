@@ -42,7 +42,10 @@ export class SocialService {
     await this.socialRepository.save(social);
   }
 
-  public async searchUser(nickname: string, page: number) {
+  public async searchUser(
+    nickname: string,
+    page: number
+  ): Promise<FriendDto[]> {
     const searchList: User[] = await this.userService.searchUser(
       nickname,
       page
@@ -62,6 +65,29 @@ export class SocialService {
       );
     }
     return userList;
+  }
+  public async searchFriend(
+    userId: string,
+    nickname: string,
+    page: number
+  ): Promise<User[]> {
+    const take = 10;
+    const skip = (page - 1) * take;
+
+    const friends = await this.socialRepository
+      .createQueryBuilder("social")
+      .innerJoinAndSelect("social.friend", "friend")
+      .innerJoinAndSelect("social.user", "user")
+      .where("social.userId = :userId", { userId })
+      .andWhere("friend.nickname LIKE :nickname", {
+        nickname: `%${nickname}%`,
+      })
+      .orderBy("friend.nickname")
+      .skip(skip)
+      .take(take)
+      .getMany();
+
+    return friends.map((friend) => friend.friend);
   }
 
   public async getFriendList(
