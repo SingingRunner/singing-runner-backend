@@ -6,6 +6,7 @@ import { Repository } from "typeorm";
 import { NotificationService } from "./notification/notification.service";
 import { FriendDto } from "src/user/dto/friend.dto";
 import { UserMatchTier } from "src/game/utill/game.enum";
+import { User } from "src/user/entity/user.entity";
 
 @Injectable()
 export class SocialService {
@@ -39,6 +40,28 @@ export class SocialService {
     }
     social.deletedAt = date;
     await this.socialRepository.save(social);
+  }
+
+  public async searchUser(nickname: string, page: number) {
+    const searchList: User[] = await this.userService.searchUser(
+      nickname,
+      page
+    );
+    const userTier = UserMatchTier.BRONZE;
+    const userList: FriendDto[] = [];
+    for (const user of searchList) {
+      userList.push(
+        new FriendDto(
+          user.userId,
+          user.nickname,
+          user.userActive,
+          user.character,
+          user.userMmr,
+          userTier
+        )
+      );
+    }
+    return userList;
   }
 
   public async getFriendList(

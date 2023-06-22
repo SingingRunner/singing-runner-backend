@@ -1,9 +1,11 @@
+import { friendDto } from "src/user/dto/friend.dto";
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { UserRegisterDto } from "./dto/user.register.dto";
-import { FindOneOptions, Repository } from "typeorm";
+import { FindOneOptions, Like, Repository } from "typeorm";
 import { User } from "./entity/user.entity";
 import * as bcrypt from "bcrypt";
+import { UserMatchTier } from "src/game/utill/game.enum";
 
 @Injectable()
 export class UserService {
@@ -43,5 +45,16 @@ export class UserService {
 
   async findUserById(userId: string): Promise<User | null> {
     return await this.userRepository.findOne({ where: { userId } });
+  }
+
+  public async searchUser(nickname: string, page: number): Promise<User[]> {
+    const take = 10;
+    const skip = (page - 1) * take;
+    const searchResult: User[] = await this.userRepository.find({
+      where: [{ nickname: Like(`%${nickname}%`) }],
+      take: take,
+      skip: skip,
+    });
+    return searchResult;
   }
 }
