@@ -1,3 +1,4 @@
+import { UserMatchDto } from "./../user/dto/user.match.dto";
 import {
   ConnectedSocket,
   MessageBody,
@@ -17,6 +18,9 @@ import { UserGameDto } from "src/user/dto/user.game.dto";
 import { UserScoreDto } from "./rank/dto/user-score.dto";
 import { GameTerminatedDto } from "./rank/game-terminated.dto";
 import { CustomModeService } from "./custom-mode/custom.mode.service";
+import { UserMatchDto } from "src/user/dto/user.match.dto";
+import { HostUserDto } from "src/user/dto/host-user.dto";
+import { subscribe } from "diagnostics_channel";
 
 /**
  * webSocket 통신을 담당하는 Handler
@@ -149,18 +153,32 @@ export class GameGateway
     @ConnectedSocket() user: Socket,
     @MessageBody() userScoreDto: UserScoreDto
   ) {
-    /**
-     * 게임종료시 gameRoom안에 인원이 전부(탈주자 예외처리)
-     * terminated 메시지와 점수, 녹음정보(리플레이용)를 보내면
-     * 순위, mmr, userId 를 보내줘야함
-     * + 게임이벤트 및 녹음정보를 각 user마다 DB에 저장.
-     */
     if (!this.gameService.allUsersTerminated(user, userScoreDto)) {
       return;
     }
     const gameTermintaedList: GameTerminatedDto[] =
       this.gameService.caculateRank(user);
     this.broadCast(user, "game_terminated", gameTermintaedList);
+  }
+
+  @SubscribeMessage("invite")
+  accpetInvite(@ConnectedSocket() user: Socket, @MessageBody() data) {
+    this.customModeService.acceptInvite(
+      user,
+      data.userMatchDto,
+      data.HostUserDto
+    );
+    const userList: UserGameDto[] =
+      this.customModeService.findUsersInSameRoom(user);
+    this.broadCast(user, "invite", userList);
+  }
+
+  @SubscribeMessage("create_custom")
+  createCustomRoom(
+    @ConnectedSocket() user: Socket,
+    @MessageBody() userMatchDto: UserMatchDto
+  ) {
+    this.customModeService.createCustomRoom(user, userMatchDto);
   }
 
   private broadCast(user: Socket, message: string, responseData: any) {

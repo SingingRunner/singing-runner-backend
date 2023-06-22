@@ -59,4 +59,9 @@ export class CustomModeService {
     );
     this.joinCustomRoom(user, userMatchDto, gameRoom);
   }
+
+  public findUsersInSameRoom(user: Socket): UserGameDto[] {
+    const gameRoom: GameRoom = this.gameRoomHandler.findRoomBySocket(user);
+    return this.gameRoomHandler.findUsersInRoom(gameRoom);
+  }
 }
