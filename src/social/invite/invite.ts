@@ -28,4 +28,8 @@ export class Invite {
     );
     this.inviteMap.set(userId, inviteQueue);
   }
+
+  public hasInvitation(userId: string): boolean {
+    return this.inviteMap.has(userId);
+  }
 }
