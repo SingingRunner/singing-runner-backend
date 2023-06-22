@@ -145,8 +145,8 @@ type Mutation {
   addFriend(addFriendDto: AddFriendDto!): String!
   removeFriend(addFriendDto: AddFriendDto!): String!
   inviteFriend(friendId: String!, hostUserDto: HostUserInput!): String!
-  friendRequest: String!
-  deleteNotification: String!
+  friendRequest(notificationDto: NotificationDto!): String!
+  deleteNotification(notificationDto: NotificationDto!): String!
 }
 
 input UserRegisterDto {
@@ -164,4 +164,9 @@ enum userKeynoteStatus {
   ORIGINAL_KEY
   FEMALE_KEY
   MALE_KEY
+}
+
+input NotificationDto {
+  userId: String!
+  senderId: String!
 }

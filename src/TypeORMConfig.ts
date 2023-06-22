@@ -12,5 +12,5 @@ export const TypeORMConfig: TypeOrmModuleOptions = {
   host: process.env.DB_HOST,
   database: process.env.DB_DATABASE,
   entities: [Song, User, GameReplayEntity, Social],
-  synchronize: true,
+  synchronize: false,
 };
