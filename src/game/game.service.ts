@@ -11,7 +11,6 @@ import { UserScoreDto } from "./rank/dto/user-score.dto";
 import { RankHandler } from "./rank/rank.hanlder";
 import { GameTerminatedDto } from "./rank/game-terminated.dto";
 import { GameReplayService } from "./replay/game.replay.service";
-import { UserResultDto } from "./rank/dto/user-result.dto";
 
 @Injectable()
 export class GameService {
@@ -80,10 +79,7 @@ export class GameService {
     if (this.gameRoomHandler.isGameRoomReady(gameRoom)) {
       return true;
     }
-    this.rankHandler.pushUserScore(
-      gameRoom,
-      new UserScoreDto(userResultDto.getUserId(), userResultDto.getScore())
-    );
+    this.rankHandler.pushUserScore(gameRoom, userScoreDto);
     return false;
   }
 
