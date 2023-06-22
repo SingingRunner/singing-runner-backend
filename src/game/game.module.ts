@@ -11,6 +11,7 @@ import { GameReplayEntity } from "./replay/entity/game.replay.entity";
 import { RankHandlerImpl } from "./rank/rank.handler.impl";
 import { GameReplayService } from "./replay/game.replay.service";
 import { RandomItemPolicy } from "./item/random.item.policy";
+import { GameResolver } from "./game.resolver";
 
 @Module({
   imports: [SongModule, TypeOrmModule.forFeature([GameReplayEntity])],
@@ -32,6 +33,7 @@ import { RandomItemPolicy } from "./item/random.item.policy";
       provide: "RankHandler",
       useClass: RankHandlerImpl,
     },
+    GameResolver,
   ],
 })
 export class GameModule {}

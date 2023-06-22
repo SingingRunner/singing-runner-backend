@@ -1,25 +1,21 @@
 import {
   Args,
-  Context,
-  Field,
   Int,
+  Field,
   Mutation,
-  ObjectType,
   Resolver,
+  ObjectType,
 } from "@nestjs/graphql";
 import { GameService } from "./game.service";
 import { GameReplayService } from "./replay/game.replay.service";
 
 @ObjectType()
-class SaveReplay {
-  @Field(() => Int)
-  replayId: number;
-
-  @Field(() => Int)
-  status: number;
-
+class Reply {
   @Field(() => String)
   message: string;
+
+  @Field(() => Int)
+  code: number;
 }
 
 @Resolver()
@@ -29,18 +25,16 @@ export class GameResolver {
     private gameReplayService: GameReplayService
   ) {}
 
-  @Mutation(() => SaveReplay)
+  @Mutation(() => Reply)
   async saveReplay(
-    @Args("userId") userId: string,
-    @Args("userVocal") userVocal: Blob[],
-    @Context() context: any
-  ): Promise<SaveReplay> {
-    context;
+    @Args({ name: "userVocal", type: () => String })
+    userVocal: string,
+    @Args({ name: "userId", type: () => String }) userId: string
+  ): Promise<Reply> {
     await this.gameService.saveReplay(userId, userVocal);
     return {
-      replayId: 1,
-      status: 200,
-      message: "success",
+      message: "성공적으로 저장되었습니다.",
+      code: 200,
     };
   }
 }
