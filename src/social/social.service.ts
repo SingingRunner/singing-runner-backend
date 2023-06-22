@@ -42,7 +42,10 @@ export class SocialService {
     const social = new Social();
     social.user = user;
     social.friend = friend;
+    await this.socialRepository.save(social);
 
+    social.user = friend;
+    social.friend = user;
     await this.socialRepository.save(social);
   }
 
