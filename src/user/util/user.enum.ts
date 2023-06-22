@@ -1,10 +1,11 @@
 export enum userKeynoteStatus {
-  FEMALE_KEY,
-  MALE_KEY,
+  ORIGINAL_KEY = 0,
+  FEMALE_KEY = 1,
+  MALE_KEY = 2,
 }
 
 export enum userActiveStatus {
-  LOGOUT,
-  CONNECT,
-  IN_GAME,
+  CONNECT = 0,
+  LOGOUT = 1,
+  IN_GAME = 2,
 }
