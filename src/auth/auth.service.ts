@@ -15,6 +15,7 @@ import { Payload } from "./security/payload.interface";
 import { JwtService } from "@nestjs/jwt";
 import { characterEnum } from "../user/util/character.enum";
 import { Response } from "express";
+import { userActiveStatus } from "src/user/util/user.enum";
 
 @Injectable()
 export class AuthService {
@@ -93,6 +94,10 @@ export class AuthService {
       throw new UnauthorizedException("비밀번호가 틀렸습니다.");
     }
 
+    // 로그인 성공 시, 유저 userActive를 'Connect'(1)로 변경
+    userFind.userActive = userActiveStatus.CONNECT;
+    await this.userService.saveUser(userFind);
+
     const payload: Payload = {
       userId: userFind.userId,
       userEmail: userFind.userEmail,
@@ -148,7 +153,8 @@ export class AuthService {
   async logout(user: User): Promise<string> {
     try {
       user.refreshToken = null;
-      await this.userService.updateRefreshToken(user.userId, null);
+      user.userActive = userActiveStatus.LOGOUT;
+      await this.userService.saveUser(user);
       return "로그아웃 성공";
     } catch (err) {
       throw new Error("로그아웃 실패");
