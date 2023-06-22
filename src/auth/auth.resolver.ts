@@ -65,12 +65,22 @@ export class AuthResolver {
     private userService: UserService
   ) {}
 
-  @Mutation(() => User)
-  async registerUser(@Args("newUser") newUser: UserRegisterDto): Promise<User> {
+  @Mutation(() => Auth)
+  async registerUser(
+    @Args("newUser") newUser: UserRegisterDto,
+    @Context() context: any
+  ): Promise<Auth> {
     if (!newUser) {
       throw new Error("데이터가 없습니다.");
     }
-    return await this.authService.registerUser(newUser);
+    const registeredUser = await this.authService.registerUser(newUser);
+
+    const userLoginDto = new UserLoginDto();
+    userLoginDto.userEmail = registeredUser.userEmail;
+    userLoginDto.password = newUser.password;
+
+    // 자동으로 로그인 되도록 함
+    return await this.loginUser(userLoginDto, context);
   }
 
   @Mutation(() => Auth)
