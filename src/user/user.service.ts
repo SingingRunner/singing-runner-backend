@@ -1,9 +1,12 @@
+import { UserGameDto } from "src/user/dto/user.game.dto";
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { UserRegisterDto } from "./dto/user.register.dto";
 import { FindOneOptions, Like, Repository } from "typeorm";
 import { User } from "./entity/user.entity";
 import * as bcrypt from "bcrypt";
+import { UserGameDto } from "./dto/user.game.dto";
+import { userActiveStatus } from "./util/user.enum";
 
 @Injectable()
 export class UserService {
@@ -54,6 +57,19 @@ export class UserService {
       skip: skip,
     });
     return searchResult;
+  }
+
+  public async updateUserActive(
+    userGameDto: UserGameDto,
+    userActive: userActiveStatus
+  ) {
+    const userId: string = userGameDto.getUserMatchDto().userId;
+    const user: User | null = await this.findUserById(userId);
+    if (user === null) {
+      throw new Error("게임룸에 등록되지 않은 유저가 있습니다.");
+    }
+    user.userActive = userActive;
+    this.update(user);
   }
 
   async saveUser(user: User): Promise<User> {
