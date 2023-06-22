@@ -15,6 +15,7 @@ import { UserLoginDto } from "../user/dto/user.login.dto";
 import { User } from "../user/entity/user.entity";
 import { GqlAuthAccessGuard } from "./security/auth.guard";
 import { UserContext } from "src/commons/context";
+import { UserService } from "src/user/user.service";
 
 @ObjectType()
 class AuthUser {
@@ -61,7 +62,10 @@ class Token {
 
 @Resolver()
 export class AuthResolver {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private userService: UserService
+  ) {}
 
   @Mutation(() => User)
   async registerUser(@Args("newUser") newUser: UserRegisterDto): Promise<User> {
@@ -98,7 +102,7 @@ export class AuthResolver {
 
   @UseGuards(GqlAuthAccessGuard)
   @Query(() => AuthUser)
-  fetchUser(@Context() context: UserContext): AuthUser {
+  tempFetchUser(@Context() context: UserContext): AuthUser {
     console.log("================");
     console.log(context.req.user);
     console.log("================");
@@ -115,6 +119,26 @@ export class AuthResolver {
     authUser.userMmr = context.req.user.userMmr ?? 0;
     authUser.userPoint = context.req.user.userPoint ?? 0;
     authUser.character = context.req.user.character ?? "beluga";
+
+    return authUser;
+  }
+
+  @Query(() => AuthUser)
+  async realFetchUser(@Args("userId") userId: string): Promise<AuthUser> {
+    const user = await this.userService.findUserById(userId);
+    if (!user) {
+      throw new UnauthorizedException("유저 정보가 없습니다.");
+    }
+
+    const authUser = new AuthUser();
+    authUser.userId = user.userId ?? "No User ID";
+    authUser.userEmail = user.userEmail ?? "No User Email";
+    authUser.nickname = user.nickname ?? "No Nickname";
+    authUser.userActive = user.userActive ?? 0;
+    authUser.userKeynote = user.userKeynote ?? 0;
+    authUser.userMmr = user.userMmr ?? 0;
+    authUser.userPoint = user.userPoint ?? 0;
+    authUser.character = user.character ?? "beluga";
 
     return authUser;
   }
