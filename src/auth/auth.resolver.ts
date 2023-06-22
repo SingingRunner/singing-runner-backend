@@ -81,17 +81,7 @@ export class AuthResolver {
     authUser.userPoint = context.req.user.userPoint ?? 0;
     authUser.character = context.req.user.character ?? "beluga";
 
-    if (authUser.userMmr < 2000) {
-      authUser.userTier = "BRONZE";
-    } else if (authUser.userMmr < 3000) {
-      authUser.userTier = "SILVER";
-    } else if (authUser.userMmr < 4000) {
-      authUser.userTier = "GOLD";
-    } else if (authUser.userMmr < 5000) {
-      authUser.userTier = "PLATINUM";
-    } else {
-      authUser.userTier = "DIAMOND";
-    }
+    authUser.userTier = this.userService.determineUserTier(authUser.userMmr);
 
     return authUser;
   }
@@ -114,17 +104,7 @@ export class AuthResolver {
     authUser.userPoint = user.userPoint ?? 0;
     authUser.character = user.character ?? "beluga";
 
-    if (authUser.userMmr < 2000) {
-      authUser.userTier = "BRONZE";
-    } else if (authUser.userMmr < 3000) {
-      authUser.userTier = "SILVER";
-    } else if (authUser.userMmr < 4000) {
-      authUser.userTier = "GOLD";
-    } else if (authUser.userMmr < 5000) {
-      authUser.userTier = "PLATINUM";
-    } else {
-      authUser.userTier = "DIAMOND";
-    }
+    authUser.userTier = this.userService.determineUserTier(authUser.userMmr);
 
     return authUser;
   }
