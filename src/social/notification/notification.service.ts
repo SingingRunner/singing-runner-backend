@@ -50,6 +50,7 @@ export class NotificationService {
         where: [{ userId: userId }, { deletedAt: notDeleted }],
         take: take,
         skip: skip,
+        relations: ["sender"],
         order: { receivedAt: "DESC" },
       });
     return searchResult;

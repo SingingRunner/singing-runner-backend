@@ -11,6 +11,7 @@ import { UserMatchTier } from "src/game/utill/game.enum";
 import { User } from "src/user/entity/user.entity";
 import { Invite } from "./invite/invite";
 import { UserNotification } from "./notification/user.notification.entitiy";
+import { RequestDto } from "./dto/request-dto";
 
 @Injectable()
 export class SocialService {
@@ -180,7 +181,11 @@ export class SocialService {
     userId: string,
     page: number
   ): Promise<UserNotification[]> {
-    return await this.notificationService.getNotifications(userId, page);
+    const notifications = await this.notificationService.getNotifications(
+      userId,
+      page
+    );
+    return notifications;
   }
 
   public delay(ms: number) {

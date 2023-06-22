@@ -5,8 +5,8 @@ import { User } from "src/user/entity/user.entity";
 import { FriendDto } from "src/user/dto/friend.dto";
 import { HostUserDto } from "src/user/dto/host-user.dto";
 import { PollingDto } from "./dto/polling.dto";
-import { UserNotification } from "./notification/user.notification.entitiy";
 import { NotificationDto } from "./dto/notification.dto";
+import { RequestDto } from "./dto/request-dto";
 
 @Resolver()
 export class SocialResolver {
@@ -27,12 +27,22 @@ export class SocialResolver {
 
     return pollingDto;
   }
-  @Query(() => [UserNotification])
+  @Query(() => [RequestDto])
   async getNotification(
     @Args("userId") userId: string,
     @Args("page") page: number
   ) {
-    return this.socialService.getNotification(userId, page);
+    const notifications = await this.socialService.getNotification(
+      userId,
+      page
+    );
+    const requestDtoList: RequestDto[] = [];
+    for (const notification of notifications) {
+      requestDtoList.push(
+        new RequestDto(notification.senderId, notification.sender.nickname)
+      );
+    }
+    return requestDtoList;
   }
 
   @Query(() => [User])
