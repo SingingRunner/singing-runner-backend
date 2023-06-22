@@ -1,3 +1,4 @@
+import { UserService } from "src/user/user.service";
 import { GameRoomHandler } from "./room/game.room.handler";
 import { Inject, Injectable } from "@nestjs/common";
 import { Socket } from "socket.io";
@@ -14,6 +15,7 @@ import { GameReplayService } from "./replay/game.replay.service";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { User } from "src/user/entity/user.entity";
+import { userActiveStatus } from "src/user/util/user.enum";
 
 @Injectable()
 export class GameService {
@@ -24,6 +26,7 @@ export class GameService {
     @Inject("RankHandler")
     private rankHandler: RankHandler,
     private gameReplayService: GameReplayService,
+    private userService: UserService,
     @InjectRepository(User)
     private userRepository: Repository<User>
   ) {}
@@ -85,9 +88,26 @@ export class GameService {
     return false;
   }
 
-  public caculateRank(user: Socket): GameTerminatedDto[] {
+  public calculateRank(user: Socket): GameTerminatedDto[] {
     const gameRoom: GameRoom = this.gameRoomHandler.findRoomBySocket(user);
-    return this.rankHandler.calculateRank(gameRoom);
+    const gameTerminatedList = this.rankHandler.calculateRank(gameRoom);
+    return gameTerminatedList;
+  }
+
+  public setNickname(user: Socket, gameTerminatedDto: GameTerminatedDto) {
+    const gameRoom: GameRoom = this.gameRoomHandler.findRoomBySocket(user);
+    const userList: UserGameDto[] =
+      this.gameRoomHandler.findUsersInRoom(gameRoom);
+    for (const user of userList) {
+      if (user.getUserMatchDto().userId === gameTerminatedDto.getUserId()) {
+        gameTerminatedDto.setNickname(user.getUserMatchDto().nickname);
+        return;
+      }
+    }
+  }
+
+  public updateUserActive(userId: string, userActive: userActiveStatus) {
+    this.userService.updateUserActive(userId, userActive);
   }
 
   public async saveReplay(userId: string, userVocal: string) {

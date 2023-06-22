@@ -1,8 +1,8 @@
 import { Injectable } from "@nestjs/common";
 import { GameRoom } from "../room/game.room";
 import { UserScoreDto } from "./dto/user-score.dto";
-import { GameTerminatedDto } from "./game-terminated.dto";
 import { RankHandler } from "./rank.hanlder";
+import { GameTerminatedDto } from "./game-terminated.dto";
 
 @Injectable()
 export class RankHandlerImpl implements RankHandler {
@@ -38,8 +38,8 @@ export class RankHandlerImpl implements RankHandler {
     if (userScoreList == undefined) {
       throw new Error("game room is undefined or null");
     }
-    const gameTerminatedList: GameTerminatedDto[] = [];
 
+    const gameTerminatedList: GameTerminatedDto[] = [];
     gameTerminatedList.push(
       new GameTerminatedDto(
         userScoreList[0].getUserId(),

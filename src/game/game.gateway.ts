@@ -19,9 +19,7 @@ import { UserScoreDto } from "./rank/dto/user-score.dto";
 import { GameTerminatedDto } from "./rank/game-terminated.dto";
 import { CustomModeService } from "./custom-mode/custom.mode.service";
 import { GameSongDto } from "src/song/dto/game-song.dto";
-import { UserService } from "src/user/user.service";
 import { userActiveStatus } from "src/user/util/user.enum";
-import { subscribe } from "diagnostics_channel";
 
 /**
  * webSocket 통신을 담당하는 Handler
@@ -35,8 +33,7 @@ export class GameGateway
   constructor(
     private matchService: MatchService,
     private gameService: GameService,
-    private customModeService: CustomModeService,
-    private userService: UserService
+    private customModeService: CustomModeService
   ) {}
 
   afterInit(server: Server) {
@@ -63,6 +60,7 @@ export class GameGateway
   async matchMakingData(@ConnectedSocket() user: Socket, @MessageBody() data) {
     console.log("matchmaking connect");
     const message = "match_making";
+    console.log("matchMaking", data);
     if (!data.accept) {
       this.matchService.matchCancel(user);
       return;
@@ -111,7 +109,7 @@ export class GameGateway
     if (this.gameService.isGameReady(user)) {
       const userIdList: string[] = this.gameService.findUsersIdInSameRoom(user);
       for (const userId of userIdList) {
-        this.userService.updateUserActive(userId, userActiveStatus.IN_GAME);
+        this.gameService.updateUserActive(userId, userActiveStatus.IN_GAME);
       }
       this.broadCast(user, "game_ready", userIdList);
     }
@@ -161,13 +159,16 @@ export class GameGateway
       return;
     }
     const gameTermintaedList: GameTerminatedDto[] =
-      this.gameService.caculateRank(user);
+      this.gameService.calculateRank(user);
+
     for (const gameTerminatedDto of gameTermintaedList) {
-      this.userService.updateUserActive(
-        gameTerminatedDto.userId,
+      this.gameService.setNickname(user, gameTerminatedDto);
+      this.gameService.updateUserActive(
+        gameTerminatedDto.getUserId(),
         userActiveStatus.CONNECT
       );
     }
+
     this.broadCast(user, "game_terminated", gameTermintaedList);
   }
 

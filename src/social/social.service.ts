@@ -86,6 +86,7 @@ export class SocialService {
     }
     return userList;
   }
+
   public async searchFriend(
     userId: string,
     nickname: string,
