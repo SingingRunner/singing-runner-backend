@@ -37,6 +37,11 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+type Reply {
+  message: String!
+  code: Int!
+}
+
 type AuthUserDto {
   userId: String!
   userEmail: String!
@@ -58,7 +63,7 @@ type AuthTokenDto {
   accessToken: String!
 }
 
-type UserCharacterResponse {
+type UserCharacterResponseDto {
   userId: String!
   character: characterEnum!
 }
@@ -74,6 +79,11 @@ enum characterEnum {
   PUFFIN
 }
 
+type UserKeynoteResponseDto {
+  userId: String!
+  userKeynote: Int!
+}
+
 type Query {
   searchSong(keyword: String!, page: Int!): [GameSongDto!]!
   fetchUserGuard: AuthUserDto!
@@ -81,11 +91,13 @@ type Query {
 }
 
 type Mutation {
+  saveReplay(userVocal: String!, userId: String!): Reply!
   registerUser(newUser: UserRegisterDto!): AuthDto!
   loginUser(userLoginDto: UserLoginDto!): AuthDto!
   refreshAccessToken: AuthTokenDto!
   logout(userId: String!): String!
-  updateCharacter(userId: String!, character: String!): UserCharacterResponse!
+  updateCharacter(userId: String!, character: String!): UserCharacterResponseDto!
+  updateUserKeynote(userId: String!, keynote: KeynoteEnum!): UserKeynoteResponseDto!
 }
 
 input UserRegisterDto {
@@ -97,4 +109,10 @@ input UserRegisterDto {
 input UserLoginDto {
   userEmail: String!
   password: String!
+}
+
+enum KeynoteEnum {
+  Original
+  Male
+  Female
 }
