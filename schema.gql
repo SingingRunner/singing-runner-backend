@@ -63,15 +63,6 @@ type AuthTokenDto {
   accessToken: String!
 }
 
-
-type FriendDto {
-  userId: String!
-  nickname: String!
-  userActive: Int!
-  userMmr: Int!
-  character: String!
-  userTier: String!
-
 type UserCharacterResponseDto {
   userId: String!
   character: characterEnum!
@@ -91,7 +82,15 @@ enum characterEnum {
 type UserKeynoteResponseDto {
   userId: String!
   userKeynote: Int!
+}
 
+type FriendDto {
+  userId: String!
+  nickname: String!
+  userActive: Int!
+  userMmr: Int!
+  character: String!
+  userTier: String!
 }
 
 type Query {
@@ -114,13 +113,10 @@ type Mutation {
   loginUser(userLoginDto: UserLoginDto!): AuthDto!
   refreshAccessToken: AuthTokenDto!
   logout(userId: String!): String!
-
+  updateCharacter(userId: String!, character: String!): UserCharacterResponseDto!
+  updateUserKeynote(userId: String!, keynote: userKeynoteStatus!): UserKeynoteResponseDto!
   addFriend(addFriendDto: AddFriendDto!): String!
   removeFriend(addFriendDto: AddFriendDto!): String!
-
-  updateCharacter(userId: String!, character: String!): UserCharacterResponseDto!
-  updateUserKeynote(userId: String!, keynote: KeynoteEnum!): UserKeynoteResponseDto!
-
 }
 
 input UserRegisterDto {
@@ -134,8 +130,8 @@ input UserLoginDto {
   password: String!
 }
 
-enum KeynoteEnum {
-  Original
-  Male
-  Female
+enum userKeynoteStatus {
+  ORIGINAL_KEY
+  FEMALE_KEY
+  MALE_KEY
 }

@@ -3,17 +3,10 @@ import { SocialService } from "./social.service";
 import { Args, Mutation, Query, Resolver } from "@nestjs/graphql";
 import { User } from "src/user/entity/user.entity";
 import { FriendDto } from "src/user/dto/friend.dto";
+import { query } from "express";
 
 @Resolver()
 export class SocialResolver {
-  /**
-   * 친구추가(mutation)
-   * 친구삭제(mutation)
-   * 친구검색(query)
-   * 유저전체검색(query)
-   * 친구목록조회(query)
-   */
-
   constructor(private socialService: SocialService) {}
 
   @Query(() => [User])
@@ -62,4 +55,7 @@ export class SocialResolver {
     );
     return "ok";
   }
+
+  @Query()
+  
 }
