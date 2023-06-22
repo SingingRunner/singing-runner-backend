@@ -186,7 +186,9 @@ export class GameGateway
     @MessageBody() gameSongDto: GameSongDto
   ) {
     this.customModeService.setGameSong(user, gameSongDto);
+    this.broadCast(user, "set_song", gameSongDto);
   }
+
   private broadCast(user: Socket, message: string, responseData: any) {
     console.log("in broad cast : ", responseData);
     const gameRoom: GameRoom = this.matchService.findRoomBySocket(user);
