@@ -1,3 +1,4 @@
+import { PollingDto } from "./dto/polling.dto";
 import { HostUserDto } from "src/user/dto/host-user.dto";
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
@@ -9,6 +10,7 @@ import { FriendDto } from "src/user/dto/friend.dto";
 import { UserMatchTier } from "src/game/utill/game.enum";
 import { User } from "src/user/entity/user.entity";
 import { Invite } from "./invite/invite";
+import { UserNotification } from "./notification/user.notification.entitiy";
 
 @Injectable()
 export class SocialService {
@@ -19,6 +21,17 @@ export class SocialService {
     private readonly socialRepository: Repository<Social>,
     private invite: Invite
   ) {}
+
+  public async checkWhilePolling(userId: string): Promise<PollingDto> {
+    const pollingDto: PollingDto = new PollingDto();
+    if (await this.hasInvitation(userId)) {
+      pollingDto.hostUserDtoList = this.getAllInvitation(userId);
+    }
+    if (await this.hasNotification(userId)) {
+      pollingDto.userNotificationList = await this.getNotification(userId, 1);
+    }
+    return pollingDto;
+  }
 
   public async addFriend(userId: string, friendId: string) {
     const user = await this.userService.findUserById(userId);
@@ -141,5 +154,28 @@ export class SocialService {
 
   public inviteFriend(friendId: string, hostUserDto: HostUserDto) {
     this.invite.inviteFriend(friendId, hostUserDto);
+  }
+
+  private hasInvitation(userId: string): boolean {
+    return this.invite.hasInvitation(userId);
+  }
+
+  private getAllInvitation(userId: string): HostUserDto[] {
+    return this.getAllInvitation(userId);
+  }
+
+  private async getNotification(
+    userId: string,
+    page: number
+  ): Promise<UserNotification[]> {
+    return await this.getNotification(userId, page);
+  }
+
+  public delay(ms: number) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  private async hasNotification(userId: string): Promise<boolean> {
+    return await this.hasNotification(userId);
   }
 }
