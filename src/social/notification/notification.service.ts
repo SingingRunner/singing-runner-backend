@@ -12,7 +12,7 @@ export class Notification {
     private readonly userNotificationRepository: Repository<UserNotification>
   ) {}
 
-  public async addNotification(userId: string, senderId: string) {
+  public async addNotification(userId: string, senderId: string, date: Date) {
     const user = await this.userService.findUserById(userId);
     const sender = await this.userService.findUserById(senderId);
     if (user === null || sender === null) {
@@ -21,7 +21,7 @@ export class Notification {
     const notification = new UserNotification();
     notification.user = user;
     notification.sender = sender;
-
+    notification.receivedAt = date;
     await this.userNotificationRepository.save(notification);
   }
 
@@ -40,5 +40,17 @@ export class Notification {
 
     notification.deletedAt = date;
     await this.userNotificationRepository.save(notification);
+  }
+
+  public async searchNotification(userId: string, page: number) {
+    const take = 10;
+    const skip = (page - 1) * take;
+    const searchResult: UserNotification[] =
+      await this.userNotificationRepository.find({
+        where: [{ userId: userId }],
+        take: take,
+        skip: skip,
+      });
+    return searchResult;
   }
 }
