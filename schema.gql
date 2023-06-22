@@ -66,6 +66,7 @@ type Mutation {
   registerUser(newUser: UserRegisterDto!): Auth!
   loginUser(userLoginDto: UserLoginDto!): Auth!
   refreshAccessToken: Token!
+  logout(userId: String!): String!
 }
 
 input UserRegisterDto {

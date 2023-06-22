@@ -30,10 +30,9 @@ export class UserService {
     return Promise.resolve();
   }
 
-  // in UserService
   async updateRefreshToken(
     userId: string,
-    refreshToken: string
+    refreshToken: string | null
   ): Promise<void> {
     await this.userRepository.update(userId, { refreshToken });
   }
