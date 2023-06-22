@@ -14,8 +14,8 @@ import { UserRegisterDto } from "../user/dto/user.register.dto";
 import { UserLoginDto } from "../user/dto/user.login.dto";
 import { User } from "../user/entity/user.entity";
 import { GqlAuthAccessGuard } from "./security/auth.guard";
-import { UserContext } from "src/commons/context";
 import { UserService } from "src/user/user.service";
+import { UserContext } from "./auth.context";
 
 @ObjectType()
 class AuthUser {
