@@ -3,11 +3,13 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { UserService } from "src/user/user.service";
 import { Social } from "./entity/social.entity";
 import { Repository } from "typeorm";
+import { NotificationService } from "./notification/notification.service";
 
 @Injectable()
 export class SocialService {
   constructor(
     private userService: UserService,
+    private notificationService: NotificationService,
     @InjectRepository(Social)
     private readonly socialRepository: Repository<Social>
   ) {}
@@ -35,5 +37,10 @@ export class SocialService {
     }
     social.deletedAt = date;
     await this.socialRepository.save(social);
+  }
+
+  public async friendRequest(userId: string, senderId: string, date: Date) {
+    this.notificationService.addNotification(userId, senderId, date);
+    
   }
 }

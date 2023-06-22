@@ -5,7 +5,7 @@ import { Repository } from "typeorm";
 import { UserNotification } from "./user.notification.entitiy";
 
 @Injectable()
-export class Notification {
+export class NotificationService {
   constructor(
     private userService: UserService,
     @InjectRepository(UserNotification)
@@ -42,14 +42,16 @@ export class Notification {
     await this.userNotificationRepository.save(notification);
   }
 
-  public async searchNotification(userId: string, page: number) {
+  public async getNotifications(userId: string, page: number) {
     const take = 10;
     const skip = (page - 1) * take;
+
     const searchResult: UserNotification[] =
       await this.userNotificationRepository.find({
         where: [{ userId: userId }],
         take: take,
         skip: skip,
+        order: { receivedAt: "DESC" },
       });
     return searchResult;
   }
