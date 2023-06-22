@@ -54,4 +54,17 @@ describe("Invite", () => {
       expect(inviteQueue).not.toContain(host2);
     });
   });
+
+  describe("hasInvitation", () => {
+    it("초대를 받지 않은 유저", () => {
+      expect(invite.hasInvitation("boo")).toBe(false);
+    });
+
+    it("초대가 온 유저 ", () => {
+      const host = new HostUserDto("1", "민규리");
+
+      invite.inviteFriend("friend1", host);
+      expect(invite.hasInvitation("friend1")).toBe(true);
+    });
+  });
 });
