@@ -62,5 +62,18 @@ export class SocialResolver {
     @Args("hostUserDto") hostUserDto: HostUserDto
   ) {
     this.socialService.inviteFriend(friendId, hostUserDto);
+    return "ok";
+  }
+
+  @Mutation(() => String)
+  async friendRequest(userId: string, senderId: string) {
+    this.socialService.friendRequest(userId, senderId, new Date());
+    return "ok";
+  }
+
+  @Mutation(() => String)
+  async deleteNotification(userId: string, senderId: string) {
+    this.socialService.deleteNotification(userId, senderId, new Date());
+    return "ok";
   }
 }
