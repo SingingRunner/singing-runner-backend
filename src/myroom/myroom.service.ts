@@ -3,7 +3,7 @@ import { AuthService } from "src/auth/auth.service";
 import { User } from "src/user/entity/user.entity";
 import { UserService } from "src/user/user.service";
 import { characterEnum } from "src/user/util/character.enum";
-import { KeynoteEnum } from "src/user/util/keynote.enum";
+import { userKeynoteStatus } from "src/user/util/user.enum";
 
 @Injectable()
 export class MyroomService {
@@ -32,7 +32,10 @@ export class MyroomService {
     return await this.userService.saveUser(user);
   }
 
-  async updateUserKeynote(userId: string, keynote: KeynoteEnum): Promise<User> {
+  async updateUserKeynote(
+    userId: string,
+    keynote: userKeynoteStatus
+  ): Promise<User> {
     const user: User | null = await this.userService.findUserById(userId);
     if (!user) {
       throw new Error("해당하는 유저가 없습니다.");
