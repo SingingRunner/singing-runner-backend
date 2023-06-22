@@ -45,10 +45,10 @@ export class NotificationService {
   public async getNotifications(userId: string, page: number) {
     const take = 10;
     const skip = (page - 1) * take;
-
+    const deletedAtDate = new Date("1970-01-01");
     const searchResult: UserNotification[] =
       await this.userNotificationRepository.find({
-        where: [{ userId: userId }],
+        where: [{ userId: userId }, { deletedAt: deletedAtDate }],
         take: take,
         skip: skip,
         order: { receivedAt: "DESC" },

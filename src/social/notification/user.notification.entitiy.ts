@@ -23,6 +23,6 @@ export class UserNotification {
   @Column({ type: "datetime" })
   receivedAt: Date;
 
-  @Column({ type: "datetime" })
+  @Column({ type: "datetime", default: "1970-01-01" })
   deletedAt: Date;
 }
