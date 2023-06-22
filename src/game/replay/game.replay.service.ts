@@ -36,13 +36,15 @@ export class GameReplayService {
     );
   }
 
-  public async saveVocal(chunks: Blob[], filename: string): Promise<string> {
-    const filebuffer = new Blob(chunks, { type: "audio/wav" });
+  public async saveVocal(
+    filebase64: string,
+    filename: string
+  ): Promise<string> {
     const params = {
       Bucket: BUCKET_NAME,
-      Key: `${filename}.wav`,
-      Body: filebuffer,
-      ContentType: "audio/wav",
+      Key: `${filename}.txt`,
+      Body: filebase64,
+      ContentType: "text/plain",
     };
     s3.upload(params, (err, data) => {
       if (err) {
@@ -50,7 +52,7 @@ export class GameReplayService {
       }
       console.log(data);
     });
-    return `${BUCKET_URL}${filename}.wav`;
+    return `${BUCKET_URL}${filename}.txt`;
   }
 
   public async saveGameEvent(
