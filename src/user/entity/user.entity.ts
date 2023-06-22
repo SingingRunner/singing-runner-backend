@@ -48,7 +48,7 @@ export class User {
 
   @Field(() => String, { nullable: true })
   @Column({ type: "varchar", length: 255, nullable: true })
-  refreshToken?: string;
+  refreshToken?: string | null;
 
   @OneToMany(
     () => GameReplayEntity,
