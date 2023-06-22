@@ -18,6 +18,7 @@ import { UserGameDto } from "src/user/dto/user.game.dto";
 import { UserScoreDto } from "./rank/dto/user-score.dto";
 import { GameTerminatedDto } from "./rank/game-terminated.dto";
 import { CustomModeService } from "./custom-mode/custom.mode.service";
+import { GameSongDto } from "src/song/dto/game-song.dto";
 
 /**
  * webSocket 통신을 담당하는 Handler
@@ -179,6 +180,13 @@ export class GameGateway
     this.customModeService.createCustomRoom(user, userMatchDto);
   }
 
+  @SubscribeMessage("set_song")
+  setGameSong(
+    @ConnectedSocket() user: Socket,
+    @MessageBody() gameSongDto: GameSongDto
+  ) {
+    this.customModeService.setGameSong(user, gameSongDto);
+  }
   private broadCast(user: Socket, message: string, responseData: any) {
     console.log("in broad cast : ", responseData);
     const gameRoom: GameRoom = this.matchService.findRoomBySocket(user);
