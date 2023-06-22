@@ -19,5 +19,13 @@ export class SocialResolver {
     this.socialService.addFriend(addFriendDto.userId, addFriendDto.firendId);
   }
 
- 
+  @Mutation()
+  async removeFriend(@Args("addFriendDto") addFriendDto: AddFriendDto) {
+    const date = new Date();
+    this.socialService.removeFriend(
+      addFriendDto.userId,
+      addFriendDto.firendId,
+      date
+    );
+  }
 }
