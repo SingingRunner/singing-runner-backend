@@ -5,7 +5,7 @@ import { MyroomService } from "./myroom.service";
 import { characterEnum } from "src/user/util/character.enum";
 import { UserCharacterResponseDto } from "src/user/dto/user.character.response.dto";
 import { UserKeynoteResponseDto } from "src/user/dto/user.keynote.response.dto";
-import { KeynoteEnum } from "src/user/util/keynote.enum";
+import { userKeynoteStatus } from "src/user/util/user.enum";
 
 @Resolver()
 export class MyroomResolver {
@@ -46,7 +46,8 @@ export class MyroomResolver {
   @Mutation(() => UserKeynoteResponseDto)
   async updateUserKeynote(
     @Args("userId") userId: string,
-    @Args("keynote", { type: () => KeynoteEnum }) keynote: KeynoteEnum
+    @Args("keynote", { type: () => userKeynoteStatus })
+    keynote: userKeynoteStatus
   ): Promise<UserKeynoteResponseDto> {
     const updatedUser = await this.myroomService.updateUserKeynote(
       userId,
