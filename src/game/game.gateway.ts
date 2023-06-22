@@ -16,6 +16,7 @@ import { UserItemDto } from "./item/dto/user-item.dto";
 import { UserGameDto } from "src/user/dto/user.game.dto";
 import { UserScoreDto } from "./rank/dto/user-score.dto";
 import { GameTerminatedDto } from "./rank/game-terminated.dto";
+import { UserResultDto } from "./rank/dto/user-result.dto";
 
 /**
  * webSocket 통신을 담당하는 Handler
@@ -145,7 +146,7 @@ export class GameGateway
   @SubscribeMessage("game_terminated")
   gameTermintated(
     @ConnectedSocket() user: Socket,
-    @MessageBody() userScoreDto: UserScoreDto
+    @MessageBody() userResultDto: UserResultDto
   ) {
     /**
      * 게임종료시 gameRoom안에 인원이 전부(탈주자 예외처리)
@@ -153,7 +154,11 @@ export class GameGateway
      * 순위, mmr, userId 를 보내줘야함
      * + 게임이벤트 및 녹음정보를 각 user마다 DB에 저장.
      */
-    if (!this.gameService.allUsersTerminated(user, userScoreDto)) {
+    this.gameService.saveReplay(
+      userResultDto.getUserId(),
+      userResultDto.getUserVocal()
+    );
+    if (!this.gameService.allUsersTerminated(user, userResultDto)) {
       return;
     }
     const gameTermintaedList: GameTerminatedDto[] =

@@ -11,6 +11,7 @@ import { UserScoreDto } from "./rank/dto/user-score.dto";
 import { RankHandler } from "./rank/rank.hanlder";
 import { GameTerminatedDto } from "./rank/game-terminated.dto";
 import { GameReplayService } from "./replay/game.replay.service";
+import { UserResultDto } from "./rank/dto/user-result.dto";
 
 @Injectable()
 export class GameService {
@@ -66,7 +67,10 @@ export class GameService {
     return this.itemPolicy.getItems();
   }
 
-  public allUsersTerminated(user: Socket, userScoreDto: UserScoreDto): boolean {
+  public allUsersTerminated(
+    user: Socket,
+    userResultDto: UserResultDto
+  ): boolean {
     // 50/20/-10
     const gameRoom: GameRoom = this.gameRoomHandler.findRoomBySocket(user);
     this.gameRoomHandler.increaseAcceptCount(user);
@@ -76,7 +80,10 @@ export class GameService {
     if (this.gameRoomHandler.isGameRoomReady(gameRoom)) {
       return true;
     }
-    this.rankHandler.pushUserScore(gameRoom, userScoreDto);
+    this.rankHandler.pushUserScore(
+      gameRoom,
+      new UserScoreDto(userResultDto.getUserId(), userResultDto.getScore())
+    );
     return false;
   }
 
@@ -85,11 +92,8 @@ export class GameService {
     return this.rankHandler.calculateRank(gameRoom);
   }
 
-  public async saveReplay(
-    gameRoom: GameRoom,
-    userId: string,
-    userVocal: Blob[]
-  ) {
+  public async saveReplay(userId: string, userVocal: Blob[]) {
+    const gameRoom: GameRoom = this.gameRoomHandler.findRoomByUserId(userId);
     const songId = gameRoom.getGameSongDto().songId;
     const filename = `${userId}_${songId}_${new Date().getTime()}`;
     const gameEvent = gameRoom.getGameEvent();
