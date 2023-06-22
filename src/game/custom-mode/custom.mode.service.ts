@@ -18,6 +18,25 @@ export class CustomModeService {
     this.setRoomMaster(gameRoom, userMatchDto.userId);
   }
 
+  public leaveRoom(user: Socket, userMatchDto: UserMatchDto) {
+    const gameRoom: GameRoom = this.findRoomByUserId(userMatchDto.userId);
+    if (this.isRoomMaster(userMatchDto, gameRoom)) {
+      this.gameRoomHandler.deleteRoom(user);
+      return;
+    }
+    this.gameRoomHandler.leaveRoom(gameRoom, user);
+  }
+
+  private isRoomMaster(
+    userMatchDto: UserMatchDto,
+    gameRoom: GameRoom
+  ): boolean {
+    if (gameRoom.getRoomMaster() === userMatchDto.userId) {
+      return false;
+    }
+    return true;
+  }
+
   private createUserGameDto(
     user: Socket,
     userMatchDto: UserMatchDto

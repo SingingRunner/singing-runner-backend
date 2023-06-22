@@ -188,6 +188,14 @@ export class GameGateway
     this.customModeService.setGameSong(user, gameSongDto);
     this.broadCast(user, "set_song", gameSongDto);
   }
+  @SubscribeMessage("leave_room")
+  leaveRoom(
+    @ConnectedSocket() user: Socket,
+    @MessageBody() userMatchDto: UserMatchDto
+  ) {
+    this.broadCast(user, "leave_room", true);
+    this.customModeService.leaveRoom(user, userMatchDto);
+  }
 
   private broadCast(user: Socket, message: string, responseData: any) {
     console.log("in broad cast : ", responseData);
