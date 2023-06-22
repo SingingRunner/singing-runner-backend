@@ -50,6 +50,7 @@
     "graphql-codegen": "^0.4.0",
     "graphql-import": "^1.0.2",
     "graphql-tools": "^9.0.0",
+    "graphql-upload": "^13.0.0",
     "mysql2": "^3.3.5",
     "passport": "^0.6.0",
     "passport-jwt": "^4.0.1",
