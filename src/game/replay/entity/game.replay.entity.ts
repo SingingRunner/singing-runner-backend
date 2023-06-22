@@ -28,6 +28,9 @@ export class GameReplayEntity extends BaseEntity {
   @Column({ type: "tinyint", default: 0 })
   keynote: number;
 
+  @Column({ type: "tinyint", default: 0 })
+  isPublic: number;
+
   @ManyToOne(() => User)
   userId: string;
 
