@@ -1,6 +1,6 @@
 import { Test } from "@nestjs/testing";
 import { Invite } from "./invite";
-import { HostUserDto } from "src/auth/user/dto/host-user.dto";
+import { HostUserDto } from "src/user/dto/host-user.dto";
 
 describe("Invite", () => {
   let invite: Invite;

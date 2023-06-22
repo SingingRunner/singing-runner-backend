@@ -1,4 +1,4 @@
-import { characterEnum } from "../user/util/character.enum";
+import { characterEnum } from "../../user/util/character.enum";
 
 export interface Payload {
   userId: string;
