@@ -16,6 +16,7 @@ import { UserItemDto } from "./item/dto/user-item.dto";
 import { UserGameDto } from "src/user/dto/user.game.dto";
 import { UserScoreDto } from "./rank/dto/user-score.dto";
 import { GameTerminatedDto } from "./rank/game-terminated.dto";
+import { CustomModeService } from "./custom-mode/custom.mode.service";
 
 /**
  * webSocket 통신을 담당하는 Handler
@@ -28,7 +29,8 @@ export class GameGateway
 
   constructor(
     private matchService: MatchService,
-    private gameService: GameService
+    private gameService: GameService,
+    private customModeService: CustomModeService
   ) {}
 
   afterInit(server: Server) {

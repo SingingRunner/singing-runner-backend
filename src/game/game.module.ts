@@ -13,6 +13,7 @@ import { GameReplayService } from "./replay/game.replay.service";
 import { RandomItemPolicy } from "./item/random.item.policy";
 import { GameResolver } from "./game.resolver";
 import { User } from "src/user/entity/user.entity";
+import { CustomModeService } from "./custom-mode/custom.mode.service";
 
 @Module({
   imports: [SongModule, TypeOrmModule.forFeature([GameReplayEntity, User])],
@@ -21,6 +22,7 @@ import { User } from "src/user/entity/user.entity";
     MatchService,
     GameReplayService,
     GameRoomHandler,
+    CustomModeService,
     {
       provide: "MatchMakingPolicy",
       useClass: MMRMatchPolicy,
