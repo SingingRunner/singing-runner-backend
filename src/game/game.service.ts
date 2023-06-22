@@ -136,7 +136,7 @@ export class GameService {
     }
   }
 
-  private updateUserActive(userId: string, userActive: userActiveStatus) {
+  public updateUserActive(userId: string, userActive: userActiveStatus) {
     this.userService.updateUserActive(userId, userActive);
   }
 
