@@ -8,6 +8,7 @@ import { TypeORMConfig } from "./TypeORMConfig";
 import { AuthModule } from "./auth/auth.module";
 import { GraphQLModule } from "@nestjs/graphql";
 import { ApolloDriver } from "@nestjs/apollo";
+import { MyRoomModule } from "./myroom/myroom.module";
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { ApolloDriver } from "@nestjs/apollo";
     GameModule,
     SongModule,
     AuthModule,
+    MyRoomModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -6,14 +6,14 @@ import {
   Injectable,
   UnauthorizedException,
 } from "@nestjs/common";
-import { UserRegisterDto } from "./user/dto/user.register.dto";
-import { UserService } from "./user/user.service";
-import { UserLoginDto } from "./user/dto/user.login.dto";
-import { User } from "./user/entity/user.entity";
+import { UserRegisterDto } from "../user/dto/user.register.dto";
+import { UserService } from "../user/user.service";
+import { UserLoginDto } from "../user/dto/user.login.dto";
+import { User } from "../user/entity/user.entity";
 import * as bcrypt from "bcrypt";
 import { Payload } from "./security/payload.interface";
 import { JwtService } from "@nestjs/jwt";
-import { characterEnum } from "./user/util/character.enum";
+import { characterEnum } from "../user/util/character.enum";
 import { Response } from "express";
 
 @Injectable()
@@ -115,93 +115,9 @@ export class AuthService {
     const { refreshToken: _, ...userWithoutRefreshToken } = userFind;
 
     return {
-      accessToken: this.jwtService.sign(payload, { expiresIn: "1h" }),
+      accessToken: this.jwtService.sign(payload, { expiresIn: "2m" }),
       user: userWithoutRefreshToken as User,
     };
-  }
-
-  async validateUser(
-    UserLoginDto: UserLoginDto
-  ): Promise<{ accessToken: string; user: Omit<User, "refreshToken"> }> {
-    const userFind: User | null = await this.userService.findByFields({
-      where: { userEmail: UserLoginDto.userEmail },
-    });
-
-    if (!userFind) {
-      throw new UnauthorizedException("유저를 찾을 수 없습니다.");
-    }
-
-    const validatePassword = await bcrypt.compare(
-      UserLoginDto.password,
-      userFind.password
-    );
-
-    if (!validatePassword) {
-      throw new UnauthorizedException("비밀번호가 틀렸습니다.");
-    }
-
-    const payload: Payload = {
-      userId: userFind.userId,
-      userEmail: userFind.userEmail,
-      nickname: userFind.nickname,
-      userActive: userFind.userActive,
-      userKeynote: userFind.userKeynote,
-      userMmr: userFind.userMmr,
-      userPoint: userFind.userPoint,
-      character: userFind.character,
-    };
-
-    const { refreshToken: _, ...userWithoutRefreshToken } = userFind;
-
-    return {
-      accessToken: this.jwtService.sign(payload, { expiresIn: "1h" }),
-      user: userWithoutRefreshToken as User,
-    };
-  }
-
-  async createRefreshToken(userLoginDto: UserLoginDto): Promise<string> {
-    const userFind: User | null = await this.userService.findByFields({
-      where: { userEmail: userLoginDto.userEmail },
-    });
-
-    if (!userFind) {
-      throw new UnauthorizedException("유저를 찾을 수 없습니다.");
-    }
-
-    const refreshToken: string = this.generateRefreshToken(userFind.userId);
-    userFind.refreshToken = refreshToken;
-    await this.userService.save(userFind);
-
-    return refreshToken;
-  }
-
-  async tokenValidateUser(payload: Payload): Promise<User> {
-    const userFind: User | null = await this.userService.findByFields({
-      where: { userEmail: payload.userEmail },
-    });
-
-    if (!userFind) {
-      throw new UnauthorizedException("유저를 찾을 수 없습니다.");
-    }
-
-    return userFind;
-  }
-
-  async validateToken(token: string): Promise<User> {
-    try {
-      const payload: Payload = this.jwtService.verify(token);
-      const userFind: User | null = await this.userService.findByFields({
-        where: { userEmail: payload.userEmail },
-      });
-
-      if (!userFind) {
-        throw new UnauthorizedException("유저를 찾을 수 없습니다.");
-      }
-
-      return userFind;
-    } catch (err) {
-      throw new UnauthorizedException("토큰이 유효하지 않습니다.");
-    }
   }
 
   async refreshAccessToken(token: string): Promise<{ accessToken: string }> {
@@ -224,6 +140,8 @@ export class AuthService {
       character: user.character,
     };
 
-    return { accessToken: this.jwtService.sign(payload) };
+    const accessToken = this.jwtService.sign(payload, { expiresIn: "2m" });
+
+    return { accessToken };
   }
 }

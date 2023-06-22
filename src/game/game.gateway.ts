@@ -13,7 +13,7 @@ import { MatchService } from "./match/match.service";
 import { GameService } from "./game.service";
 import { GameRoom } from "./room/game.room";
 import { UserItemDto } from "./item/dto/user-item.dto";
-import { UserGameDto } from "src/auth/user/dto/user.game.dto";
+import { UserGameDto } from "src/user/dto/user.game.dto";
 import { Item } from "./item/item.enum";
 import { UserScoreDto } from "./rank/dto/user-score.dto";
 import { GameTerminatedDto } from "./rank/game-terminated.dto";
@@ -122,9 +122,7 @@ export class GameGateway
   getItemData(@ConnectedSocket() user: Socket) {
     console.log("get item");
     const item = this.gameService.getItem();
-    if (item !== Item.NULL) {
-      this.broadCast(user, "get_item", item);
-    }
+    user.emit("get_item", item);
   }
 
   @SubscribeMessage("escape_item")

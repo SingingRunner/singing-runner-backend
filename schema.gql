@@ -37,6 +37,17 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+type AuthUser {
+  userId: String!
+  userEmail: String!
+  nickname: String!
+  userActive: Int!
+  userKeynote: Int!
+  userMmr: Int!
+  userPoint: Int!
+  character: String!
+}
+
 type Auth {
   accessToken: String!
   user: User!
@@ -48,13 +59,13 @@ type Token {
 
 type Query {
   searchSong(keyword: String!, page: Int!): [GameSongDto!]!
-  isAuthenticated(token: String!): String!
+  fetchUser: AuthUser!
 }
 
 type Mutation {
   registerUser(newUser: UserRegisterDto!): User!
   loginUser(userLoginDto: UserLoginDto!): Auth!
-  getRefreshToken(userLoginDto: UserLoginDto!): Token!
+  refreshAccessToken: Token!
 }
 
 input UserRegisterDto {

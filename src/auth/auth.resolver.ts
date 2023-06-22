@@ -1,4 +1,4 @@
-import { UseGuards } from "@nestjs/common";
+import { UnauthorizedException, UseGuards } from "@nestjs/common";
 import {
   Resolver,
   Query,
@@ -7,13 +7,42 @@ import {
   ObjectType,
   Field,
   Context,
+  Int,
 } from "@nestjs/graphql";
 import { AuthService } from "./auth.service";
-import { UserRegisterDto } from "./user/dto/user.register.dto";
-import { UserLoginDto } from "./user/dto/user.login.dto";
-import { AuthGuard } from "@nestjs/passport";
-import { User } from "./user/entity/user.entity";
-import { UserService } from "./user/user.service";
+import { UserRegisterDto } from "../user/dto/user.register.dto";
+import { UserLoginDto } from "../user/dto/user.login.dto";
+import { User } from "../user/entity/user.entity";
+import { GqlAuthAccessGuard } from "./security/auth.guard";
+import { UserContext } from "src/commons/context";
+
+@ObjectType()
+class AuthUser {
+  // Define the fields that you want to return to the client
+  @Field(() => String)
+  userId: string;
+
+  @Field(() => String)
+  userEmail: string;
+
+  @Field(() => String)
+  nickname: string;
+
+  @Field(() => Int)
+  userActive: number;
+
+  @Field(() => Int)
+  userKeynote: number;
+
+  @Field(() => Int)
+  userMmr: number;
+
+  @Field(() => Int)
+  userPoint: number;
+
+  @Field(() => String)
+  character: string;
+}
 
 @ObjectType()
 class Auth {
@@ -32,10 +61,7 @@ class Token {
 
 @Resolver()
 export class AuthResolver {
-  constructor(
-    private authService: AuthService,
-    private userService: UserService
-  ) {}
+  constructor(private authService: AuthService) {}
 
   @Mutation(() => User)
   async registerUser(@Args("newUser") newUser: UserRegisterDto): Promise<User> {
@@ -64,39 +90,32 @@ export class AuthResolver {
   }
 
   @Mutation(() => Token)
-  async getRefreshToken(
-    @Args("userLoginDto") userLoginDto: UserLoginDto
-  ): Promise<Token> {
-    const { user } = await this.authService.validateUser(userLoginDto);
-    const refreshToken = this.authService.generateRefreshToken(user.userId);
-
-    await this.userService.updateRefreshToken(user.userId, refreshToken);
-
-    return { accessToken: refreshToken };
+  async refreshAccessToken(@Context() context: any): Promise<Token> {
+    const refreshToken = context.req.cookies["refreshToken"];
+    const accessToken = await this.authService.refreshAccessToken(refreshToken);
+    return { accessToken: accessToken.accessToken };
   }
 
-  // @Mutation(() => Token)
-  // async refreshAccessToken(
-  //   @Args("refreshToken") refreshToken: string
-  // ): Promise<Token> {
-  //   const accessToken = await this.authService.refreshAccessToken(refreshToken);
-  //   return { accessToken: accessToken.accessToken };
-  // }
+  @UseGuards(GqlAuthAccessGuard)
+  @Query(() => AuthUser)
+  fetchUser(@Context() context: UserContext): AuthUser {
+    console.log("================");
+    console.log(context.req.user);
+    console.log("================");
 
-  // @Mutation(() => Token)
-  // async getNewRefreshToken(
-  //   @Args("accessToken") accessToken: string
-  // ): Promise<Token> {
-  //   const user = await this.authService.validateToken(accessToken);
-  //   const refreshToken = this.authService.generateRefreshToken(user.userId);
-  //   await this.userService.updateRefreshToken(user.userId, refreshToken);
-  //   return { accessToken: refreshToken };
-  // }
+    const authUser = new AuthUser();
+    if (!context.req.user) {
+      throw new UnauthorizedException("유저 정보가 없습니다.");
+    }
+    authUser.userId = context.req.user.userId ?? "No User ID";
+    authUser.userEmail = context.req.user.userEmail ?? "No User Email";
+    authUser.nickname = context.req.user.nickname ?? "No Nickname";
+    authUser.userActive = context.req.user.userActive ?? 0;
+    authUser.userKeynote = context.req.user.userKeynote ?? 0;
+    authUser.userMmr = context.req.user.userMmr ?? 0;
+    authUser.userPoint = context.req.user.userPoint ?? 0;
+    authUser.character = context.req.user.character ?? "beluga";
 
-  @Query(() => String)
-  @UseGuards(AuthGuard("jwt"))
-  isAuthenticated(@Args("token") token: string) {
-    const user = this.authService.validateToken(token);
-    return user;
+    return authUser;
   }
 }

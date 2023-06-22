@@ -1,5 +1,5 @@
 import { Socket } from "socket.io";
-import { UserGameDto } from "src/auth/user/dto/user.game.dto";
+import { UserGameDto } from "src/user/dto/user.game.dto";
 
 export interface MatchMakingPolicy {
   joinQueue(userGameDto: UserGameDto);

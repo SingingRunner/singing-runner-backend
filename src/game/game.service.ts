@@ -2,7 +2,7 @@ import { GameRoomHandler } from "./room/game.room.handler";
 import { Inject, Injectable } from "@nestjs/common";
 import { Socket } from "socket.io";
 import { GameRoom } from "./room/game.room";
-import { UserGameDto } from "src/auth/user/dto/user.game.dto";
+import { UserGameDto } from "src/user/dto/user.game.dto";
 import { ItemPolicy } from "./item/item.policy";
 import { GameSongDto } from "src/song/dto/game-song.dto";
 import { CreateReplayInput } from "./replay/dto/create-replay.input";
