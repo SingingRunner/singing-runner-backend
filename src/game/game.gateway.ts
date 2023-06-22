@@ -21,6 +21,7 @@ import { CustomModeService } from "./custom-mode/custom.mode.service";
 import { GameSongDto } from "src/song/dto/game-song.dto";
 import { UserService } from "src/user/user.service";
 import { userActiveStatus } from "src/user/util/user.enum";
+import { subscribe } from "diagnostics_channel";
 
 /**
  * webSocket 통신을 담당하는 Handler
@@ -206,6 +207,11 @@ export class GameGateway
   ) {
     this.broadCast(user, "leave_room", true);
     this.customModeService.leaveRoom(user, userMatchDto);
+  }
+
+  @SubscribeMessage("custom_start")
+  startCustom(@ConnectedSocket() user: Socket) {
+    this.broadCast(user, "custom_start", true);
   }
 
   private broadCast(user: Socket, message: string, responseData: any) {
