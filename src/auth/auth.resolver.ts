@@ -1,4 +1,4 @@
-import { UnauthorizedException, UseGuards } from "@nestjs/common";
+import { UnauthorizedException } from "@nestjs/common";
 import {
   Resolver,
   Query,
@@ -13,9 +13,7 @@ import { AuthService } from "./auth.service";
 import { UserRegisterDto } from "../user/dto/user.register.dto";
 import { UserLoginDto } from "../user/dto/user.login.dto";
 import { User } from "../user/entity/user.entity";
-import { GqlAuthAccessGuard } from "./security/auth.guard";
 import { UserService } from "src/user/user.service";
-import { UserContext } from "./auth.context";
 
 @ObjectType()
 class AuthUser {
@@ -100,31 +98,32 @@ export class AuthResolver {
     return { accessToken: accessToken.accessToken };
   }
 
-  @UseGuards(GqlAuthAccessGuard)
+  // 추수 인증 기능 수정 필요
+  // @UseGuards(GqlAuthAccessGuard)
+  // @Query(() => AuthUser)
+  // fetchUser(@Context() context: UserContext): AuthUser {
+  //   console.log("================");
+  //   console.log(context.req.user);
+  //   console.log("================");
+
+  //   const authUser = new AuthUser();
+  //   if (!context.req.user) {
+  //     throw new UnauthorizedException("유저 정보가 없습니다.");
+  //   }
+  //   authUser.userId = context.req.user.userId ?? "No User ID";
+  //   authUser.userEmail = context.req.user.userEmail ?? "No User Email";
+  //   authUser.nickname = context.req.user.nickname ?? "No Nickname";
+  //   authUser.userActive = context.req.user.userActive ?? 0;
+  //   authUser.userKeynote = context.req.user.userKeynote ?? 0;
+  //   authUser.userMmr = context.req.user.userMmr ?? 0;
+  //   authUser.userPoint = context.req.user.userPoint ?? 0;
+  //   authUser.character = context.req.user.character ?? "beluga";
+
+  //   return authUser;
+  // }
+
   @Query(() => AuthUser)
-  tempFetchUser(@Context() context: UserContext): AuthUser {
-    console.log("================");
-    console.log(context.req.user);
-    console.log("================");
-
-    const authUser = new AuthUser();
-    if (!context.req.user) {
-      throw new UnauthorizedException("유저 정보가 없습니다.");
-    }
-    authUser.userId = context.req.user.userId ?? "No User ID";
-    authUser.userEmail = context.req.user.userEmail ?? "No User Email";
-    authUser.nickname = context.req.user.nickname ?? "No Nickname";
-    authUser.userActive = context.req.user.userActive ?? 0;
-    authUser.userKeynote = context.req.user.userKeynote ?? 0;
-    authUser.userMmr = context.req.user.userMmr ?? 0;
-    authUser.userPoint = context.req.user.userPoint ?? 0;
-    authUser.character = context.req.user.character ?? "beluga";
-
-    return authUser;
-  }
-
-  @Query(() => AuthUser)
-  async realFetchUser(@Args("userId") userId: string): Promise<AuthUser> {
+  async fetchUser(@Args("userId") userId: string): Promise<AuthUser> {
     const user = await this.userService.findUserById(userId);
     if (!user) {
       throw new UnauthorizedException("유저 정보가 없습니다.");
