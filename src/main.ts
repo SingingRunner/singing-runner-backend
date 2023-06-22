@@ -1,6 +1,7 @@
 import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./app.module";
 import { IoAdapter } from "@nestjs/platform-socket.io";
+import { graphqlUploadExpress } from "graphql-upload";
 import cookieParser from "cookie-parser";
 
 class MyIoAdapter extends IoAdapter {
@@ -19,7 +20,7 @@ class MyIoAdapter extends IoAdapter {
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.use(cookieParser());
-
+  app.use(graphqlUploadExpress());
   app.useWebSocketAdapter(new MyIoAdapter(app));
   app.enableCors({
     origin: true,
