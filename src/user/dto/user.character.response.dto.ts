@@ -1,8 +1,8 @@
 import { Field, ObjectType } from "@nestjs/graphql";
-import { characterEnum } from "./character.enum";
+import { characterEnum } from "../util/character.enum";
 
 @ObjectType()
-export class UserCharacterResponse {
+export class UserCharacterResponseDto {
   @Field()
   userId: string;
 
