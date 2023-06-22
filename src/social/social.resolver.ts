@@ -3,7 +3,7 @@ import { SocialService } from "./social.service";
 import { Args, Mutation, Query, Resolver } from "@nestjs/graphql";
 import { User } from "src/user/entity/user.entity";
 import { FriendDto } from "src/user/dto/friend.dto";
-import { query } from "express";
+import { HostUserDto } from "src/user/dto/host-user.dto";
 
 @Resolver()
 export class SocialResolver {
@@ -56,6 +56,11 @@ export class SocialResolver {
     return "ok";
   }
 
-  @Query()
-  
+  @Mutation(() => String)
+  async inviteFriend(
+    @Args("friendId") friendId: string,
+    @Args("hostUserDto") hostUserDto: HostUserDto
+  ) {
+    this.socialService.inviteFriend(friendId, hostUserDto);
+  }
 }

@@ -1,3 +1,4 @@
+import { HostUserDto } from "src/user/dto/host-user.dto";
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { UserService } from "src/user/user.service";
@@ -136,5 +137,9 @@ export class SocialService {
     date: Date
   ) {
     await this.notificationService.removeNotification(userId, senderId, date);
+  }
+
+  public inviteFriend(friendId: string, hostUserDto: HostUserDto) {
+    this.invite.inviteFriend(friendId, hostUserDto);
   }
 }
