@@ -29,7 +29,7 @@ export class SocialService {
       pollingDto.hostUserDtoList = this.getAllInvitation(userId);
     }
     if (await this.hasNotification(userId)) {
-      pollingDto.userNotificationList = await this.getNotification(userId, 1);
+      pollingDto.userNotificationList = await this.getNotifications(userId, 1);
     }
     return pollingDto;
   }
@@ -177,7 +177,7 @@ export class SocialService {
     return this.getAllInvitation(userId);
   }
 
-  public async getNotification(
+  public async getNotifications(
     userId: string,
     page: number
   ): Promise<UserNotification[]> {
@@ -186,6 +186,16 @@ export class SocialService {
       page
     );
     return notifications;
+  }
+
+  public getRequestDto(notifications: UserNotification[]): RequestDto[] {
+    const requestDtoList: RequestDto[] = [];
+    for (const notification of notifications) {
+      requestDtoList.push(
+        new RequestDto(notification.senderId, notification.sender.nickname)
+      );
+    }
+    return requestDtoList;
   }
 
   public delay(ms: number) {

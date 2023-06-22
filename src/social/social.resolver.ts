@@ -27,22 +27,18 @@ export class SocialResolver {
 
     return pollingDto;
   }
+
   @Query(() => [RequestDto])
   async getNotification(
     @Args("userId") userId: string,
     @Args("page") page: number
   ) {
-    const notifications = await this.socialService.getNotification(
+    const notifications = await this.socialService.getNotifications(
       userId,
       page
     );
-    const requestDtoList: RequestDto[] = [];
-    for (const notification of notifications) {
-      requestDtoList.push(
-        new RequestDto(notification.senderId, notification.sender.nickname)
-      );
-    }
-    return requestDtoList;
+
+    return this.socialService.getRequestDto(notifications);
   }
 
   @Query(() => [User])
