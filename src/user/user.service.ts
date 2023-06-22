@@ -1,11 +1,9 @@
-import { friendDto } from "src/user/dto/friend.dto";
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { UserRegisterDto } from "./dto/user.register.dto";
 import { FindOneOptions, Like, Repository } from "typeorm";
 import { User } from "./entity/user.entity";
 import * as bcrypt from "bcrypt";
-import { UserMatchTier } from "src/game/utill/game.enum";
 
 @Injectable()
 export class UserService {

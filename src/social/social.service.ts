@@ -21,7 +21,7 @@ export class SocialService {
     const user = await this.userService.findUserById(userId);
     const friend = await this.userService.findUserById(friendId);
     if (user === null || friend === null) {
-      throw new Error("등록되지 않은 유저 또는 친구입니다");
+      throw new Error("등록되지 않은 유저 입니다");
     }
     const social = new Social();
     social.user = user;
@@ -95,5 +95,13 @@ export class SocialService {
 
   public async friendRequest(userId: string, senderId: string, date: Date) {
     this.notificationService.addNotification(userId, senderId, date);
+  }
+
+  public async deleteNotification(
+    userId: string,
+    senderId: string,
+    date: Date
+  ) {
+    this.notificationService.removeNotification(userId, senderId, date);
   }
 }
