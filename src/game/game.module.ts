@@ -5,7 +5,6 @@ import { GameRoomHandler } from "./room/game.room.handler";
 import { GameGateway } from "./game.gateway";
 import { MatchService } from "./match/match.service";
 import { SongModule } from "src/song/song.module";
-import { SimpleItemPolicy } from "./item/simple.item.policy";
 import { MMRMatchPolicy } from "./match/mmr.match.policy";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { GameReplayEntity } from "./replay/entity/game.replay.entity";
