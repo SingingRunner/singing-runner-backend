@@ -11,6 +11,7 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { GameReplayEntity } from "./replay/entity/game.replay.entity";
 import { RankHandlerImpl } from "./rank/rank.handler.impl";
 import { GameReplayService } from "./replay/game.replay.service";
+import { RandomItemPolicy } from "./item/random.item.policy";
 
 @Module({
   imports: [SongModule, TypeOrmModule.forFeature([GameReplayEntity])],
@@ -26,7 +27,7 @@ import { GameReplayService } from "./replay/game.replay.service";
     GameGateway,
     {
       provide: "ItemPolicy",
-      useClass: SimpleItemPolicy,
+      useClass: RandomItemPolicy,
     },
     {
       provide: "RankHandler",
