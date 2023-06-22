@@ -54,6 +54,7 @@ export class UserService {
       skip: skip,
     });
     return searchResult;
+  }
 
   async saveUser(user: User): Promise<User> {
     return this.userRepository.save(user);
@@ -71,6 +72,5 @@ export class UserService {
     } else {
       return "DIAMOND";
     }
-
   }
 }
