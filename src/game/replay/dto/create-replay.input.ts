@@ -1,9 +1,10 @@
 import { Field, InputType, Int } from "@nestjs/graphql";
+import { User } from "src/user/entity/user.entity";
 
 @InputType()
 export class CreateReplayInput {
-  @Field(() => String)
-  userId: string;
+  @Field(() => User)
+  userId: User;
 
   @Field(() => String)
   userCharacter: string;

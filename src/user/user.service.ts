@@ -54,5 +54,23 @@ export class UserService {
       skip: skip,
     });
     return searchResult;
+
+  async saveUser(user: User): Promise<User> {
+    return this.userRepository.save(user);
+  }
+
+  determineUserTier(userMmr: number): string {
+    if (userMmr < 2000) {
+      return "BRONZE";
+    } else if (userMmr < 3000) {
+      return "SILVER";
+    } else if (userMmr < 4000) {
+      return "GOLD";
+    } else if (userMmr < 5000) {
+      return "PLATINUM";
+    } else {
+      return "DIAMOND";
+    }
+
   }
 }

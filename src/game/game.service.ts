@@ -11,7 +11,9 @@ import { UserScoreDto } from "./rank/dto/user-score.dto";
 import { RankHandler } from "./rank/rank.hanlder";
 import { GameTerminatedDto } from "./rank/game-terminated.dto";
 import { GameReplayService } from "./replay/game.replay.service";
-import { UserResultDto } from "./rank/dto/user-result.dto";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
+import { User } from "src/user/entity/user.entity";
 
 @Injectable()
 export class GameService {
@@ -21,7 +23,9 @@ export class GameService {
     private itemPolicy: ItemPolicy,
     @Inject("RankHandler")
     private rankHandler: RankHandler,
-    private gameReplayService: GameReplayService
+    private gameReplayService: GameReplayService,
+    @InjectRepository(User)
+    private userRepository: Repository<User>
   ) {}
 
   public loadData(user: Socket) {
@@ -67,10 +71,7 @@ export class GameService {
     return this.itemPolicy.getItems();
   }
 
-  public allUsersTerminated(
-    user: Socket,
-    userResultDto: UserResultDto
-  ): boolean {
+  public allUsersTerminated(user: Socket, userScoreDto: UserScoreDto): boolean {
     // 50/20/-10
     const gameRoom: GameRoom = this.gameRoomHandler.findRoomBySocket(user);
     this.gameRoomHandler.increaseAcceptCount(user);
@@ -80,10 +81,7 @@ export class GameService {
     if (this.gameRoomHandler.isGameRoomReady(gameRoom)) {
       return true;
     }
-    this.rankHandler.pushUserScore(
-      gameRoom,
-      new UserScoreDto(userResultDto.getUserId(), userResultDto.getScore())
-    );
+    this.rankHandler.pushUserScore(gameRoom, userScoreDto);
     return false;
   }
 
@@ -92,15 +90,17 @@ export class GameService {
     return this.rankHandler.calculateRank(gameRoom);
   }
 
-  public async saveReplay(userId: string, userVocal: Blob[]) {
+  public async saveReplay(userId: string, userVocal: string) {
     const gameRoom: GameRoom = this.gameRoomHandler.findRoomByUserId(userId);
+    const user: User | null = await this.userRepository.findOne({
+      where: { userId: userId },
+    });
     const songId = gameRoom.getGameSongDto().songId;
     const filename = `${userId}_${songId}_${new Date().getTime()}`;
     const gameEvent = gameRoom.getGameEvent();
     const gameEventJson = JSON.stringify(gameEvent);
     const users = this.gameRoomHandler.findUsersInRoom(gameRoom);
 
-    let mainUser = users[0].getUserMatchDto().userId;
     let subUser1 = users[1].getUserMatchDto().userId;
     let subUser2 = users[2].getUserMatchDto().userId;
     let mainCharacter = users[0].getUserMatchDto().character;
@@ -110,7 +110,6 @@ export class GameService {
 
     users.forEach((user, i) => {
       if (user.getUserMatchDto().userId === userId) {
-        mainUser = user.getUserMatchDto().userId;
         userKeynote = user.getUserMatchDto().userKeynote;
         subUser1 = users[(i + 1) % 3].getUserMatchDto().userId;
         subUser2 = users[(i + 2) % 3].getUserMatchDto().userId;
@@ -130,8 +129,11 @@ export class GameService {
     );
     console.log(gameEventJson);
     // 같이 게임한 유저 정보 및 유저 캐릭터 정보도 추가해야함
+    if (user === null) {
+      return;
+    }
     const gameReplayEntity: CreateReplayInput = {
-      userId: mainUser,
+      userId: user,
       userCharacter: mainCharacter,
       songId: songId,
       userVocal: vocalUrl,

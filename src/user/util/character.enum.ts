@@ -1,3 +1,5 @@
+import { registerEnumType } from "@nestjs/graphql";
+
 export enum characterEnum {
   BELUGA = "beluga",
   PUMA = "puma",
@@ -8,3 +10,7 @@ export enum characterEnum {
   NARWHAL = "narwhal",
   PUFFIN = "puffin",
 }
+
+registerEnumType(characterEnum, {
+  name: "characterEnum",
+});
