@@ -151,36 +151,21 @@ export class GameGateway
   }
 
   @SubscribeMessage("game_terminated")
-  gameTermintated(
+  async gameTermintated(
     @ConnectedSocket() user: Socket,
     @MessageBody() userScoreDto: UserScoreDto
   ) {
     if (!this.gameService.allUsersTerminated(user, userScoreDto)) {
       return;
     }
+
     const gameTermintaedList: GameTerminatedDto[] =
       this.gameService.calculateRank(user);
 
     for (const gameTerminatedDto of gameTermintaedList) {
-      this.gameService.setNicknameSocket(user, gameTerminatedDto);
-      this.gameService.updateUserActive(
-        gameTerminatedDto.getUserId(),
-        userActiveStatus.CONNECT
-      );
-    }
-
-    for (const gameTerminatedDto of gameTermintaedList) {
-      const friendList = this.gameService.getFriendList(
-        gameTerminatedDto.getUserId()
-      );
-      for (const friend of friendList) {
-        friend == gameTerminatedDto.getUserId();
-        gameTerminatedDto.setIsFriend(true);
-      }
+      this.gameService.setGameTerminatedDto(user, gameTerminatedDto);
       gameTerminatedDto.getSocket().emit("game_terminated", gameTermintaedList);
     }
-
-    this.broadCast(user, "game_terminated", gameTermintaedList);
   }
 
   @SubscribeMessage("invite")

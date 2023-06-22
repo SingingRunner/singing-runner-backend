@@ -96,7 +96,26 @@ export class GameService {
     return gameTerminatedList;
   }
 
-  public setNicknameSocket(user: Socket, gameTerminatedDto: GameTerminatedDto) {
+  public async setGameTerminatedDto(
+    user: Socket,
+    gameTerminatedDto: GameTerminatedDto
+  ) {
+    this.setNicknameSocket(user, gameTerminatedDto);
+    this.updateUserActive(
+      gameTerminatedDto.getUserId(),
+      userActiveStatus.CONNECT
+    );
+    const friendList = await this.getFriendList(gameTerminatedDto.getUserId());
+    for (const friend of friendList) {
+      friend == gameTerminatedDto.getUserId();
+      gameTerminatedDto.setIsFriend(true);
+    }
+  }
+
+  private setNicknameSocket(
+    user: Socket,
+    gameTerminatedDto: GameTerminatedDto
+  ) {
     const gameRoom: GameRoom = this.gameRoomHandler.findRoomBySocket(user);
     const userList: UserGameDto[] =
       this.gameRoomHandler.findUsersInRoom(gameRoom);
@@ -111,11 +130,11 @@ export class GameService {
     }
   }
 
-  public updateUserActive(userId: string, userActive: userActiveStatus) {
+  private updateUserActive(userId: string, userActive: userActiveStatus) {
     this.userService.updateUserActive(userId, userActive);
   }
 
-  public async getFriendList(userId: string): Promise<string[]> {
+  private async getFriendList(userId: string): Promise<string[]> {
     return await this.socialService.getFriendList(userId);
   }
 
