@@ -44,4 +44,8 @@ export class UserService {
   async findUserById(userId: string): Promise<User | null> {
     return await this.userRepository.findOne({ where: { userId } });
   }
+
+  async saveUser(user: User): Promise<User> {
+    return this.userRepository.save(user);
+  }
 }

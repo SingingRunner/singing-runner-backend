@@ -63,7 +63,7 @@ export class AuthResolver {
   // 권한 부여된 유저만 접근 가능하도록 하는 fetchUser
   @UseGuards(GqlAuthAccessGuard)
   @Query(() => AuthUserDto)
-  fetchUserGuard(@Context() context: UserContext): AuthUserDto {
+  async fetchUserGuard(@Context() context: UserContext): Promise<AuthUserDto> {
     console.log("================");
     console.log(context.req.user);
     console.log("================");
