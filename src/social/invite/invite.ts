@@ -1,5 +1,4 @@
 import { Injectable } from "@nestjs/common";
-import { UnionDefinitionFactory } from "@nestjs/graphql/dist/schema-builder/factories/union-definition.factory";
 import { HostUserDto } from "src/user/dto/host-user.dto";
 
 @Injectable()

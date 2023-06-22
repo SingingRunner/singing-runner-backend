@@ -1,3 +1,4 @@
+import { describe } from "node:test";
 import { Test } from "@nestjs/testing";
 import { Invite } from "./invite";
 import { HostUserDto } from "src/user/dto/host-user.dto";
@@ -56,7 +57,7 @@ describe("Invite", () => {
   });
 
   describe("hasInvitation", () => {
-    it("초대를 받지 않은 유저", () => {
+    it("초대를 받지 못한 유저", () => {
       expect(invite.hasInvitation("boo")).toBe(false);
     });
 
@@ -65,6 +66,43 @@ describe("Invite", () => {
 
       invite.inviteFriend("friend1", host);
       expect(invite.hasInvitation("friend1")).toBe(true);
+    });
+  });
+
+  describe("getAllinvitation", () => {
+    it("초대리스트를 전부 반환", () => {
+      const host1 = new HostUserDto("1", "민규리1");
+      const host2 = new HostUserDto("2", "민규리2");
+      invite.inviteFriend("friend", host1);
+      invite.inviteFriend("friend", host2);
+
+      const invitationList: HostUserDto[] = invite.getAllInvitation("friend");
+
+      expect(invitationList[0].getNickname()).toBe("민규리1");
+      expect(invitationList[1].getNickname()).toBe("민규리2");
+    });
+
+    it("초대리스트 반환후 맵에서 삭제되어야함", () => {
+      const host1 = new HostUserDto("1", "민규리1");
+      const host2 = new HostUserDto("2", "민규리2");
+      invite.inviteFriend("friend", host1);
+      invite.inviteFriend("friend", host2);
+
+      invite.getAllInvitation("friend");
+
+      expect(invite.hasInvitation("friend")).toBe(false);
+    });
+
+    it("초대리스트 반환후 다시 초대가 올떄 맵이 생성되어야함", () => {
+      const host1 = new HostUserDto("1", "민규리1");
+      const host2 = new HostUserDto("2", "민규리2");
+      invite.inviteFriend("friend", host1);
+      invite.inviteFriend("friend", host2);
+
+      invite.getAllInvitation("friend");
+      invite.inviteFriend("friend", host1);
+
+      expect(invite.hasInvitation("friend")).toBe(true);
     });
   });
 });
