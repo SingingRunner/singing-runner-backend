@@ -59,7 +59,7 @@ type Token {
 
 type Query {
   searchSong(keyword: String!, page: Int!): [GameSongDto!]!
-  fetchUser: AuthUser!
+  fetchUser(userId: String!): AuthUser!
 }
 
 type Mutation {
