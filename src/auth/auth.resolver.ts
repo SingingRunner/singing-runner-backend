@@ -1,62 +1,12 @@
 import { UnauthorizedException } from "@nestjs/common";
-import {
-  Resolver,
-  Query,
-  Mutation,
-  Args,
-  ObjectType,
-  Field,
-  Context,
-  Int,
-} from "@nestjs/graphql";
+import { Resolver, Query, Mutation, Args, Context } from "@nestjs/graphql";
 import { AuthService } from "./auth.service";
 import { UserRegisterDto } from "../user/dto/user.register.dto";
 import { UserLoginDto } from "../user/dto/user.login.dto";
-import { User } from "../user/entity/user.entity";
 import { UserService } from "src/user/user.service";
-
-@ObjectType()
-class AuthUser {
-  // Define the fields that you want to return to the client
-  @Field(() => String)
-  userId: string;
-
-  @Field(() => String)
-  userEmail: string;
-
-  @Field(() => String)
-  nickname: string;
-
-  @Field(() => Int)
-  userActive: number;
-
-  @Field(() => Int)
-  userKeynote: number;
-
-  @Field(() => Int)
-  userMmr: number;
-
-  @Field(() => Int)
-  userPoint: number;
-
-  @Field(() => String)
-  character: string;
-}
-
-@ObjectType()
-class Auth {
-  @Field(() => String)
-  accessToken: string;
-
-  @Field(() => User)
-  user: User;
-}
-
-@ObjectType()
-class Token {
-  @Field(() => String)
-  accessToken: string;
-}
+import { AuthUserDto } from "./dto/auth.user.dto";
+import { AuthDto } from "./dto/auth.dto";
+import { AuthTokenDto } from "./dto/auth.token.dto";
 
 @Resolver()
 export class AuthResolver {
@@ -65,11 +15,11 @@ export class AuthResolver {
     private userService: UserService
   ) {}
 
-  @Mutation(() => Auth)
+  @Mutation(() => AuthDto)
   async registerUser(
     @Args("newUser") newUser: UserRegisterDto,
     @Context() context: any
-  ): Promise<Auth> {
+  ): Promise<AuthDto> {
     if (!newUser) {
       throw new Error("데이터가 없습니다.");
     }
@@ -83,11 +33,11 @@ export class AuthResolver {
     return await this.loginUser(userLoginDto, context);
   }
 
-  @Mutation(() => Auth)
+  @Mutation(() => AuthDto)
   async loginUser(
     @Args("userLoginDto") userLoginDto: UserLoginDto,
     @Context() context: any
-  ): Promise<Auth> {
+  ): Promise<AuthDto> {
     console.log(context);
 
     const jwt = await this.authService.validateUserAndSetCookie(
@@ -101,8 +51,8 @@ export class AuthResolver {
     };
   }
 
-  @Mutation(() => Token)
-  async refreshAccessToken(@Context() context: any): Promise<Token> {
+  @Mutation(() => AuthTokenDto)
+  async refreshAccessToken(@Context() context: any): Promise<AuthTokenDto> {
     const refreshToken = context.req.cookies["refreshToken"];
     const accessToken = await this.authService.refreshAccessToken(refreshToken);
     return { accessToken: accessToken.accessToken };
@@ -132,14 +82,14 @@ export class AuthResolver {
   //   return authUser;
   // }
 
-  @Query(() => AuthUser)
-  async fetchUser(@Args("userId") userId: string): Promise<AuthUser> {
+  @Query(() => AuthUserDto)
+  async fetchUser(@Args("userId") userId: string): Promise<AuthUserDto> {
     const user = await this.userService.findUserById(userId);
     if (!user) {
       throw new UnauthorizedException("유저 정보가 없습니다.");
     }
 
-    const authUser = new AuthUser();
+    const authUser = new AuthUserDto();
     authUser.userId = user.userId ?? "No User ID";
     authUser.userEmail = user.userEmail ?? "No User Email";
     authUser.nickname = user.nickname ?? "No Nickname";
@@ -148,6 +98,18 @@ export class AuthResolver {
     authUser.userMmr = user.userMmr ?? 0;
     authUser.userPoint = user.userPoint ?? 0;
     authUser.character = user.character ?? "beluga";
+
+    if (authUser.userMmr < 2000) {
+      authUser.userTier = "BRONZE";
+    } else if (authUser.userMmr < 3000) {
+      authUser.userTier = "SILVER";
+    } else if (authUser.userMmr < 4000) {
+      authUser.userTier = "GOLD";
+    } else if (authUser.userMmr < 5000) {
+      authUser.userTier = "PLATINUM";
+    } else {
+      authUser.userTier = "DIAMOND";
+    }
 
     return authUser;
   }
