@@ -17,6 +17,6 @@ export class Social {
   @JoinColumn({ name: "friendId" })
   friend: User;
 
-  @Column({ type: "datetime" })
+  @Column({ type: "datetime", default: "1970-01-01" })
   deletedAt: Date;
 }
