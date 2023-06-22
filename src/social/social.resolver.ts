@@ -1,7 +1,6 @@
-import { Query } from "@nestjs/common";
 import { AddFriendDto } from "./dto/add-friend.dto";
 import { SocialService } from "./social.service";
-import { Args, Mutation, Resolver } from "@nestjs/graphql";
+import { Args, Mutation, Query, Resolver } from "@nestjs/graphql";
 import { User } from "src/user/entity/user.entity";
 import { FriendDto } from "src/user/dto/friend.dto";
 
@@ -33,7 +32,9 @@ export class SocialResolver {
   }
 
   @Mutation(() => [User])
-  async searchFriend(@Args("addFriendDto") addFriendDto: AddFriendDto) {
+  async searchFriend(
+    @Args("addFriendDto") addFriendDto: AddFriendDto
+  ): Promise<User[]> {
     return await this.socialService.searchFriend(
       addFriendDto.userId,
       addFriendDto.firendId,
@@ -45,7 +46,15 @@ export class SocialResolver {
   async searchUser(
     @Args("nickname") nickname: string,
     @Args("page") page: number
-  ) {
+  ): Promise<FriendDto[]> {
     return await this.socialService.searchUser(nickname, page);
+  }
+
+  @Query(() => [FriendDto])
+  async getFriendList(
+    @Args("userId") userId: string,
+    @Args("page") page: number
+  ): Promise<FriendDto[]> {
+    return await this.socialService.getFriendList(userId, page);
   }
 }
