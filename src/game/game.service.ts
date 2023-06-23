@@ -159,22 +159,20 @@ export class GameService {
     user: Socket,
     gameTerminatedDto: GameTerminatedDto
   ) {
-    this.setNicknameSocket(user, gameTerminatedDto);
+    this.setSocket(user, gameTerminatedDto);
     this.updateUserActive(
       gameTerminatedDto.getUserId(),
       userActiveStatus.CONNECT
     );
     const friendList = await this.getFriendList(gameTerminatedDto.getUserId());
     for (const friend of friendList) {
-      friend == gameTerminatedDto.getUserId();
-      gameTerminatedDto.setIsFriend(true);
+      if (friend == gameTerminatedDto.getUserId()) {
+        gameTerminatedDto.setIsFriend(true);
+      }
     }
   }
 
-  private setNicknameSocket(
-    user: Socket,
-    gameTerminatedDto: GameTerminatedDto
-  ) {
+  private setSocket(user: Socket, gameTerminatedDto: GameTerminatedDto) {
     const gameRoom: GameRoom = this.gameRoomHandler.findRoomBySocket(user);
     const userList: UserGameDto[] =
       this.gameRoomHandler.findUsersInRoom(gameRoom);
@@ -182,7 +180,6 @@ export class GameService {
       if (
         userGameDto.getUserMatchDto().userId === gameTerminatedDto.getUserId()
       ) {
-        gameTerminatedDto.setNickname(userGameDto.getUserMatchDto().nickname);
         gameTerminatedDto.setUserSocket(userGameDto.getSocket());
         return;
       }
