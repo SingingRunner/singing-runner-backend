@@ -65,19 +65,21 @@ export class GameService {
     for (const userGameDto of userGameDtoList) {
       usersSocket.push(userGameDto.getSocket());
     }
+
     return usersSocket;
   }
-  // public handleDis(user: Socket) {
-  //   const gameRoom = this.gameRoomHandler.findRoomBySocket(user);
-  //   const users = this.gameRoomHandler.findUsersInRoom(gameRoom);
-  //   if (gameRoom === null || gameRoom === undefined) {
-  //     return false;
-  //   }
-  //   if (users[0].getUserMatchDto().userActive == userActiveStatus.IN_GAME) {
-  //     return true;
-  //   }
-  //   return false;
-  // }
+
+  public exitWhileInGame(user: Socket) {
+    const gameRoom = this.gameRoomHandler.findRoomBySocket(user);
+    const users = this.gameRoomHandler.findUsersInRoom(gameRoom);
+    if (gameRoom === null || gameRoom === undefined) {
+      return false;
+    }
+    if (users[0].getUserMatchDto().userActive == userActiveStatus.IN_GAME) {
+      return true;
+    }
+    return false;
+  }
 
   public leaveRoom(user: Socket) {
     const gameRoom = this.gameRoomHandler.findRoomBySocket(user);
