@@ -21,7 +21,6 @@ import { CustomModeService } from "./custom-mode/custom.mode.service";
 import { GameSongDto } from "src/song/dto/game-song.dto";
 import { UserService } from "src/user/user.service";
 import { userActiveStatus } from "src/user/util/user.enum";
-import { subscribe } from "diagnostics_channel";
 
 /**
  * webSocket 통신을 담당하는 Handler

@@ -15,5 +15,6 @@ import { Invite } from "./invite/invite";
     TypeOrmModule.forFeature([UserNotification]),
   ],
   providers: [SocialService, SocialResolver, NotificationService, Invite],
+  exports: [SocialService],
 })
 export class SocialModule {}
