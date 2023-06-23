@@ -34,10 +34,16 @@ export class SongService {
 
   public async searchSong(
     keyword: string,
-    page: number
+    page: number,
+    filter: string
   ): Promise<GameSongDto[]> {
     const take = 10;
     const skip = (page - 1) * take;
+
+    const order = {};
+
+    order[filter] = "ASC";
+
     const searchResult: Song[] = await this.songRepository.find({
       where: [
         { songTitle: Like(`%${keyword}%`) },
@@ -45,7 +51,9 @@ export class SongService {
       ],
       take: take,
       skip: skip,
+      order: order,
     });
+
     const gameSongDtoList: GameSongDto[] = [];
     for (const result of searchResult) {
       gameSongDtoList.push(new GameSongDto(result));
