@@ -114,6 +114,8 @@ export class AuthService {
 
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
+      secure: true,
+      sameSite: "none",
       path: "/refresh_token",
     });
 
