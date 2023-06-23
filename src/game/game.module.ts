@@ -38,5 +38,6 @@ import { CustomModeService } from "./custom-mode/custom.mode.service";
     },
     GameResolver,
   ],
+  exports: [GameReplayService],
 })
 export class GameModule {}

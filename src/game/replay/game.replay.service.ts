@@ -8,6 +8,7 @@ import * as AWS from "aws-sdk";
 import { GameEventDto } from "../event/dto/game.event.dto";
 import { CreateReplayInput } from "./dto/create-replay.input";
 import { InjectRepository } from "@nestjs/typeorm";
+import { User } from "src/user/entity/user.entity";
 
 const BUCKET_NAME: string = process.env.S3_BUCKET_NAME as string;
 const BUCKET_REGION: string = process.env.S3_BUCKET_REGION as string;
@@ -22,12 +23,23 @@ AWS.config.update({
   region: BUCKET_REGION,
 });
 
+interface ReplayWithSongInfo
+  extends Omit<
+    GameReplayEntity,
+    "song" | "hasId" | "save" | "remove" | "softRemove" | "recover" | "reload"
+  > {
+  songTitle: string;
+  singer: string;
+}
+
 @Injectable()
 export class GameReplayService {
   constructor(
     private songService: SongService,
     @InjectRepository(GameReplayEntity)
-    private gameReplayRepository: Repository<GameReplayEntity>
+    private gameReplayRepository: Repository<GameReplayEntity>,
+    @InjectRepository(User)
+    private userRepository: Repository<User>
   ) {}
 
   public async saveReplay(gameReplayEntity: CreateReplayInput) {
@@ -143,5 +155,53 @@ export class GameReplayService {
       });
       console.log(gameEventUrl);
     }
+  }
+
+  /**
+   * 유저 게임 리플레이를 가져오기
+   * @param isMyReplay - 사용자의 리플레이만 가져올지, 또는 공개 리플레이를 가져올지 결정하는 flag
+   * @param pageNumber - 가져올 리플레이의 수
+   * @param userId - 리플레이를 가져올 userId
+   * @returns 리플레이 노래 정보, 게임 리플레이 배열 반환
+   */
+  public async getUserReplays(
+    isMyReplay: boolean,
+    pageNumber: number,
+    userId: string
+  ): Promise<ReplayWithSongInfo[]> {
+    const take = 10; // 각 페이지에 표시될 리플레이 수
+    const skip = (pageNumber - 1) * take; // 표시할 페이지 계산
+
+    // 리플레이 가져오는 쿼리(각 리플레이와 함께 노래 데이터)
+    const replaysQuery = this.gameReplayRepository
+      .createQueryBuilder("gameReplay")
+      .innerJoinAndSelect("gameReplay.song", "song")
+      .orderBy("gameReplay.createdAt", "DESC") // 리플레이 생성 날짜 순 정렬
+      .skip(skip)
+      .take(take);
+
+    if (isMyReplay) {
+      // 해당 유저 리플레이만 가져오기
+      replaysQuery.andWhere("gameReplay.user.userId = :userId", { userId });
+    } else {
+      // 해당 유저의 공개 리플레이 가져오기
+      replaysQuery.andWhere(
+        "gameReplay.user.userId = :userId AND gameReplay.isPublic = true",
+        { userId }
+      );
+    }
+
+    // 쿼리 실행 및 결과 가져오기
+    const replays = await replaysQuery.getMany();
+
+    // 각 리플레이에 대해 songTitle, singer 추가한 새 객체 반환
+    return replays.map((replay) => {
+      const { song, ...rest } = replay; // 'song'을 제외한 나머지 -> 'rest'에 할당
+      return {
+        ...rest, // 'rest'에 있는 속성들 복사
+        songTitle: song.songTitle,
+        singer: song.singer,
+      };
+    });
   }
 }
