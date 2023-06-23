@@ -6,6 +6,7 @@ import { Social } from "./entity/social.entity";
 import { SocialResolver } from "./social.resolver";
 import { NotificationService } from "./notification/notification.service";
 import { UserNotification } from "./notification/user.notification.entitiy";
+import { Invite } from "./invite/invite";
 
 @Module({
   imports: [
@@ -13,6 +14,6 @@ import { UserNotification } from "./notification/user.notification.entitiy";
     TypeOrmModule.forFeature([Social]),
     TypeOrmModule.forFeature([UserNotification]),
   ],
-  providers: [SocialService, SocialResolver, NotificationService],
+  providers: [SocialService, SocialResolver, NotificationService, Invite],
 })
 export class SocialModule {}

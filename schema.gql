@@ -63,15 +63,6 @@ type AuthTokenDto {
   accessToken: String!
 }
 
-
-type FriendDto {
-  userId: String!
-  nickname: String!
-  userActive: Int!
-  userMmr: Int!
-  character: String!
-  userTier: String!
-
 type UserCharacterResponseDto {
   userId: String!
   character: characterEnum!
@@ -91,13 +82,47 @@ enum characterEnum {
 type UserKeynoteResponseDto {
   userId: String!
   userKeynote: Int!
+}
 
+type UserNotification {
+  userId: String!
+  senderId: String!
+  user: User!
+  sender: User!
+  content: String!
+  receivedAt: DateTime!
+  deletedAt: DateTime!
+}
+
+type HostUserOutput {
+  userId: String!
+  nickname: String!
+}
+
+type PollingDto {
+  hostUserDtoList: [HostUserOutput!]!
+  userNotificationList: [UserNotification!]!
+}
+
+type FriendDto {
+  userId: String!
+  nickname: String!
+  userActive: Int!
+  userMmr: Int!
+  character: String!
+  userTier: String!
+}
+
+input HostUserInput {
+  userId: String!
+  nickname: String!
 }
 
 type Query {
   searchSong(keyword: String!, page: Int!): [GameSongDto!]!
   fetchUserGuard: AuthUserDto!
   fetchUser(userId: String!): AuthUserDto!
+  getNotification(userId: String!, page: Float!): [UserNotification!]!
   searchFriend(addFriendDto: AddFriendDto!): [User!]!
   searchUser(nickname: String!, page: Float!): [FriendDto!]!
   getFriendList(userId: String!, page: Float!): [FriendDto!]!
@@ -114,13 +139,14 @@ type Mutation {
   loginUser(userLoginDto: UserLoginDto!): AuthDto!
   refreshAccessToken: AuthTokenDto!
   logout(userId: String!): String!
-
+  updateCharacter(userId: String!, character: String!): UserCharacterResponseDto!
+  updateUserKeynote(userId: String!, keynote: userKeynoteStatus!): UserKeynoteResponseDto!
+  longPolling(userId: String!): PollingDto!
   addFriend(addFriendDto: AddFriendDto!): String!
   removeFriend(addFriendDto: AddFriendDto!): String!
-
-  updateCharacter(userId: String!, character: String!): UserCharacterResponseDto!
-  updateUserKeynote(userId: String!, keynote: KeynoteEnum!): UserKeynoteResponseDto!
-
+  inviteFriend(friendId: String!, hostUserDto: HostUserInput!): String!
+  friendRequest: String!
+  deleteNotification: String!
 }
 
 input UserRegisterDto {
@@ -134,8 +160,8 @@ input UserLoginDto {
   password: String!
 }
 
-enum KeynoteEnum {
-  Original
-  Male
-  Female
+enum userKeynoteStatus {
+  ORIGINAL_KEY
+  FEMALE_KEY
+  MALE_KEY
 }

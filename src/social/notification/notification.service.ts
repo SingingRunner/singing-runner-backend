@@ -36,7 +36,10 @@ export class NotificationService {
     await this.userNotificationRepository.save(notification);
   }
 
-  public async getNotifications(userId: string, page: number) {
+  public async getNotifications(
+    userId: string,
+    page: number
+  ): Promise<UserNotification[]> {
     const take = 10;
     const skip = (page - 1) * take;
     const notDeleted = new Date("1970-01-01");
@@ -48,5 +51,17 @@ export class NotificationService {
         order: { receivedAt: "DESC" },
       });
     return searchResult;
+  }
+
+  public async hasNotification(userId: string): Promise<boolean> {
+    const notDeleted = new Date("1970-01-01");
+    const notification: UserNotification | null =
+      await this.userNotificationRepository.findOne({
+        where: [{ userId: userId }, { deletedAt: notDeleted }],
+      });
+    if (!notification) {
+      return false;
+    }
+    return true;
   }
 }
