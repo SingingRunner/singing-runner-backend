@@ -84,6 +84,14 @@ type UserKeynoteResponseDto {
   userKeynote: Int!
 }
 
+type ReplayWithSongInfo {
+  replayId: Int!
+  createdAt: DateTime!
+  isPublic: Int!
+  songTitle: String!
+  singer: String!
+}
+
 type UserNotification {
   userId: String!
   senderId: String!
@@ -122,6 +130,7 @@ type Query {
   searchSong(keyword: String!, page: Int!): [GameSongDto!]!
   fetchUserGuard: AuthUserDto!
   fetchUser(userId: String!): AuthUserDto!
+  getUserReplays(isMyReplay: Boolean!, pageNumber: Int!, userId: String!): [ReplayWithSongInfo!]!
   getNotification(userId: String!, page: Float!): [UserNotification!]!
   searchFriend(addFriendDto: AddFriendDto!): [User!]!
   searchUser(nickname: String!, page: Float!): [FriendDto!]!

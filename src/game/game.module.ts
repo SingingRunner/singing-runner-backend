@@ -36,5 +36,6 @@ import { User } from "src/user/entity/user.entity";
     },
     GameResolver,
   ],
+  exports: [GameReplayService],
 })
 export class GameModule {}
