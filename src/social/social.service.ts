@@ -1,7 +1,3 @@
-import {
-  SearchFriendDto,
-  SearchFriendDto,
-} from "./../user/dto/search-freind.dto";
 import { PollingDto } from "./dto/polling.dto";
 import { HostUserDto } from "src/user/dto/host-user.dto";
 import { Injectable } from "@nestjs/common";

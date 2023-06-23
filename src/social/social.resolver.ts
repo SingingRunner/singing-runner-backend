@@ -1,7 +1,6 @@
 import { AddFriendDto } from "./dto/add-friend.dto";
 import { SocialService } from "./social.service";
 import { Args, Mutation, Query, Resolver } from "@nestjs/graphql";
-import { User } from "src/user/entity/user.entity";
 import { FriendDto } from "src/user/dto/friend.dto";
 import { HostUserDto } from "src/user/dto/host-user.dto";
 import { PollingDto } from "./dto/polling.dto";

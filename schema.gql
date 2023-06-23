@@ -55,6 +55,15 @@ type RequestDto {
   senderNickname: String!
 }
 
+type SearchFriendDto {
+  userId: String!
+  userMmr: Int!
+  userTier: String!
+  nickname: String!
+  userActive: Int!
+  character: String!
+}
+
 type GameSongDto {
   songTitle: String!
   singer: String!
@@ -134,7 +143,7 @@ input HostUserInput {
 type Query {
   searchSong(keyword: String!, page: Int!, filter: String!): [GameSongDto!]!
   getNotification(userId: String!, page: Float!): [RequestDto!]!
-  searchFriend(userId: String!, nickname: String!, page: Float!): [User!]!
+  searchFriend(userId: String!, nickname: String!, page: Float!): [SearchFriendDto!]!
   searchUser(nickname: String!, page: Float!): [FriendDto!]!
   fetchUserGuard: AuthUserDto!
   fetchUser(userId: String!): AuthUserDto!
