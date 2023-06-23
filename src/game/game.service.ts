@@ -41,7 +41,7 @@ export class GameService {
     }
     const gameSongdto: GameSongDto = gameRoom.getGameSongDto();
     const gameSong = gameSongdto;
-    user.emit("loading", { gameSong: gameSong, characterList: characterList });
+    return { gameSong: gameSong, characterList: characterList };
   }
 
   public isGameReady(user: Socket): boolean {

@@ -3,6 +3,7 @@ import { Song } from "src/song/entities/song.entity";
 import { User } from "./user/entity/user.entity";
 import { GameReplayEntity } from "./game/replay/entity/game.replay.entity";
 import { Social } from "./social/entity/social.entity";
+import { UserNotification } from "./social/notification/user.notification.entitiy";
 
 export const TypeORMConfig: TypeOrmModuleOptions = {
   type: process.env.DB_TYPE as any,
@@ -11,6 +12,6 @@ export const TypeORMConfig: TypeOrmModuleOptions = {
   port: Number(process.env.DB_PORT),
   host: process.env.DB_HOST,
   database: process.env.DB_DATABASE,
-  entities: [Song, User, GameReplayEntity, Social],
-  synchronize: true,
+  entities: [Song, User, GameReplayEntity, Social, UserNotification],
+  synchronize: false,
 };

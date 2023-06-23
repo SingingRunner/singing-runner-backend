@@ -59,6 +59,10 @@ export class GameRoom {
     this.roomMaster = userId;
   }
 
+  public getRoomMaster() {
+    return this.roomMaster;
+  }
+
   public setSongListInCustom(gameSongDtoList: GameSongDto[]) {
     this.songListInCustom = gameSongDtoList;
   }

@@ -5,7 +5,8 @@ import { User } from "src/user/entity/user.entity";
 import { FriendDto } from "src/user/dto/friend.dto";
 import { HostUserDto } from "src/user/dto/host-user.dto";
 import { PollingDto } from "./dto/polling.dto";
-import { UserNotification } from "./notification/user.notification.entitiy";
+import { NotificationDto } from "./dto/notification.dto";
+import { RequestDto } from "./dto/request-dto";
 
 @Resolver()
 export class SocialResolver {
@@ -26,12 +27,18 @@ export class SocialResolver {
 
     return pollingDto;
   }
-  @Query(() => [UserNotification])
+
+  @Query(() => [RequestDto])
   async getNotification(
     @Args("userId") userId: string,
     @Args("page") page: number
   ) {
-    return this.socialService.getNotification(userId, page);
+    const notifications = await this.socialService.getNotifications(
+      userId,
+      page
+    );
+
+    return this.socialService.getRequestDto(notifications);
   }
 
   @Query(() => [User])
@@ -91,14 +98,26 @@ export class SocialResolver {
   }
 
   @Mutation(() => String)
-  async friendRequest(userId: string, senderId: string) {
-    this.socialService.friendRequest(userId, senderId, new Date());
+  async friendRequest(
+    @Args("notificationDto") notificationDto: NotificationDto
+  ) {
+    this.socialService.friendRequest(
+      notificationDto.userId,
+      notificationDto.senderId,
+      new Date()
+    );
     return "ok";
   }
 
   @Mutation(() => String)
-  async deleteNotification(userId: string, senderId: string) {
-    this.socialService.deleteNotification(userId, senderId, new Date());
+  async deleteNotification(
+    @Args("notificationDto") notificationDto: NotificationDto
+  ) {
+    this.socialService.deleteNotification(
+      notificationDto.userId,
+      notificationDto.senderId,
+      new Date()
+    );
     return "ok";
   }
 }

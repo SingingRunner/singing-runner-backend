@@ -11,6 +11,7 @@ import { UserMatchTier } from "src/game/utill/game.enum";
 import { User } from "src/user/entity/user.entity";
 import { Invite } from "./invite/invite";
 import { UserNotification } from "./notification/user.notification.entitiy";
+import { RequestDto } from "./dto/request-dto";
 
 @Injectable()
 export class SocialService {
@@ -28,7 +29,7 @@ export class SocialService {
       pollingDto.hostUserDtoList = this.getAllInvitation(userId);
     }
     if (await this.hasNotification(userId)) {
-      pollingDto.userNotificationList = await this.getNotification(userId, 1);
+      pollingDto.userNotificationList = await this.getNotifications(userId, 1);
     }
     return pollingDto;
   }
@@ -42,7 +43,10 @@ export class SocialService {
     const social = new Social();
     social.user = user;
     social.friend = friend;
+    await this.socialRepository.save(social);
 
+    social.user = friend;
+    social.friend = user;
     await this.socialRepository.save(social);
   }
 
@@ -113,25 +117,34 @@ export class SocialService {
     const take = 10;
     const skip = (page - 1) * take;
     const notDeleted = new Date("1970-01-01");
+
     const socialList = await this.socialRepository.find({
       where: [{ userId: userId }, { deletedAt: notDeleted }],
       take: take,
       skip: skip,
+      relations: ["friend"],
     });
+
     const userTier = UserMatchTier.BRONZE;
     const friendList: FriendDto[] = [];
+
     for (const social of socialList) {
+      const friend = social.friend;
+      if (!friend) {
+        throw new Error("없는 친구");
+      }
       friendList.push(
         new FriendDto(
-          social.friend.userId,
-          social.friend.nickname,
-          social.friend.userActive,
-          social.friend.character,
-          social.friend.userMmr,
+          friend.userId,
+          friend.nickname,
+          friend.userActive,
+          friend.character,
+          friend.userMmr,
           userTier
         )
       );
     }
+
     return friendList;
   }
 
@@ -164,11 +177,25 @@ export class SocialService {
     return this.getAllInvitation(userId);
   }
 
-  public async getNotification(
+  public async getNotifications(
     userId: string,
     page: number
   ): Promise<UserNotification[]> {
-    return await this.getNotification(userId, page);
+    const notifications = await this.notificationService.getNotifications(
+      userId,
+      page
+    );
+    return notifications;
+  }
+
+  public getRequestDto(notifications: UserNotification[]): RequestDto[] {
+    const requestDtoList: RequestDto[] = [];
+    for (const notification of notifications) {
+      requestDtoList.push(
+        new RequestDto(notification.senderId, notification.sender.nickname)
+      );
+    }
+    return requestDtoList;
   }
 
   public delay(ms: number) {
