@@ -7,6 +7,7 @@ import { HostUserDto } from "src/user/dto/host-user.dto";
 import { PollingDto } from "./dto/polling.dto";
 import { NotificationDto } from "./dto/notification.dto";
 import { RequestDto } from "./dto/request-dto";
+import { SearchFriendDto } from "src/user/dto/search-freind.dto";
 
 @Resolver()
 export class SocialResolver {
@@ -41,12 +42,12 @@ export class SocialResolver {
     return this.socialService.getRequestDto(notifications);
   }
 
-  @Query(() => [User])
+  @Query(() => [SearchFriendDto])
   async searchFriend(
     @Args("userId") userId: string,
     @Args("nickname") nickname: string,
     @Args("page") page: number
-  ): Promise<User[]> {
+  ): Promise<SearchFriendDto[]> {
     return await this.socialService.searchFriend(userId, nickname, page);
   }
 
