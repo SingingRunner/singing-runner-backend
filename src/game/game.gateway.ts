@@ -19,6 +19,9 @@ import { UserScoreDto } from "./rank/dto/user-score.dto";
 import { GameTerminatedDto } from "./rank/game-terminated.dto";
 import { CustomModeService } from "./custom-mode/custom.mode.service";
 import { GameSongDto } from "src/song/dto/game-song.dto";
+import { UserService } from "src/user/user.service";
+import { userActiveStatus } from "src/user/util/user.enum";
+import { subscribe } from "diagnostics_channel";
 
 /**
  * webSocket 통신을 담당하는 Handler
@@ -32,7 +35,8 @@ export class GameGateway
   constructor(
     private matchService: MatchService,
     private gameService: GameService,
-    private customModeService: CustomModeService
+    private customModeService: CustomModeService,
+    private userService: UserService
   ) {}
 
   afterInit(server: Server) {
@@ -68,7 +72,6 @@ export class GameGateway
     }
     const gameRoom: GameRoom = this.matchService.findRoomBySocket(user);
     const responseData = this.matchService.getSongInfo(gameRoom);
-    console.log("before broadcast : ");
     this.broadCast(user, message, responseData);
     return;
   }
@@ -107,12 +110,14 @@ export class GameGateway
   gameReadyData(@ConnectedSocket() user: Socket) {
     if (this.gameService.isGameReady(user)) {
       const userIdList: string[] = this.gameService.findUsersIdInSameRoom(user);
+      for (const userId of userIdList) {
+        this.userService.updateUserActive(userId, userActiveStatus.IN_GAME);
+      }
       this.broadCast(user, "game_ready", userIdList);
     }
   }
 
   @SubscribeMessage("use_item")
-  //userId, item
   useItemData(
     @ConnectedSocket() user: Socket,
     @MessageBody() useItem: UserItemDto
@@ -157,6 +162,12 @@ export class GameGateway
     }
     const gameTermintaedList: GameTerminatedDto[] =
       this.gameService.caculateRank(user);
+    for (const gameTerminatedDto of gameTermintaedList) {
+      this.userService.updateUserActive(
+        gameTerminatedDto.userId,
+        userActiveStatus.CONNECT
+      );
+    }
     this.broadCast(user, "game_terminated", gameTermintaedList);
   }
 
@@ -188,6 +199,7 @@ export class GameGateway
     this.customModeService.setGameSong(user, gameSongDto);
     this.broadCast(user, "set_song", gameSongDto);
   }
+
   @SubscribeMessage("leave_room")
   leaveRoom(
     @ConnectedSocket() user: Socket,
@@ -195,6 +207,11 @@ export class GameGateway
   ) {
     this.broadCast(user, "leave_room", true);
     this.customModeService.leaveRoom(user, userMatchDto);
+  }
+
+  @SubscribeMessage("custom_start")
+  startCustom(@ConnectedSocket() user: Socket) {
+    this.broadCast(user, "custom_start", true);
   }
 
   private broadCast(user: Socket, message: string, responseData: any) {
