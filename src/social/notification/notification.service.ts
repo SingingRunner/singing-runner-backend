@@ -16,6 +16,8 @@ export class NotificationService {
     notification.user = user;
     notification.sender = sender;
     notification.receivedAt = date;
+    notification.content = "친구요청";
+    console.log(notification);
     await this.userNotificationRepository.save(notification);
   }
 
@@ -48,6 +50,7 @@ export class NotificationService {
         where: [{ userId: userId }, { deletedAt: notDeleted }],
         take: take,
         skip: skip,
+        relations: ["sender"],
         order: { receivedAt: "DESC" },
       });
     return searchResult;

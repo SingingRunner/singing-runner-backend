@@ -42,6 +42,16 @@ type Reply {
   code: Int!
 }
 
+type UserNotification {
+  userId: String!
+  senderId: String!
+  user: User!
+  sender: User!
+  content: String!
+  receivedAt: DateTime!
+  deletedAt: DateTime!
+}
+
 type AuthUserDto {
   userId: String!
   userEmail: String!
@@ -84,16 +94,6 @@ type UserKeynoteResponseDto {
   userKeynote: Int!
 }
 
-type UserNotification {
-  userId: String!
-  senderId: String!
-  user: User!
-  sender: User!
-  content: String!
-  receivedAt: DateTime!
-  deletedAt: DateTime!
-}
-
 type HostUserOutput {
   userId: String!
   nickname: String!
@@ -113,6 +113,11 @@ type FriendDto {
   userTier: String!
 }
 
+type RequestDto {
+  senderId: String!
+  senderNickname: String!
+}
+
 input HostUserInput {
   userId: String!
   nickname: String!
@@ -122,7 +127,7 @@ type Query {
   searchSong(keyword: String!, page: Int!): [GameSongDto!]!
   fetchUserGuard: AuthUserDto!
   fetchUser(userId: String!): AuthUserDto!
-  getNotification(userId: String!, page: Float!): [UserNotification!]!
+  getNotification(userId: String!, page: Float!): [RequestDto!]!
   searchFriend(addFriendDto: AddFriendDto!): [User!]!
   searchUser(nickname: String!, page: Float!): [FriendDto!]!
   getFriendList(userId: String!, page: Float!): [FriendDto!]!
@@ -145,8 +150,8 @@ type Mutation {
   addFriend(addFriendDto: AddFriendDto!): String!
   removeFriend(addFriendDto: AddFriendDto!): String!
   inviteFriend(friendId: String!, hostUserDto: HostUserInput!): String!
-  friendRequest: String!
-  deleteNotification: String!
+  friendRequest(notificationDto: NotificationDto!): String!
+  deleteNotification(notificationDto: NotificationDto!): String!
 }
 
 input UserRegisterDto {
@@ -164,4 +169,9 @@ enum userKeynoteStatus {
   ORIGINAL_KEY
   FEMALE_KEY
   MALE_KEY
+}
+
+input NotificationDto {
+  userId: String!
+  senderId: String!
 }

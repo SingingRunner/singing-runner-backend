@@ -20,7 +20,7 @@ export class UserNotification {
 
   @Field()
   @ManyToOne(() => User)
-  @JoinColumn({ name: "friendId" })
+  @JoinColumn({ name: "senderId" })
   sender: User;
 
   @Field(() => String)
@@ -28,7 +28,7 @@ export class UserNotification {
   content: string;
 
   @Field(() => Date)
-  @Column({ type: "datetime" })
+  @Column({ type: "datetime", nullable: true })
   receivedAt: Date;
 
   @Field(() => Date)
