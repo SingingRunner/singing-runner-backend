@@ -60,14 +60,6 @@ export class SocialResolver {
     return await this.socialService.searchUser(nickname, page);
   }
 
-  @Query(() => [FriendDto])
-  async getFriendList(
-    @Args("userId") userId: string,
-    @Args("page") page: number
-  ): Promise<FriendDto[]> {
-    return await this.socialService.getFriendList(userId, page);
-  }
-
   @Mutation(() => String)
   async addFriend(@Args("addFriendDto") addFriendDto: AddFriendDto) {
     await this.socialService.addFriend(

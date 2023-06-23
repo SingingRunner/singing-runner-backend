@@ -66,6 +66,14 @@ export class UserService {
     this.update(user);
   }
 
+  public async updateMmr(userId: string, mmrDiff: number) {
+    const user: User | null = await this.findUserById(userId);
+    if (user === null) {
+      throw new Error("게임룸에 등록되지 않은 유저가 있습니다.");
+    }
+    user.userMmr += mmrDiff;
+    this.update(user);
+  }
   async saveUser(user: User): Promise<User> {
     return this.userRepository.save(user);
   }

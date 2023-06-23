@@ -31,6 +31,7 @@ export class MatchService {
     user: Socket,
     userMatchDto: UserMatchDto
   ): Promise<boolean> {
+    console.log(userMatchDto);
     const userGameDto: UserGameDto = new UserGameDto(user, userMatchDto);
     if (this.matchMakingPolicy.isQueueReady(userGameDto)) {
       await this.matchMaking(userGameDto);
