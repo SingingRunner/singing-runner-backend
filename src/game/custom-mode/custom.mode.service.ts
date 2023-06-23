@@ -2,6 +2,7 @@ import { GameRoom } from "../room/game.room";
 import { GameRoomHandler } from "../room/game.room.handler";
 import { Injectable } from "@nestjs/common";
 import { Socket } from "socket.io";
+import { GameSongDto } from "src/song/dto/game-song.dto";
 import { HostUserDto } from "src/user/dto/host-user.dto";
 import { UserGameDto } from "src/user/dto/user.game.dto";
 import { UserMatchDto } from "src/user/dto/user.match.dto";
@@ -58,5 +59,15 @@ export class CustomModeService {
       host.getUserId()
     );
     this.joinCustomRoom(user, userMatchDto, gameRoom);
+  }
+
+  public findUsersInSameRoom(user: Socket): UserGameDto[] {
+    const gameRoom: GameRoom = this.gameRoomHandler.findRoomBySocket(user);
+    return this.gameRoomHandler.findUsersInRoom(gameRoom);
+  }
+
+  public setGameSong(user: Socket, gameSongDto: GameSongDto) {
+    const gameRoom: GameRoom = this.gameRoomHandler.findRoomBySocket(user);
+    gameRoom.setGameSongDto(gameSongDto);
   }
 }

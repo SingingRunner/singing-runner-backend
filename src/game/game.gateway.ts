@@ -1,3 +1,4 @@
+import { UserMatchDto } from "./../user/dto/user.match.dto";
 import {
   ConnectedSocket,
   MessageBody,
@@ -16,6 +17,8 @@ import { UserItemDto } from "./item/dto/user-item.dto";
 import { UserGameDto } from "src/user/dto/user.game.dto";
 import { UserScoreDto } from "./rank/dto/user-score.dto";
 import { GameTerminatedDto } from "./rank/game-terminated.dto";
+import { CustomModeService } from "./custom-mode/custom.mode.service";
+import { GameSongDto } from "src/song/dto/game-song.dto";
 
 /**
  * webSocket 통신을 담당하는 Handler
@@ -28,7 +31,8 @@ export class GameGateway
 
   constructor(
     private matchService: MatchService,
-    private gameService: GameService
+    private gameService: GameService,
+    private customModeService: CustomModeService
   ) {}
 
   afterInit(server: Server) {
@@ -95,7 +99,8 @@ export class GameGateway
 
   @SubscribeMessage("loading")
   loadSongData(@ConnectedSocket() user: Socket) {
-    this.gameService.loadData(user);
+    const data = this.gameService.loadData(user);
+    user.emit("loading", data);
   }
 
   @SubscribeMessage("game_ready")
@@ -147,12 +152,6 @@ export class GameGateway
     @ConnectedSocket() user: Socket,
     @MessageBody() userScoreDto: UserScoreDto
   ) {
-    /**
-     * 게임종료시 gameRoom안에 인원이 전부(탈주자 예외처리)
-     * terminated 메시지와 점수, 녹음정보(리플레이용)를 보내면
-     * 순위, mmr, userId 를 보내줘야함
-     * + 게임이벤트 및 녹음정보를 각 user마다 DB에 저장.
-     */
     if (!this.gameService.allUsersTerminated(user, userScoreDto)) {
       return;
     }
@@ -161,6 +160,33 @@ export class GameGateway
     this.broadCast(user, "game_terminated", gameTermintaedList);
   }
 
+  @SubscribeMessage("invite")
+  accpetInvite(@ConnectedSocket() user: Socket, @MessageBody() data) {
+    this.customModeService.acceptInvite(
+      user,
+      data.userMatchDto,
+      data.HostUserDto
+    );
+    const userList: UserGameDto[] =
+      this.customModeService.findUsersInSameRoom(user);
+    this.broadCast(user, "invite", userList);
+  }
+
+  @SubscribeMessage("create_custom")
+  createCustomRoom(
+    @ConnectedSocket() user: Socket,
+    @MessageBody() userMatchDto: UserMatchDto
+  ) {
+    this.customModeService.createCustomRoom(user, userMatchDto);
+  }
+
+  @SubscribeMessage("set_song")
+  setGameSong(
+    @ConnectedSocket() user: Socket,
+    @MessageBody() gameSongDto: GameSongDto
+  ) {
+    this.customModeService.setGameSong(user, gameSongDto);
+  }
   private broadCast(user: Socket, message: string, responseData: any) {
     console.log("in broad cast : ", responseData);
     const gameRoom: GameRoom = this.matchService.findRoomBySocket(user);
