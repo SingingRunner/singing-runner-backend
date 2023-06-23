@@ -102,16 +102,6 @@ type ReplayWithSongInfo {
   singer: String!
 }
 
-type UserNotification {
-  userId: String!
-  senderId: String!
-  user: User!
-  sender: User!
-  content: String!
-  receivedAt: DateTime!
-  deletedAt: DateTime!
-}
-
 type HostUserOutput {
   userId: String!
   nickname: String!
@@ -147,14 +137,9 @@ type Query {
   fetchUser(userId: String!): AuthUserDto!
   getUserReplays(isMyReplay: Boolean!, pageNumber: Int!, userId: String!): [ReplayWithSongInfo!]!
   getNotification(userId: String!, page: Float!): [RequestDto!]!
-  searchFriend(addFriendDto: AddFriendDto!): [User!]!
+  searchFriend(userId: String!, nickname: String!): [User!]!
   searchUser(nickname: String!, page: Float!): [FriendDto!]!
   getFriendList(userId: String!, page: Float!): [FriendDto!]!
-}
-
-input AddFriendDto {
-  userId: String!
-  firendId: String!
 }
 
 type Mutation {
@@ -188,6 +173,11 @@ enum userKeynoteStatus {
   ORIGINAL_KEY
   FEMALE_KEY
   MALE_KEY
+}
+
+input AddFriendDto {
+  userId: String!
+  firendId: String!
 }
 
 input NotificationDto {

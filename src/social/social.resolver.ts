@@ -44,9 +44,10 @@ export class SocialResolver {
   @Query(() => [User])
   async searchFriend(
     @Args("userId") userId: string,
-    @Args("nickname") nickname: string
+    @Args("nickname") nickname: string,
+    @Args("page") page: number
   ): Promise<User[]> {
-    return await this.socialService.searchFriend(userId, nickname, 10);
+    return await this.socialService.searchFriend(userId, nickname, page);
   }
 
   @Query(() => [FriendDto])
