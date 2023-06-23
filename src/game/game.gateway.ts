@@ -47,6 +47,11 @@ export class GameGateway
 
   handleDisconnect(@ConnectedSocket() user: Socket) {
     // 게임중일떄 disconnect 시 탈주자처리
+    
+    if(exitWhileInGame()){
+      this.gameService.
+      this.gameService.leaveRoom(user);
+    }
     console.log(`Client disconnected: ${user.id}`);
     this.matchService.matchCancel(user);
   }
