@@ -129,12 +129,6 @@ export class GameService {
       return true;
     }
 
-    const userInfo: User | null = await this.userService.findUserById(
-      userScoreDto.getUserId()
-    );
-    const userNickname = userInfo === null ? "guest" : userInfo.nickname;
-
-    userScoreDto.setNickname(userNickname);
     this.rankHandler.pushUserScore(gameRoom, userScoreDto);
     return false;
   }
@@ -159,7 +153,7 @@ export class GameService {
     user: Socket,
     gameTerminatedDto: GameTerminatedDto
   ) {
-    this.setSocket(user, gameTerminatedDto);
+    this.setSocketAndNickname(user, gameTerminatedDto);
     this.updateUserActive(
       gameTerminatedDto.getUserId(),
       userActiveStatus.CONNECT
@@ -172,7 +166,10 @@ export class GameService {
     }
   }
 
-  private setSocket(user: Socket, gameTerminatedDto: GameTerminatedDto) {
+  private setSocketAndNickname(
+    user: Socket,
+    gameTerminatedDto: GameTerminatedDto
+  ) {
     const gameRoom: GameRoom = this.gameRoomHandler.findRoomBySocket(user);
     const userList: UserGameDto[] =
       this.gameRoomHandler.findUsersInRoom(gameRoom);
@@ -181,6 +178,7 @@ export class GameService {
         userGameDto.getUserMatchDto().userId === gameTerminatedDto.getUserId()
       ) {
         gameTerminatedDto.setUserSocket(userGameDto.getSocket());
+        gameTerminatedDto.setNickname(userGameDto.getUserMatchDto().nickname);
         return;
       }
     }
