@@ -15,6 +15,7 @@ import { GameTerminatedDto } from "./rank/game-terminated.dto";
 import { GameReplayService } from "./replay/game.replay.service";
 import { User } from "src/user/entity/user.entity";
 import { userActiveStatus } from "src/user/util/user.enum";
+import { UserInfoDto } from "./utill/user-info.dto";
 
 @Injectable()
 export class GameService {
@@ -56,6 +57,7 @@ export class GameService {
     }
     return false;
   }
+
   public findUsersSocketInSameRoom(user): Socket[] {
     const gameRoom = this.gameRoomHandler.findRoomBySocket(user);
     const userGameDtoList: UserGameDto[] =
@@ -67,6 +69,18 @@ export class GameService {
     }
 
     return usersSocket;
+  }
+  public getUserInfoBySocket(user: Socket) {
+    const gameRoom = this.gameRoomHandler.findRoomBySocket(user);
+    const UserGameDtoList: UserGameDto[] =
+      this.gameRoomHandler.findUsersInRoom(gameRoom);
+    for (const userGameDto of UserGameDtoList) {
+      if (userGameDto.getSocket() === user) {
+        const userId: string = userGameDto.getUserMatchDto().userId;
+        const nickName: string = userGameDto.getUserMatchDto().nickname;
+        return new UserInfoDto(userId, nickName);
+      }
+    }
   }
 
   public exitWhileInGame(user: Socket) {
