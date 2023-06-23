@@ -20,6 +20,7 @@ import { GameTerminatedDto } from "./rank/game-terminated.dto";
 import { CustomModeService } from "./custom-mode/custom.mode.service";
 import { GameSongDto } from "src/song/dto/game-song.dto";
 import { userActiveStatus } from "src/user/util/user.enum";
+import { UserInfoDto } from "./utill/user-info.dto";
 
 /**
  * webSocket 통신을 담당하는 Handler
@@ -47,13 +48,25 @@ export class GameGateway
 
   handleDisconnect(@ConnectedSocket() user: Socket) {
     // 게임중일떄 disconnect 시 탈주자처리
-    
-    if(exitWhileInGame()){
-      this.gameService.
-      this.gameService.leaveRoom(user);
-    }
     console.log(`Client disconnected: ${user.id}`);
-    this.matchService.matchCancel(user);
+
+    if (!this.gameService.exitWhileInGame(user)) {
+      this.matchService.matchCancel(user);
+      return;
+    }
+
+    const userSocketList: Socket[] | undefined =
+      this.gameService.findUsersSocketInSameRoom(user);
+    const exitUserInfo: UserInfoDto | undefined =
+      this.gameService.getUserInfoBySocket(user);
+
+    for (const userSocket of userSocketList) {
+      if (userSocket === user) {
+        continue;
+      }
+      userSocket.emit("exit", exitUserInfo);
+    }
+    this.gameService.leaveRoom(user);
   }
 
   /**
