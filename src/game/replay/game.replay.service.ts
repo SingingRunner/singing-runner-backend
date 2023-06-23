@@ -204,4 +204,18 @@ export class GameReplayService {
       };
     });
   }
+
+  public async updateReplayIsPublic(
+    replayId: number,
+    isPublic: number
+  ): Promise<GameReplayEntity> {
+    const replay = await this.gameReplayRepository.findOne({
+      where: { replayId: replayId },
+    });
+    if (!replay) {
+      throw new Error("해당 리플레이가 존재하지 않습니다.");
+    }
+    replay.isPublic = isPublic;
+    return await this.gameReplayRepository.save(replay);
+  }
 }

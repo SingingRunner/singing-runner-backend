@@ -42,16 +42,6 @@ type Reply {
   code: Int!
 }
 
-type UserNotification {
-  userId: String!
-  senderId: String!
-  user: User!
-  sender: User!
-  content: String!
-  receivedAt: DateTime!
-  deletedAt: DateTime!
-}
-
 type AuthUserDto {
   userId: String!
   userEmail: String!
@@ -100,6 +90,11 @@ type ReplayWithSongInfo {
   isPublic: Int!
   songTitle: String!
   singer: String!
+}
+
+type ReplayIsPublicResponseDto {
+  replayId: String!
+  isPublic: Int!
 }
 
 type UserNotification {
@@ -165,6 +160,7 @@ type Mutation {
   logout(userId: String!): String!
   updateCharacter(userId: String!, character: String!): UserCharacterResponseDto!
   updateUserKeynote(userId: String!, keynote: userKeynoteStatus!): UserKeynoteResponseDto!
+  updateReplayIsPublic(replayId: Float!, isPublic: Int!): ReplayIsPublicResponseDto!
   longPolling(userId: String!): PollingDto!
   addFriend(addFriendDto: AddFriendDto!): String!
   removeFriend(addFriendDto: AddFriendDto!): String!

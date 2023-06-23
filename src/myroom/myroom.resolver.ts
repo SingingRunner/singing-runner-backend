@@ -7,7 +7,8 @@ import { UserCharacterResponseDto } from "src/user/dto/user.character.response.d
 import { UserKeynoteResponseDto } from "src/user/dto/user.keynote.response.dto";
 import { userKeynoteStatus } from "src/user/util/user.enum";
 import { GameReplayService } from "src/game/replay/game.replay.service";
-import { ReplayWithSongInfo } from "src/game/replay/dto/replay-with-song-info-dto";
+import { ReplayWithSongInfo } from "src/game/replay/dto/replay-with-song-info.dto";
+import { ReplayIsPublicResponseDto } from "src/game/replay/dto/replay-ispublic-response.dto";
 
 @Resolver()
 export class MyroomResolver {
@@ -73,5 +74,20 @@ export class MyroomResolver {
       pageNumber,
       userId
     );
+  }
+
+  @Mutation(() => ReplayIsPublicResponseDto)
+  async updateReplayIsPublic(
+    @Args("replayId") replayId: number,
+    @Args("isPublic", { type: () => Int }) isPublic: number
+  ): Promise<ReplayIsPublicResponseDto> {
+    const updatedReplay = await this.gameReplayService.updateReplayIsPublic(
+      replayId,
+      isPublic
+    );
+    return {
+      replayId: updatedReplay.replayId,
+      isPublic: updatedReplay.isPublic,
+    };
   }
 }
