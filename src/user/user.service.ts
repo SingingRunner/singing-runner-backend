@@ -5,6 +5,8 @@ import { FindOneOptions, Like, Repository } from "typeorm";
 import { User } from "./entity/user.entity";
 import * as bcrypt from "bcrypt";
 import { userActiveStatus } from "./util/user.enum";
+import { UserMatchDto } from "./dto/user.match.dto";
+import { UserMatchTier } from "src/game/utill/game.enum";
 
 @Injectable()
 export class UserService {
@@ -79,13 +81,13 @@ export class UserService {
   }
 
   determineUserTier(userMmr: number): string {
-    if (userMmr < 2000) {
+    if (userMmr < UserMatchTier.SILVER) {
       return "BRONZE";
-    } else if (userMmr < 3000) {
+    } else if (userMmr < UserMatchTier.GOLD) {
       return "SILVER";
-    } else if (userMmr < 4000) {
+    } else if (userMmr < UserMatchTier.PLATINUM) {
       return "GOLD";
-    } else if (userMmr < 5000) {
+    } else if (userMmr < UserMatchTier.DIAMOND) {
       return "PLATINUM";
     } else {
       return "DIAMOND";

@@ -1,3 +1,7 @@
+import {
+  SearchFriendDto,
+  SearchFriendDto,
+} from "./../user/dto/search-freind.dto";
 import { PollingDto } from "./dto/polling.dto";
 import { HostUserDto } from "src/user/dto/host-user.dto";
 import { Injectable } from "@nestjs/common";
@@ -12,6 +16,7 @@ import { User } from "src/user/entity/user.entity";
 import { Invite } from "./invite/invite";
 import { UserNotification } from "./notification/user.notification.entitiy";
 import { RequestDto } from "./dto/request-dto";
+import { SearchFriendDto } from "src/user/dto/search-freind.dto";
 
 @Injectable()
 export class SocialService {
@@ -91,11 +96,11 @@ export class SocialService {
     userId: string,
     nickname: string,
     page: number
-  ): Promise<User[]> {
+  ): Promise<SearchFriendDto[]> {
     const take = 10;
     const skip = (page - 1) * take;
 
-    const friends = await this.socialRepository
+    const friends: Social[] = await this.socialRepository
       .createQueryBuilder("social")
       .innerJoinAndSelect("social.friend", "friend")
       .innerJoinAndSelect("social.user", "user")
@@ -108,7 +113,22 @@ export class SocialService {
       .take(take)
       .getMany();
 
-    return friends.map((friend) => friend.friend);
+    const friendList: User[] = friends.map((friend) => friend.friend);
+    const resultList: SearchFriendDto[] = [];
+    for (const friend of friendList) {
+      const searchFriendDto = new SearchFriendDto();
+      searchFriendDto.nickname = friend.nickname;
+      searchFriendDto.character = friend.character;
+      searchFriendDto.userActive = friend.userActive;
+      searchFriendDto.userId = friend.userId;
+      searchFriendDto.userMmr = friend.userMmr;
+      searchFriendDto.userTier = this.userService.determineUserTier(
+        friend.userMmr
+      );
+      resultList.push(searchFriendDto);
+    }
+
+    return resultList;
   }
 
   public async getFriendList(userId: string): Promise<string[]> {

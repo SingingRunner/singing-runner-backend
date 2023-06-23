@@ -14,6 +14,10 @@ export class SearchFriendDto {
 
   @IsNotEmpty()
   @Field(() => String)
+  userTier: string;
+
+  @IsNotEmpty()
+  @Field(() => String)
   nickname: string;
 
   @IsNotEmpty()
