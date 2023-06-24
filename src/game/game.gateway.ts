@@ -220,7 +220,7 @@ export class GameGateway
     @ConnectedSocket() user: Socket,
     @MessageBody() userMatchDto: UserMatchDto
   ) {
-    this.broadCast(user, "leave_room", true);
+    this.broadCast(user, "leave_room", userMatchDto.nickname);
     this.customModeService.leaveRoom(user, userMatchDto);
   }
 
