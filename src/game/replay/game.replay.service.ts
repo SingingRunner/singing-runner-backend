@@ -86,7 +86,7 @@ export class GameReplayService {
     return `${BUCKET_URL}${filename}.json`;
   }
 
-  public async loadData(user: Socket, replayId: number) {
+  public async loadData(replayId: number) {
     const gameReplay: GameReplayEntity | null =
       await this.gameReplayRepository.findOne({
         where: { replayId: replayId },
@@ -109,10 +109,7 @@ export class GameReplayService {
           userId: gameReplay.player2Id,
           character: gameReplay.player2Character,
         });
-        user.emit("load_replay", {
-          gameSong: gameSong,
-          characterList: characterList,
-        });
+        return { gameSong: gameSong, characterList: characterList };
       }
     }
   }

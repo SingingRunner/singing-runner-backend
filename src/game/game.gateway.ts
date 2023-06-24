@@ -229,6 +229,15 @@ export class GameGateway
     this.broadCast(user, "custom_start", true);
   }
 
+  @SubscribeMessage("load_replay")
+  async loadReplay(
+    @ConnectedSocket() user: Socket,
+    @MessageBody() replayId: number
+  ) {
+    const replayData = await this.gameReplayService.loadData(replayId);
+    user.emit("load_replay", replayData);
+  }
+
   private broadCast(user: Socket, message: string, responseData: any) {
     console.log("in broad cast : ", responseData);
     const gameRoom: GameRoom = this.matchService.findRoomBySocket(user);
