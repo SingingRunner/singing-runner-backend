@@ -171,7 +171,7 @@ export class GameGateway
   }
 
   @SubscribeMessage("game_terminated")
-  async gameTermintated(
+  async gameTerminated(
     @ConnectedSocket() user: Socket,
     @MessageBody() userScoreDto: UserScoreDto
   ) {
