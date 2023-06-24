@@ -6,6 +6,8 @@ export class GameTerminatedDto {
     this.mmrDiff = mmrDiff;
     this.userScore = userScore;
     this.isFriend = false;
+    this.tier = "BRONZE";
+    this.nickname = "오민규리";
   }
 
   private user: Socket;
@@ -14,6 +16,7 @@ export class GameTerminatedDto {
   private mmrDiff: number;
   private userScore: number;
   private isFriend: boolean;
+  private tier: string;
 
   public getUserId() {
     return this.userId;
@@ -26,7 +29,9 @@ export class GameTerminatedDto {
   public setIsFriend(isFriend: boolean) {
     this.isFriend = isFriend;
   }
-
+  public getNickname() {
+    return this.nickname;
+  }
   public setNickname(nickname: string) {
     this.nickname = nickname;
   }

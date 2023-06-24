@@ -1,4 +1,3 @@
-import { UserMatchDto } from "./../user/dto/user.match.dto";
 import {
   ConnectedSocket,
   MessageBody,
@@ -18,11 +17,11 @@ import { UserGameDto } from "src/user/dto/user.game.dto";
 import { UserScoreDto } from "./rank/dto/user-score.dto";
 import { GameTerminatedDto } from "./rank/game-terminated.dto";
 import { CustomModeService } from "./custom-mode/custom.mode.service";
-import { GameSongDto } from "src/song/dto/game-song.dto";
 import { userActiveStatus } from "src/user/util/user.enum";
 import { UserInfoDto } from "./utill/user-info.dto";
 import { GameReplayService } from "./replay/game.replay.service";
 import { CustomSongDto } from "./utill/custom-song.dto";
+import { UserMatchDto } from "src/user/dto/user.match.dto";
 
 /**
  * webSocket 통신을 담당하는 Handler
@@ -81,11 +80,11 @@ export class GameGateway
   async matchMakingData(@ConnectedSocket() user: Socket, @MessageBody() data) {
     console.log("matchmaking connect");
     const message = "match_making";
-    console.log("matchMaking", data);
     if (!data.accept) {
       this.matchService.matchCancel(user);
       return;
     }
+    console.log("matchmaking", data.UserMatchDto.nickName);
     if (!(await this.matchService.isMatchMade(user, data.UserMatchDto))) {
       return;
     }
@@ -176,17 +175,17 @@ export class GameGateway
     @ConnectedSocket() user: Socket,
     @MessageBody() userScoreDto: UserScoreDto
   ) {
-    if (await !this.gameService.allUsersTerminated(user, userScoreDto)) {
+    console.log("gameterminiated");
+    if (!this.gameService.allUsersTerminated(user, userScoreDto)) {
       return;
     }
 
     const gameTerminatedList: GameTerminatedDto[] =
-      this.gameService.calculateRank(user);
-
+      await this.gameService.calculateRank(user);
     for (const gameTerminatedDto of gameTerminatedList) {
-      this.gameService.setGameTerminatedDto(user, gameTerminatedDto);
-      gameTerminatedDto.getSocket().emit("game_terminated", gameTerminatedList);
+      await this.gameService.setGameTerminatedDto(user, gameTerminatedDto);
     }
+    this.broadCast(user, "game_terminated", gameTerminatedList);
   }
 
   @SubscribeMessage("invite")
@@ -250,7 +249,7 @@ export class GameGateway
   }
 
   private broadCast(user: Socket, message: string, responseData: any) {
-    console.log("in broad cast : ", responseData);
+    // console.log("in broad cast : ", responseData);
     const gameRoom: GameRoom = this.matchService.findRoomBySocket(user);
     this.gameService.putEvent(gameRoom, message, responseData, user);
     const userList: UserGameDto[] =
