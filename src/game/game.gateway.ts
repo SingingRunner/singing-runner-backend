@@ -185,10 +185,8 @@ export class GameGateway
       await this.gameService.calculateRank(user);
     for (const gameTerminatedDto of gameTerminatedList) {
       await this.gameService.setGameTerminatedDto(user, gameTerminatedDto);
-      const userIdList = this.gameService.findUsersIdInSameRoom();
     }
 
-    
     this.broadCast(user, "game_terminated", gameTerminatedList);
   }
 
@@ -259,7 +257,7 @@ export class GameGateway
   private broadCast(user: Socket, message: string, responseData: any) {
     // console.log("in broad cast : ", responseData);
     const gameRoom: GameRoom = this.matchService.findRoomBySocket(user);
-    // this.gameService.putEvent(gameRoom, message, responseData, user);
+    this.gameService.putEvent(gameRoom, message, responseData, user);
     const userList: UserGameDto[] =
       this.matchService.findUsersInSameRoom(gameRoom);
     for (const user of userList) {
