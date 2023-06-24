@@ -22,7 +22,6 @@ import { UserInfoDto } from "./utill/user-info.dto";
 import { GameReplayService } from "./replay/game.replay.service";
 import { CustomSongDto } from "./utill/custom-song.dto";
 import { UserMatchDto } from "src/user/dto/user.match.dto";
-import { GameRoomHandler } from "./room/game.room.handler";
 
 /**
  * webSocket 통신을 담당하는 Handler
@@ -186,7 +185,6 @@ export class GameGateway
     for (const gameTerminatedDto of gameTerminatedList) {
       await this.gameService.setGameTerminatedDto(user, gameTerminatedDto);
     }
-
     this.broadCast(user, "game_terminated", gameTerminatedList);
   }
 
