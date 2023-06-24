@@ -122,8 +122,6 @@ export class GameReplayService {
       .then((gameReplay: GameReplayEntity) => {
         return gameReplay.gameEvent;
       });
-    // aws s3 에서 gameEvent 를 가져와서 setTimeout으로 socket emit event 예약
-    // fetch 과정이 조금 걸릴 수도 있으니 서버에서 파일 로드가 완료될 때까지 클라이언트 대기하게끔 소켓 이벤트 추가해야할듯
     const params = {
       Bucket: BUCKET_NAME,
       Key: gameEventUrl,

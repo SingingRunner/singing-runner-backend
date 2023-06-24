@@ -240,6 +240,15 @@ export class GameGateway
     user.emit("load_replay", replayData);
   }
 
+  @SubscribeMessage("start_replay")
+  startReplay(
+    @ConnectedSocket() user: Socket,
+    @MessageBody() replayId: number,
+    @MessageBody() userId: string
+  ) {
+    this.gameReplayService.replayGame(user, replayId, userId);
+  }
+
   private broadCast(user: Socket, message: string, responseData: any) {
     console.log("in broad cast : ", responseData);
     const gameRoom: GameRoom = this.matchService.findRoomBySocket(user);
