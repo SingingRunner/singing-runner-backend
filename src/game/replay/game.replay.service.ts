@@ -5,7 +5,6 @@ import { GameReplayEntity } from "./entity/game.replay.entity";
 import { Socket } from "socket.io";
 import { GameSongDto } from "src/song/dto/game-song.dto";
 import * as AWS from "aws-sdk";
-import { GameEventDto } from "../event/dto/game.event.dto";
 import { CreateReplayInput } from "./dto/create-replay.input";
 import { InjectRepository } from "@nestjs/typeorm";
 import { User } from "src/user/entity/user.entity";
@@ -83,7 +82,7 @@ export class GameReplayService {
       }
       console.log(data);
     });
-    return `${BUCKET_URL}${filename}.json`;
+    return `${filename}.json`;
   }
 
   public async loadData(replayId: number) {
@@ -115,43 +114,46 @@ export class GameReplayService {
   }
 
   public async replayGame(user: Socket, replayId: number, userId: string) {
-    const gameEventUrl: string = await this.gameReplayRepository
-      .findOne({
-        where: { replayId: replayId },
+    const gameReplay = await this.gameReplayRepository
+      .createQueryBuilder("game_replay_entity")
+      .where("game_replay_entity.replayId = :replayId", {
+        replayId: replayId,
       })
-      .then((gameReplay: GameReplayEntity) => {
-        return gameReplay.gameEvent;
-      });
+      .getOne();
+    if (!gameReplay) return;
+    const gameEventUrl = gameReplay.gameEvent;
+    console.log(gameEventUrl);
+    console.log("b");
     const params = {
       Bucket: BUCKET_NAME,
-      Key: gameEventUrl,
+      Key: "1_1_1687447904529.json",
     };
-    let gameEventList: GameEventDto[] = [];
     s3.getObject(params, (err, data) => {
       if (err) {
         console.log(err);
       }
       if (data.Body !== null && data.Body !== undefined) {
-        gameEventList = JSON.parse(data.Body.toString()).data;
+        this.parseEventAndPlay(data.Body.toString(), user, userId);
       }
     });
-    user.emit("start_replay");
-    if (gameEventList.length > 0) {
-      gameEventList.forEach((gameEvent: GameEventDto) => {
-        const eventName = gameEvent.getEventName();
-        if (eventName === "get_item") {
-          if (gameEvent.getUserId() !== userId) {
-            return;
-          }
-        }
-        setTimeout(() => {
-          user.emit(eventName, gameEvent.getEventContent());
-        }, gameEvent.getTimestamp());
-      });
-      console.log(gameEventUrl);
-    }
   }
 
+  private parseEventAndPlay(rawEvent: string, user: Socket, userId: string) {
+    const gameEventList: string[] = JSON.parse(rawEvent);
+    user.emit("start_replay");
+    gameEventList.forEach((rawGameEvent: string) => {
+      const gameEvent = JSON.parse(rawGameEvent);
+      const eventName = gameEvent.eventName;
+      if (eventName === "get_item") {
+        if (gameEvent.getUserId() !== userId) {
+          return;
+        }
+      }
+      setTimeout(() => {
+        user.emit(eventName, gameEvent.eventContent);
+      }, gameEvent.timestamp);
+    });
+  }
   /**
    * 유저 게임 리플레이를 가져오기
    * @param isMyReplay - 사용자의 리플레이만 가져올지, 또는 공개 리플레이를 가져올지 결정하는 flag

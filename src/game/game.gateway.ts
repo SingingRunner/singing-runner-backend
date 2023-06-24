@@ -245,12 +245,8 @@ export class GameGateway
   }
 
   @SubscribeMessage("start_replay")
-  startReplay(
-    @ConnectedSocket() user: Socket,
-    @MessageBody() replayId: number,
-    @MessageBody() userId: string
-  ) {
-    this.gameReplayService.replayGame(user, replayId, userId);
+  startReplay(@ConnectedSocket() user: Socket, @MessageBody() data) {
+    this.gameReplayService.replayGame(user, data.replayId, data.userId);
   }
 
   private broadCast(user: Socket, message: string, responseData: any) {
