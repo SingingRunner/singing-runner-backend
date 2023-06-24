@@ -21,6 +21,7 @@ import { CustomModeService } from "./custom-mode/custom.mode.service";
 import { GameSongDto } from "src/song/dto/game-song.dto";
 import { userActiveStatus } from "src/user/util/user.enum";
 import { UserInfoDto } from "./utill/user-info.dto";
+import { GameReplayService } from "./replay/game.replay.service";
 
 /**
  * webSocket 통신을 담당하는 Handler
@@ -34,7 +35,8 @@ export class GameGateway
   constructor(
     private matchService: MatchService,
     private gameService: GameService,
-    private customModeService: CustomModeService
+    private customModeService: CustomModeService,
+    private gameReplayService: GameReplayService
   ) {}
 
   afterInit(server: Server) {
