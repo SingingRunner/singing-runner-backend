@@ -116,6 +116,7 @@ export class SocialService {
       .andWhere("friend.nickname LIKE :nickname", {
         nickname: `%${nickname}%`,
       })
+      .andWhere("social.deletedAt IS NULL")
       .orderBy("friend.nickname")
       .skip(skip)
       .take(take)
