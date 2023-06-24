@@ -172,11 +172,11 @@ export class GameGateway
   }
 
   @SubscribeMessage("game_terminated")
-  async gameTerminated(
+  gameTerminated(
     @ConnectedSocket() user: Socket,
     @MessageBody() userScoreDto: UserScoreDto
   ) {
-    if (await !this.gameService.allUsersTerminated(user, userScoreDto)) {
+    if (!this.gameService.allUsersTerminated(user, userScoreDto)) {
       return;
     }
 

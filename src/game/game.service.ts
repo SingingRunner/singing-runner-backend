@@ -126,11 +126,11 @@ export class GameService {
     if (gameRoom.getAcceptCount() == 1) {
       this.rankHandler.setRank(gameRoom);
     }
+
+    this.rankHandler.pushUserScore(gameRoom, userScoreDto);
     if (this.gameRoomHandler.isGameRoomReady(gameRoom)) {
       return true;
     }
-
-    this.rankHandler.pushUserScore(gameRoom, userScoreDto);
     return false;
   }
 
@@ -228,7 +228,7 @@ export class GameService {
       userVocal,
       filename
     );
-    console.log(gameEventJson);
+    // console.log(gameEventJson);
     // 같이 게임한 유저 정보 및 유저 캐릭터 정보도 추가해야함
     if (user === null) {
       return;
@@ -245,7 +245,7 @@ export class GameService {
       player2Character: subCharacter2,
       keynote: userKeynote,
     };
-    console.log(userVocal);
+    // console.log(userVocal);
     return await this.gameReplayService.saveReplay(gameReplayEntity);
   }
 
