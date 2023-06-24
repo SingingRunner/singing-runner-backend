@@ -21,6 +21,7 @@ import { CustomModeService } from "./custom-mode/custom.mode.service";
 import { GameSongDto } from "src/song/dto/game-song.dto";
 import { userActiveStatus } from "src/user/util/user.enum";
 import { UserInfoDto } from "./utill/user-info.dto";
+import { GameReplayService } from "./replay/game.replay.service";
 
 /**
  * webSocket 통신을 담당하는 Handler
@@ -34,7 +35,8 @@ export class GameGateway
   constructor(
     private matchService: MatchService,
     private gameService: GameService,
-    private customModeService: CustomModeService
+    private customModeService: CustomModeService,
+    private gameReplayService: GameReplayService
   ) {}
 
   afterInit(server: Server) {
@@ -227,6 +229,24 @@ export class GameGateway
   @SubscribeMessage("custom_start")
   startCustom(@ConnectedSocket() user: Socket) {
     this.broadCast(user, "custom_start", true);
+  }
+
+  @SubscribeMessage("load_replay")
+  async loadReplay(
+    @ConnectedSocket() user: Socket,
+    @MessageBody() replayId: number
+  ) {
+    const replayData = await this.gameReplayService.loadData(replayId);
+    user.emit("load_replay", replayData);
+  }
+
+  @SubscribeMessage("start_replay")
+  startReplay(
+    @ConnectedSocket() user: Socket,
+    @MessageBody() replayId: number,
+    @MessageBody() userId: string
+  ) {
+    this.gameReplayService.replayGame(user, replayId, userId);
   }
 
   private broadCast(user: Socket, message: string, responseData: any) {
