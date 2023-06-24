@@ -92,6 +92,7 @@ export class GameService {
     if (users[0].getUserMatchDto().userActive == userActiveStatus.IN_GAME) {
       return true;
     }
+
     return false;
   }
 
@@ -115,7 +116,10 @@ export class GameService {
     return this.itemPolicy.getItems();
   }
 
-  public allUsersTerminated(user: Socket, userScoreDto: UserScoreDto): boolean {
+  public async allUsersTerminated(
+    user: Socket,
+    userScoreDto: UserScoreDto
+  ): Promise<boolean> {
     // 50/20/-10
     const gameRoom: GameRoom = this.gameRoomHandler.findRoomBySocket(user);
     this.gameRoomHandler.increaseAcceptCount(user);
@@ -125,6 +129,7 @@ export class GameService {
     if (this.gameRoomHandler.isGameRoomReady(gameRoom)) {
       return true;
     }
+
     this.rankHandler.pushUserScore(gameRoom, userScoreDto);
     return false;
   }
@@ -149,19 +154,20 @@ export class GameService {
     user: Socket,
     gameTerminatedDto: GameTerminatedDto
   ) {
-    this.setNicknameSocket(user, gameTerminatedDto);
+    this.setSocketAndNickname(user, gameTerminatedDto);
     this.updateUserActive(
       gameTerminatedDto.getUserId(),
       userActiveStatus.CONNECT
     );
     const friendList = await this.getFriendList(gameTerminatedDto.getUserId());
     for (const friend of friendList) {
-      friend == gameTerminatedDto.getUserId();
-      gameTerminatedDto.setIsFriend(true);
+      if (friend == gameTerminatedDto.getUserId()) {
+        gameTerminatedDto.setIsFriend(true);
+      }
     }
   }
 
-  private setNicknameSocket(
+  private setSocketAndNickname(
     user: Socket,
     gameTerminatedDto: GameTerminatedDto
   ) {
@@ -172,8 +178,8 @@ export class GameService {
       if (
         userGameDto.getUserMatchDto().userId === gameTerminatedDto.getUserId()
       ) {
-        gameTerminatedDto.setNickname(userGameDto.getUserMatchDto().nickname);
         gameTerminatedDto.setUserSocket(userGameDto.getSocket());
+        gameTerminatedDto.setNickname(userGameDto.getUserMatchDto().nickname);
         return;
       }
     }

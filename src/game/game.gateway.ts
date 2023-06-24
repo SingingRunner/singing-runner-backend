@@ -21,6 +21,8 @@ import { CustomModeService } from "./custom-mode/custom.mode.service";
 import { GameSongDto } from "src/song/dto/game-song.dto";
 import { userActiveStatus } from "src/user/util/user.enum";
 import { UserInfoDto } from "./utill/user-info.dto";
+import { GameReplayService } from "./replay/game.replay.service";
+import { CustomSongDto } from "./utill/custom-song.dto";
 
 /**
  * webSocket 통신을 담당하는 Handler
@@ -34,7 +36,8 @@ export class GameGateway
   constructor(
     private matchService: MatchService,
     private gameService: GameService,
-    private customModeService: CustomModeService
+    private customModeService: CustomModeService,
+    private gameReplayService: GameReplayService
   ) {}
 
   afterInit(server: Server) {
@@ -169,20 +172,20 @@ export class GameGateway
   }
 
   @SubscribeMessage("game_terminated")
-  async gameTermintated(
+  async gameTerminated(
     @ConnectedSocket() user: Socket,
     @MessageBody() userScoreDto: UserScoreDto
   ) {
-    if (!this.gameService.allUsersTerminated(user, userScoreDto)) {
+    if (await !this.gameService.allUsersTerminated(user, userScoreDto)) {
       return;
     }
 
-    const gameTermintaedList: GameTerminatedDto[] =
+    const gameTerminatedList: GameTerminatedDto[] =
       this.gameService.calculateRank(user);
 
-    for (const gameTerminatedDto of gameTermintaedList) {
+    for (const gameTerminatedDto of gameTerminatedList) {
       this.gameService.setGameTerminatedDto(user, gameTerminatedDto);
-      gameTerminatedDto.getSocket().emit("game_terminated", gameTermintaedList);
+      gameTerminatedDto.getSocket().emit("game_terminated", gameTerminatedList);
     }
   }
 
@@ -207,12 +210,15 @@ export class GameGateway
   }
 
   @SubscribeMessage("set_song")
-  setGameSong(
+  async setGameSong(
     @ConnectedSocket() user: Socket,
-    @MessageBody() gameSongDto: GameSongDto
+    @MessageBody() songId: number
   ) {
-    this.customModeService.setGameSong(user, gameSongDto);
-    this.broadCast(user, "set_song", gameSongDto);
+    const gameSong: CustomSongDto = await this.customModeService.setCustomSong(
+      user,
+      songId
+    );
+    this.broadCast(user, "set_song", gameSong);
   }
 
   @SubscribeMessage("leave_room")
@@ -227,6 +233,24 @@ export class GameGateway
   @SubscribeMessage("custom_start")
   startCustom(@ConnectedSocket() user: Socket) {
     this.broadCast(user, "custom_start", true);
+  }
+
+  @SubscribeMessage("load_replay")
+  async loadReplay(
+    @ConnectedSocket() user: Socket,
+    @MessageBody() replayId: number
+  ) {
+    const replayData = await this.gameReplayService.loadData(replayId);
+    user.emit("load_replay", replayData);
+  }
+
+  @SubscribeMessage("start_replay")
+  startReplay(
+    @ConnectedSocket() user: Socket,
+    @MessageBody() replayId: number,
+    @MessageBody() userId: string
+  ) {
+    this.gameReplayService.replayGame(user, replayId, userId);
   }
 
   private broadCast(user: Socket, message: string, responseData: any) {
