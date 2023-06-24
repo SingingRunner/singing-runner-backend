@@ -2,22 +2,6 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-type GameSongDto {
-  songTitle: String!
-  singer: String!
-  songLyrics: String!
-  songGender: Boolean!
-  songMale: String!
-  songMaleUp: String!
-  songMaleDown: String!
-  songFemale: String!
-  songFemaleUp: String!
-  songFemaleDown: String!
-  vocalMale: String!
-  vocalMaleUp: String!
-  vocalMaleDown: String!
-}
-
 type User {
   userId: String!
   userEmail: String!
@@ -37,11 +21,6 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
-type Reply {
-  message: String!
-  code: Int!
-}
-
 type UserNotification {
   userId: String!
   senderId: String!
@@ -50,6 +29,60 @@ type UserNotification {
   content: String!
   receivedAt: DateTime!
   deletedAt: DateTime!
+}
+
+type HostUserOutput {
+  userId: String!
+  nickname: String!
+}
+
+type PollingDto {
+  hostUserDtoList: [HostUserOutput!]!
+  userNotificationList: [UserNotification!]!
+}
+
+type FriendDto {
+  userId: String!
+  nickname: String!
+  userActive: Int!
+  userMmr: Int!
+  character: String!
+  userTier: String!
+}
+
+type RequestDto {
+  senderId: String!
+  senderNickname: String!
+}
+
+type SearchFriendDto {
+  userId: String!
+  userMmr: Int!
+  userTier: String!
+  nickname: String!
+  userActive: Int!
+  character: String!
+}
+
+type GameSongDto {
+  songTitle: String!
+  singer: String!
+  songLyrics: String!
+  songGender: Boolean!
+  songMale: String!
+  songMaleUp: String!
+  songMaleDown: String!
+  songFemale: String!
+  songFemaleUp: String!
+  songFemaleDown: String!
+  vocalMale: String!
+  vocalMaleUp: String!
+  vocalMaleDown: String!
+}
+
+type Reply {
+  message: String!
+  code: Int!
 }
 
 type AuthUserDto {
@@ -102,30 +135,6 @@ type ReplayWithSongInfo {
   singer: String!
 }
 
-type HostUserOutput {
-  userId: String!
-  nickname: String!
-}
-
-type PollingDto {
-  hostUserDtoList: [HostUserOutput!]!
-  userNotificationList: [UserNotification!]!
-}
-
-type FriendDto {
-  userId: String!
-  nickname: String!
-  userActive: Int!
-  userMmr: Int!
-  character: String!
-  userTier: String!
-}
-
-type RequestDto {
-  senderId: String!
-  senderNickname: String!
-}
-
 input HostUserInput {
   userId: String!
   nickname: String!
@@ -133,29 +142,38 @@ input HostUserInput {
 
 type Query {
   searchSong(keyword: String!, page: Int!, filter: String!): [GameSongDto!]!
+  getNotification(userId: String!, page: Float!): [RequestDto!]!
+  searchFriend(userId: String!, nickname: String!, page: Float!): [SearchFriendDto!]!
+  searchUser(nickname: String!, page: Float!): [FriendDto!]!
   fetchUserGuard: AuthUserDto!
   fetchUser(userId: String!): AuthUserDto!
   getUserReplays(isMyReplay: Boolean!, pageNumber: Int!, userId: String!): [ReplayWithSongInfo!]!
-  getNotification(userId: String!, page: Float!): [RequestDto!]!
-  searchFriend(userId: String!, nickname: String!): [User!]!
-  searchUser(nickname: String!, page: Float!): [FriendDto!]!
-  getFriendList(userId: String!, page: Float!): [FriendDto!]!
 }
 
 type Mutation {
   saveReplay(userVocal: String!, userId: String!): Reply!
-  registerUser(newUser: UserRegisterDto!): AuthDto!
-  loginUser(userLoginDto: UserLoginDto!): AuthDto!
-  refreshAccessToken: AuthTokenDto!
-  logout(userId: String!): String!
-  updateCharacter(userId: String!, character: String!): UserCharacterResponseDto!
-  updateUserKeynote(userId: String!, keynote: userKeynoteStatus!): UserKeynoteResponseDto!
   longPolling(userId: String!): PollingDto!
   addFriend(addFriendDto: AddFriendDto!): String!
   removeFriend(addFriendDto: AddFriendDto!): String!
   inviteFriend(friendId: String!, hostUserDto: HostUserInput!): String!
   friendRequest(notificationDto: NotificationDto!): String!
   deleteNotification(notificationDto: NotificationDto!): String!
+  registerUser(newUser: UserRegisterDto!): AuthDto!
+  loginUser(userLoginDto: UserLoginDto!): AuthDto!
+  refreshAccessToken: AuthTokenDto!
+  logout(userId: String!): String!
+  updateCharacter(userId: String!, character: String!): UserCharacterResponseDto!
+  updateUserKeynote(userId: String!, keynote: userKeynoteStatus!): UserKeynoteResponseDto!
+}
+
+input AddFriendDto {
+  userId: String!
+  firendId: String!
+}
+
+input NotificationDto {
+  userId: String!
+  senderId: String!
 }
 
 input UserRegisterDto {
@@ -173,14 +191,4 @@ enum userKeynoteStatus {
   ORIGINAL_KEY
   FEMALE_KEY
   MALE_KEY
-}
-
-input AddFriendDto {
-  userId: String!
-  firendId: String!
-}
-
-input NotificationDto {
-  userId: String!
-  senderId: String!
 }
