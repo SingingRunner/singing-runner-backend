@@ -5,7 +5,6 @@ import { FindOneOptions, Like, Repository } from "typeorm";
 import { User } from "./entity/user.entity";
 import * as bcrypt from "bcrypt";
 import { userActiveStatus } from "./util/user.enum";
-import { UserMatchDto } from "./dto/user.match.dto";
 import { UserMatchTier } from "src/game/utill/game.enum";
 
 @Injectable()

@@ -43,16 +43,19 @@ export class RankHandlerImpl implements RankHandler {
     gameTerminatedList.push(
       new GameTerminatedDto(
         userScoreList[0].getUserId(),
+        userScoreList[0].getNickname(),
         50,
         userScoreList[0].getScore()
       ),
       new GameTerminatedDto(
         userScoreList[1].getUserId(),
+        userScoreList[1].getNickname(),
         10,
         userScoreList[1].getScore()
       ),
       new GameTerminatedDto(
         userScoreList[2].getUserId(),
+        userScoreList[2].getNickname(),
         -10,
         userScoreList[2].getScore()
       )

@@ -175,16 +175,16 @@ export class GameGateway
     @ConnectedSocket() user: Socket,
     @MessageBody() userScoreDto: UserScoreDto
   ) {
-    if (!this.gameService.allUsersTerminated(user, userScoreDto)) {
+    if (await !this.gameService.allUsersTerminated(user, userScoreDto)) {
       return;
     }
 
-    const gameTermintaedList: GameTerminatedDto[] =
+    const gameTerminatedList: GameTerminatedDto[] =
       this.gameService.calculateRank(user);
 
-    for (const gameTerminatedDto of gameTermintaedList) {
+    for (const gameTerminatedDto of gameTerminatedList) {
       this.gameService.setGameTerminatedDto(user, gameTerminatedDto);
-      gameTerminatedDto.getSocket().emit("game_terminated", gameTermintaedList);
+      gameTerminatedDto.getSocket().emit("game_terminated", gameTerminatedList);
     }
   }
 
