@@ -1,8 +1,14 @@
 import { Socket } from "socket.io";
 
 export class GameTerminatedDto {
-  constructor(userId: string, mmrDiff: number, userScore: number) {
+  constructor(
+    userId: string,
+    nickname: string,
+    mmrDiff: number,
+    userScore: number
+  ) {
     this.userId = userId;
+    this.nickname = nickname;
     this.mmrDiff = mmrDiff;
     this.userScore = userScore;
     this.isFriend = false;
