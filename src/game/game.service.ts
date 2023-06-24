@@ -115,7 +115,10 @@ export class GameService {
     return this.itemPolicy.getItems();
   }
 
-  public allUsersTerminated(user: Socket, userScoreDto: UserScoreDto): boolean {
+  public async allUsersTerminated(
+    user: Socket,
+    userScoreDto: UserScoreDto
+  ): Promise<boolean> {
     // 50/20/-10
     const gameRoom: GameRoom = this.gameRoomHandler.findRoomBySocket(user);
     this.gameRoomHandler.increaseAcceptCount(user);
@@ -125,6 +128,13 @@ export class GameService {
     if (this.gameRoomHandler.isGameRoomReady(gameRoom)) {
       return true;
     }
+
+    const userInfo: User | null = await this.userService.findUserById(
+      userScoreDto.getUserId()
+    );
+    const userNickname = userInfo === null ? "guest" : userInfo.nickname;
+
+    userScoreDto.setNickname(userNickname);
     this.rankHandler.pushUserScore(gameRoom, userScoreDto);
     return false;
   }

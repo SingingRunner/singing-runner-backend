@@ -175,7 +175,7 @@ export class GameGateway
     @ConnectedSocket() user: Socket,
     @MessageBody() userScoreDto: UserScoreDto
   ) {
-    if (!this.gameService.allUsersTerminated(user, userScoreDto)) {
+    if (await !this.gameService.allUsersTerminated(user, userScoreDto)) {
       return;
     }
 

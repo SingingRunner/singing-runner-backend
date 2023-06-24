@@ -3,9 +3,8 @@ export class UserScoreDto {
   private nickname: string;
   private score: number;
 
-  constructor($userId: string, $nickname: string, $score: number) {
+  constructor($userId: string, $score: number) {
     this.userId = $userId;
-    this.nickname = $nickname;
     this.score = $score;
   }
 
@@ -15,6 +14,10 @@ export class UserScoreDto {
 
   public getNickname(): string {
     return this.nickname;
+  }
+
+  public setNickname(nickname: string) {
+    this.nickname = nickname;
   }
 
   public getScore(): number {
