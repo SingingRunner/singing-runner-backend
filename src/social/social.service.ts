@@ -52,15 +52,27 @@ export class SocialService {
   }
 
   public async removeFriend(userId: string, friendId: string, date: Date) {
-    const social = await this.socialRepository.findOne({
-      where: [{ userId: userId }, { friendId: friendId }],
-    });
+    const userToFriend = await this.socialRepository
+      .createQueryBuilder("social")
+      .where("social.userId = :userId", { userId })
+      .andWhere("social.friendId = :friendId", { friendId })
+      .getOne();
 
-    if (!social) {
+    const friendToUser = await this.socialRepository
+      .createQueryBuilder("social")
+      .where("social.userId = :userId", { userId: friendId })
+      .andWhere("social.friendId = :friendId", { friendId: userId })
+      .getOne();
+
+    if (!userToFriend || !friendToUser) {
       throw new Error("해당 친구 관계가 존재하지 않습니다.");
     }
-    social.deletedAt = date;
-    await this.socialRepository.save(social);
+
+    userToFriend.deletedAt = date;
+    friendToUser.deletedAt = date;
+
+    await this.socialRepository.save(userToFriend);
+    await this.socialRepository.save(friendToUser);
   }
 
   public async searchUser(

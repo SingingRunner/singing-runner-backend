@@ -62,7 +62,7 @@ export class SocialResolver {
   async addFriend(@Args("addFriendDto") addFriendDto: AddFriendDto) {
     await this.socialService.addFriend(
       addFriendDto.userId,
-      addFriendDto.firendId
+      addFriendDto.friendId
     );
     return "ok";
   }
@@ -72,7 +72,7 @@ export class SocialResolver {
     const date = new Date();
     await this.socialService.removeFriend(
       addFriendDto.userId,
-      addFriendDto.firendId,
+      addFriendDto.friendId,
       date
     );
     return "ok";
