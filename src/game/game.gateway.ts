@@ -214,7 +214,7 @@ export class GameGateway
     @ConnectedSocket() user: Socket,
     @MessageBody() songId: number
   ) {
-    const gameSong: CustomSongDto = await this.customModeService.setGameSong(
+    const gameSong: CustomSongDto = await this.customModeService.setCustomSong(
       user,
       songId
     );
