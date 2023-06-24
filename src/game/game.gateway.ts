@@ -179,12 +179,12 @@ export class GameGateway
       return;
     }
 
-    const gameTermintaedList: GameTerminatedDto[] =
+    const gameTerminatedList: GameTerminatedDto[] =
       this.gameService.calculateRank(user);
 
-    for (const gameTerminatedDto of gameTermintaedList) {
+    for (const gameTerminatedDto of gameTerminatedList) {
       this.gameService.setGameTerminatedDto(user, gameTerminatedDto);
-      gameTerminatedDto.getSocket().emit("game_terminated", gameTermintaedList);
+      gameTerminatedDto.getSocket().emit("game_terminated", gameTerminatedList);
     }
   }
 
