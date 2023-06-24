@@ -78,7 +78,7 @@ export class MyroomResolver {
 
   @Mutation(() => ReplayIsPublicResponseDto)
   async updateReplayIsPublic(
-    @Args("replayId") replayId: number,
+    @Args("replayId", { type: () => Int }) replayId: number,
     @Args("isPublic", { type: () => Int }) isPublic: number
   ): Promise<ReplayIsPublicResponseDto> {
     const updatedReplay = await this.gameReplayService.updateReplayIsPublic(
