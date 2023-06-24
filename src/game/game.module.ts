@@ -14,9 +14,16 @@ import { RandomItemPolicy } from "./item/random.item.policy";
 import { GameResolver } from "./game.resolver";
 import { User } from "src/user/entity/user.entity";
 import { CustomModeService } from "./custom-mode/custom.mode.service";
+import { UserModule } from "src/user/user.module";
+import { SocialModule } from "src/social/social.module";
 
 @Module({
-  imports: [SongModule, TypeOrmModule.forFeature([GameReplayEntity, User])],
+  imports: [
+    UserModule,
+    SongModule,
+    TypeOrmModule.forFeature([GameReplayEntity, User]),
+    SocialModule,
+  ],
   providers: [
     GameService,
     MatchService,

@@ -12,6 +12,7 @@ import { User } from "src/user/entity/user.entity";
 import { Invite } from "./invite/invite";
 import { UserNotification } from "./notification/user.notification.entitiy";
 import { RequestDto } from "./dto/request-dto";
+import { SearchFriendDto } from "src/user/dto/search-freind.dto";
 
 @Injectable()
 export class SocialService {
@@ -86,15 +87,16 @@ export class SocialService {
     }
     return userList;
   }
+
   public async searchFriend(
     userId: string,
     nickname: string,
     page: number
-  ): Promise<User[]> {
+  ): Promise<SearchFriendDto[]> {
     const take = 10;
     const skip = (page - 1) * take;
 
-    const friends = await this.socialRepository
+    const friends: Social[] = await this.socialRepository
       .createQueryBuilder("social")
       .innerJoinAndSelect("social.friend", "friend")
       .innerJoinAndSelect("social.user", "user")
@@ -107,42 +109,33 @@ export class SocialService {
       .take(take)
       .getMany();
 
-    return friends.map((friend) => friend.friend);
+    const friendList: User[] = friends.map((friend) => friend.friend);
+    const resultList: SearchFriendDto[] = [];
+    for (const friend of friendList) {
+      const searchFriendDto = new SearchFriendDto();
+      searchFriendDto.nickname = friend.nickname;
+      searchFriendDto.character = friend.character;
+      searchFriendDto.userActive = friend.userActive;
+      searchFriendDto.userId = friend.userId;
+      searchFriendDto.userMmr = friend.userMmr;
+      searchFriendDto.userTier = this.userService.determineUserTier(
+        friend.userMmr
+      );
+      resultList.push(searchFriendDto);
+    }
+
+    return resultList;
   }
 
-  public async getFriendList(
-    userId: string,
-    page: number
-  ): Promise<FriendDto[]> {
-    const take = 10;
-    const skip = (page - 1) * take;
-    const notDeleted = new Date("1970-01-01");
-
+  public async getFriendList(userId: string): Promise<string[]> {
     const socialList = await this.socialRepository.find({
-      where: [{ userId: userId }, { deletedAt: notDeleted }],
-      take: take,
-      skip: skip,
+      where: [{ userId: userId }],
       relations: ["friend"],
     });
-
-    const userTier = UserMatchTier.BRONZE;
-    const friendList: FriendDto[] = [];
+    const friendList: string[] = [];
 
     for (const social of socialList) {
-      const friend = social.friend;
-      if (!friend) {
-        throw new Error("없는 친구");
-      }
-      friendList.push(
-        new FriendDto(
-          friend.userId,
-          friend.nickname,
-          friend.userActive,
-          friend.character,
-          friend.userMmr,
-          userTier
-        )
-      );
+      friendList.push(social.friendId);
     }
 
     return friendList;

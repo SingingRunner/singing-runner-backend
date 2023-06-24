@@ -9,8 +9,9 @@ export class SongResolver {
   @Query(() => [GameSongDto])
   async searchSong(
     @Args("keyword") keyword: string,
-    @Args("page", { type: () => Int }) page: number
+    @Args("page", { type: () => Int }) page: number,
+    @Args("filter") filter: string
   ): Promise<GameSongDto[]> {
-    return await this.songService.searchSong(keyword, page);
+    return await this.songService.searchSong(keyword, page, filter);
   }
 }

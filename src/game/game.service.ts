@@ -1,3 +1,5 @@
+import { SocialService } from "./../social/social.service";
+import { UserService } from "src/user/user.service";
 import { GameRoomHandler } from "./room/game.room.handler";
 import { Inject, Injectable } from "@nestjs/common";
 import { Socket } from "socket.io";
@@ -11,9 +13,9 @@ import { UserScoreDto } from "./rank/dto/user-score.dto";
 import { RankHandler } from "./rank/rank.hanlder";
 import { GameTerminatedDto } from "./rank/game-terminated.dto";
 import { GameReplayService } from "./replay/game.replay.service";
-import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
 import { User } from "src/user/entity/user.entity";
+import { userActiveStatus } from "src/user/util/user.enum";
+import { UserInfoDto } from "./utill/user-info.dto";
 
 @Injectable()
 export class GameService {
@@ -24,8 +26,8 @@ export class GameService {
     @Inject("RankHandler")
     private rankHandler: RankHandler,
     private gameReplayService: GameReplayService,
-    @InjectRepository(User)
-    private userRepository: Repository<User>
+    private userService: UserService,
+    private socialService: SocialService
   ) {}
 
   public loadData(user: Socket) {
@@ -54,6 +56,48 @@ export class GameService {
       return true;
     }
     return false;
+  }
+
+  public findUsersSocketInSameRoom(user): Socket[] {
+    const gameRoom = this.gameRoomHandler.findRoomBySocket(user);
+    const userGameDtoList: UserGameDto[] =
+      this.gameRoomHandler.findUsersInRoom(gameRoom);
+    const usersSocket: Socket[] = [];
+
+    for (const userGameDto of userGameDtoList) {
+      usersSocket.push(userGameDto.getSocket());
+    }
+
+    return usersSocket;
+  }
+  public getUserInfoBySocket(user: Socket) {
+    const gameRoom = this.gameRoomHandler.findRoomBySocket(user);
+    const UserGameDtoList: UserGameDto[] =
+      this.gameRoomHandler.findUsersInRoom(gameRoom);
+    for (const userGameDto of UserGameDtoList) {
+      if (userGameDto.getSocket() === user) {
+        const userId: string = userGameDto.getUserMatchDto().userId;
+        const nickName: string = userGameDto.getUserMatchDto().nickname;
+        return new UserInfoDto(userId, nickName);
+      }
+    }
+  }
+
+  public exitWhileInGame(user: Socket) {
+    const gameRoom = this.gameRoomHandler.findRoomBySocket(user);
+    const users = this.gameRoomHandler.findUsersInRoom(gameRoom);
+    if (gameRoom === null || gameRoom === undefined) {
+      return false;
+    }
+    if (users[0].getUserMatchDto().userActive == userActiveStatus.IN_GAME) {
+      return true;
+    }
+    return false;
+  }
+
+  public leaveRoom(user: Socket) {
+    const gameRoom = this.gameRoomHandler.findRoomBySocket(user);
+    this.gameRoomHandler.leaveRoom(gameRoom, user);
   }
 
   public findUsersIdInSameRoom(user: Socket): string[] {
@@ -85,16 +129,67 @@ export class GameService {
     return false;
   }
 
-  public caculateRank(user: Socket): GameTerminatedDto[] {
+  public calculateRank(user: Socket): GameTerminatedDto[] {
     const gameRoom: GameRoom = this.gameRoomHandler.findRoomBySocket(user);
-    return this.rankHandler.calculateRank(gameRoom);
+    const gameTerminatedList = this.rankHandler.calculateRank(gameRoom);
+    this.updateMmr(gameTerminatedList);
+    return gameTerminatedList;
+  }
+
+  private updateMmr(gameTerminiatedDtoList: GameTerminatedDto[]) {
+    for (const gameTerminatedDto of gameTerminiatedDtoList) {
+      this.userService.updateMmr(
+        gameTerminatedDto.getUserId(),
+        gameTerminatedDto.getMmrDiff()
+      );
+    }
+  }
+
+  public async setGameTerminatedDto(
+    user: Socket,
+    gameTerminatedDto: GameTerminatedDto
+  ) {
+    this.setNicknameSocket(user, gameTerminatedDto);
+    this.updateUserActive(
+      gameTerminatedDto.getUserId(),
+      userActiveStatus.CONNECT
+    );
+    const friendList = await this.getFriendList(gameTerminatedDto.getUserId());
+    for (const friend of friendList) {
+      friend == gameTerminatedDto.getUserId();
+      gameTerminatedDto.setIsFriend(true);
+    }
+  }
+
+  private setNicknameSocket(
+    user: Socket,
+    gameTerminatedDto: GameTerminatedDto
+  ) {
+    const gameRoom: GameRoom = this.gameRoomHandler.findRoomBySocket(user);
+    const userList: UserGameDto[] =
+      this.gameRoomHandler.findUsersInRoom(gameRoom);
+    for (const userGameDto of userList) {
+      if (
+        userGameDto.getUserMatchDto().userId === gameTerminatedDto.getUserId()
+      ) {
+        gameTerminatedDto.setNickname(userGameDto.getUserMatchDto().nickname);
+        gameTerminatedDto.setUserSocket(userGameDto.getSocket());
+        return;
+      }
+    }
+  }
+
+  public updateUserActive(userId: string, userActive: userActiveStatus) {
+    this.userService.updateUserActive(userId, userActive);
+  }
+
+  private async getFriendList(userId: string): Promise<string[]> {
+    return await this.socialService.getFriendList(userId);
   }
 
   public async saveReplay(userId: string, userVocal: string) {
     const gameRoom: GameRoom = this.gameRoomHandler.findRoomByUserId(userId);
-    const user: User | null = await this.userRepository.findOne({
-      where: { userId: userId },
-    });
+    const user: User | null = await this.userService.findUserById(userId);
     const songId = gameRoom.getGameSongDto().songId;
     const filename = `${userId}_${songId}_${new Date().getTime()}`;
     const gameEvent = gameRoom.getGameEvent();
