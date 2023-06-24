@@ -1,10 +1,10 @@
 export class UserScoreDto {
-  private userId: string;
-  private score: number;
+  public userId: string;
+  public score: number;
 
-  constructor($userId: string, $score: number) {
-    this.userId = $userId;
-    this.score = $score;
+  constructor(userId: string, score: number) {
+    this.userId = userId;
+    this.score = score;
   }
 
   public getUserId(): string {

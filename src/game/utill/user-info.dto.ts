@@ -1,9 +1,9 @@
 export class UserInfoDto {
   private userId: string;
-  private nicknam: string;
+  private nickname: string;
 
-  constructor($userId: string, $nicknam: string) {
+  constructor($userId: string, $nickname: string) {
     this.userId = $userId;
-    this.nicknam = $nicknam;
+    this.nickname = $nickname;
   }
 }
