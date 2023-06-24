@@ -6,7 +6,7 @@ export class JwtAccessStrategy extends PassportStrategy(Strategy, "access") {
   constructor() {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      ignoreExpiration: true, // 토큰 만료 여부 확인
+      ignoreExpiration: false, // 토큰 만료 여부 확인
       secretOrKey: "SECRET_KEY",
     });
   }

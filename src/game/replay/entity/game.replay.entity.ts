@@ -6,6 +6,7 @@ import {
   Entity,
   ManyToOne,
   PrimaryGeneratedColumn,
+  JoinColumn,
 } from "typeorm";
 
 @Entity()
@@ -28,24 +29,31 @@ export class GameReplayEntity extends BaseEntity {
   @Column({ type: "tinyint", default: 0 })
   keynote: number;
 
-  @ManyToOne(() => User)
-  userId: string;
+  @Column({ type: "tinyint", default: 0 })
+  isPublic: number;
+
+  @ManyToOne(() => User, (user) => user.replays)
+  user: User;
 
   @Column({ type: "varchar", length: 1024 })
   userCharacter: string;
 
-  @ManyToOne(() => User)
+  @Column({ type: "varchar", length: 36 })
   player1Id: string;
 
   @Column({ type: "varchar", length: 1024 })
   player1Character: string;
 
-  @ManyToOne(() => User)
+  @Column({ type: "varchar", length: 36 })
   player2Id: string;
 
   @Column({ type: "varchar", length: 1024 })
   player2Character: string;
 
-  @ManyToOne(() => Song)
+  @Column({ type: "int", default: 0 })
   songId: number;
+
+  @ManyToOne(() => Song)
+  @JoinColumn({ name: "songId" })
+  song: Song;
 }

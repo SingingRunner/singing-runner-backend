@@ -5,20 +5,31 @@ import { GameRoomHandler } from "./room/game.room.handler";
 import { GameGateway } from "./game.gateway";
 import { MatchService } from "./match/match.service";
 import { SongModule } from "src/song/song.module";
-import { SimpleItemPolicy } from "./item/simple.item.policy";
 import { MMRMatchPolicy } from "./match/mmr.match.policy";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { GameReplayEntity } from "./replay/entity/game.replay.entity";
 import { RankHandlerImpl } from "./rank/rank.handler.impl";
 import { GameReplayService } from "./replay/game.replay.service";
+import { RandomItemPolicy } from "./item/random.item.policy";
+import { GameResolver } from "./game.resolver";
+import { User } from "src/user/entity/user.entity";
+import { CustomModeService } from "./custom-mode/custom.mode.service";
+import { UserModule } from "src/user/user.module";
+import { SocialModule } from "src/social/social.module";
 
 @Module({
-  imports: [SongModule, TypeOrmModule.forFeature([GameReplayEntity])],
+  imports: [
+    UserModule,
+    SongModule,
+    TypeOrmModule.forFeature([GameReplayEntity, User]),
+    SocialModule,
+  ],
   providers: [
     GameService,
     MatchService,
     GameReplayService,
     GameRoomHandler,
+    CustomModeService,
     {
       provide: "MatchMakingPolicy",
       useClass: MMRMatchPolicy,
@@ -26,12 +37,14 @@ import { GameReplayService } from "./replay/game.replay.service";
     GameGateway,
     {
       provide: "ItemPolicy",
-      useClass: SimpleItemPolicy,
+      useClass: RandomItemPolicy,
     },
     {
       provide: "RankHandler",
       useClass: RankHandlerImpl,
     },
+    GameResolver,
   ],
+  exports: [GameReplayService],
 })
 export class GameModule {}

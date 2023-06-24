@@ -28,4 +28,18 @@ export class Invite {
     );
     this.inviteMap.set(userId, inviteQueue);
   }
+
+  public hasInvitation(userId: string): boolean {
+    return this.inviteMap.has(userId);
+  }
+
+  public getAllInvitation(userId: string): HostUserDto[] {
+    const invitationList: HostUserDto[] | undefined =
+      this.inviteMap.get(userId);
+    if (invitationList === null || invitationList === undefined) {
+      throw new Error("유저의 초대리스트가 비어있습니다.");
+    }
+    this.inviteMap.delete(userId);
+    return invitationList;
+  }
 }
