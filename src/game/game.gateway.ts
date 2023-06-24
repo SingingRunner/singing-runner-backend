@@ -22,6 +22,7 @@ import { GameSongDto } from "src/song/dto/game-song.dto";
 import { userActiveStatus } from "src/user/util/user.enum";
 import { UserInfoDto } from "./utill/user-info.dto";
 import { GameReplayService } from "./replay/game.replay.service";
+import { CustomSongDto } from "./utill/custom-song.dto";
 
 /**
  * webSocket 통신을 담당하는 Handler
@@ -209,12 +210,15 @@ export class GameGateway
   }
 
   @SubscribeMessage("set_song")
-  setGameSong(
+  async setGameSong(
     @ConnectedSocket() user: Socket,
-    @MessageBody() gameSongDto: GameSongDto
+    @MessageBody() songId: number
   ) {
-    this.customModeService.setGameSong(user, gameSongDto);
-    this.broadCast(user, "set_song", gameSongDto);
+    const gameSong: CustomSongDto = await this.customModeService.setCustomSong(
+      user,
+      songId
+    );
+    this.broadCast(user, "set_song", gameSong);
   }
 
   @SubscribeMessage("leave_room")
