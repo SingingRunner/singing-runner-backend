@@ -6,5 +6,5 @@ export class AddFriendDto {
   userId: string;
 
   @Field(() => String)
-  firendId: string;
+  friendId: string;
 }
