@@ -106,7 +106,11 @@ export class GameReplayService {
           userId: gameReplay.player2Id,
           character: gameReplay.player2Character,
         });
-        return { gameSong: gameSong, characterList: characterList };
+        return {
+          gameSong: gameSong,
+          characterList: characterList,
+          replayId: replayId,
+        };
       }
     }
   }
