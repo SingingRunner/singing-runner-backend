@@ -227,6 +227,8 @@ export class GameGateway
     @ConnectedSocket() user: Socket,
     @MessageBody() userMatchDto: UserMatchDto
   ) {
+    console.log("create usermatchdto : ", userMatchDto.character);
+    console.log("create usermatchdto : ", userMatchDto);
     await this.customModeService.createCustomRoom(user, userMatchDto);
     const gameRoom: GameRoom = this.matchService.findRoomBySocket(user);
     user.emit("create_custom", gameRoom.getRoomId());
