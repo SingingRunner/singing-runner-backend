@@ -1,3 +1,4 @@
+import { characterEnum } from "src/user/util/character.enum";
 import { SocialService } from "./../social/social.service";
 import { UserService } from "src/user/user.service";
 import { GameRoomHandler } from "./room/game.room.handler";
@@ -148,6 +149,17 @@ export class GameService {
       );
     }
   }
+  public async setGameTerminatedCharacter(
+    gameTerminatedDto: GameTerminatedDto
+  ) {
+    const user: User | null = await this.userService.findUserById(
+      gameTerminatedDto.getUserId()
+    );
+    if (user === null) {
+      throw new Error("없는 유저입니다");
+    }
+    gameTerminatedDto.setCharacter(user.character);
+  }
 
   public async setGameTerminatedDto(
     userGame: UserGameDto,
@@ -156,13 +168,15 @@ export class GameService {
     this.setTerminatedUserNickname(userGame.getSocket(), gameTerminatedDto);
     const userMatchDto = userGame.getUserMatchDto();
     await this.updateUserActive(userMatchDto.userId, userActiveStatus.CONNECT);
-    const friendList = await this.getFriendList(userMatchDto.userId);
+    const friendList: User[] = await this.getFriendList(userMatchDto.userId);
+
     if (friendList === null) {
       return;
     }
     for (const friend of friendList) {
-      if (friend === gameTerminatedDto.getUserId()) {
+      if (friend.userId === gameTerminatedDto.getUserId()) {
         gameTerminatedDto.setIsFriend(true);
+
         return;
       }
       gameTerminatedDto.setIsFriend(false);
@@ -190,7 +204,7 @@ export class GameService {
     await this.userService.updateUserActive(userId, userActive);
   }
 
-  private async getFriendList(userId: string): Promise<string[]> {
+  private async getFriendList(userId: string): Promise<User[]> {
     return await this.socialService.getFriendList(userId);
   }
 

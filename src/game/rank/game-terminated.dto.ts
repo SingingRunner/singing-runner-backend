@@ -17,6 +17,7 @@ export class GameTerminatedDto {
   private userScore: number;
   private isFriend: boolean;
   private tier: string;
+  private charcter: string;
 
   public getUserId() {
     return this.userId;
@@ -42,5 +43,9 @@ export class GameTerminatedDto {
 
   public getMmrDiff() {
     return this.mmrDiff;
+  }
+
+  public setCharacter(character: string) {
+    this.charcter = character;
   }
 }
