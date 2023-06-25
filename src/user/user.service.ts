@@ -43,8 +43,21 @@ export class UserService {
     return await this.userRepository.save(user);
   }
 
-  async findUserById(userId: string): Promise<User | null> {
-    return await this.userRepository.findOne({ where: { userId } });
+  async findUserById(userId: string): Promise<User> {
+    const user: User | null = await this.userRepository.findOne({
+      where: { userId },
+    });
+    if (user === null) {
+      throw new Error("user is not defined");
+    }
+    return user;
+  }
+
+  public async findUserByNickname(nickname: string): Promise<User[]> {
+    return await this.userRepository
+      .createQueryBuilder("user")
+      .where("user.nickname LIKE :nickname", { nickname: `%${nickname}%` })
+      .getMany();
   }
 
   public async searchUser(nickname: string, page: number): Promise<User[]> {

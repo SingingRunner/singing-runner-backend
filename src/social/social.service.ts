@@ -7,7 +7,6 @@ import { Social } from "./entity/social.entity";
 import { Repository } from "typeorm";
 import { NotificationService } from "./notification/notification.service";
 import { FriendDto } from "src/user/dto/friend.dto";
-import { UserMatchTier } from "src/game/utill/game.enum";
 import { User } from "src/user/entity/user.entity";
 import { Invite } from "./invite/invite";
 import { UserNotification } from "./notification/user.notification.entitiy";
@@ -79,13 +78,27 @@ export class SocialService {
     nickname: string,
     page: number
   ): Promise<FriendDto[]> {
-    const searchList: User[] = await this.userService.searchUser(
-      nickname,
-      page
-    );
-    const userTier = UserMatchTier.BRONZE;
+    if (!nickname) {
+      return []; // 빈 닉네임 제공 시, 빈 배열 반환(조회 X)
+    }
+
+    const take = 10;
+    const skip = (page - 1) * take;
+
+    // 유저의 친구 목록
+    const friendList = await this.getFriendList(nickname);
+    const friendIds = friendList.map((user) => user.userId);
+
+    // 친구 목록에 없고 별명과 일치하는 유저 찾는 옵션
+    const users: User[] = await this.userService.findUserByNickname(nickname);
+    const filteredUsers: User[] = users
+      .filter((user) => !friendIds.includes(user.userId))
+      .slice(skip, skip + take);
+
     const userList: FriendDto[] = [];
-    for (const user of searchList) {
+    for (const user of filteredUsers) {
+      const userTier = this.userService.determineUserTier(user.userMmr);
+
       userList.push(
         new FriendDto(
           user.userId,
@@ -140,15 +153,15 @@ export class SocialService {
     return resultList;
   }
 
-  public async getFriendList(userId: string): Promise<string[]> {
+  public async getFriendList(userId: string): Promise<User[]> {
     const socialList = await this.socialRepository.find({
       where: [{ userId: userId }],
       relations: ["friend"],
     });
-    const friendList: string[] = [];
+    const friendList: User[] = [];
 
     for (const social of socialList) {
-      friendList.push(social.friendId);
+      friendList.push(social.friend);
     }
 
     return friendList;

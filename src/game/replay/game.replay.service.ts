@@ -10,17 +10,9 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { User } from "src/user/entity/user.entity";
 
 const BUCKET_NAME: string = process.env.AWS_S3_BUCKET_NAME as string;
-const BUCKET_REGION: string = process.env.AWS_S3_BUCKET_REGION as string;
-const BUCKET_ACCESS_KEY: string = process.env.AWS_ACCESS_KEY as string;
-const BUCKET_SECRET_KEY: string = process.env.AWS_SECRET_ACCESS_KEY as string;
 const BUCKET_URL: string = `https://${BUCKET_NAME}.s3.amazonaws.com/` as string;
 
 const s3 = new AWS.S3();
-AWS.config.update({
-  accessKeyId: BUCKET_ACCESS_KEY,
-  secretAccessKey: BUCKET_SECRET_KEY,
-  region: BUCKET_REGION,
-});
 
 interface ReplayWithSongInfo
   extends Omit<
@@ -39,7 +31,13 @@ export class GameReplayService {
     private gameReplayRepository: Repository<GameReplayEntity>,
     @InjectRepository(User)
     private userRepository: Repository<User>
-  ) {}
+  ) {
+    s3.config.update({
+      accessKeyId: process.env.AWS_ACCESS_KEY,
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+      region: process.env.AWS_S3_BUCKET_REGION,
+    });
+  }
 
   public async saveReplay(gameReplayEntity: CreateReplayInput) {
     return await this.gameReplayRepository.save(
