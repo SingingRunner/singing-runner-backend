@@ -47,6 +47,13 @@ export class UserService {
     return await this.userRepository.findOne({ where: { userId } });
   }
 
+  public async findUserByNickname(nickname: string): Promise<User[]> {
+    return await this.userRepository
+      .createQueryBuilder("user")
+      .where("user.nickname LIKE :nickname", { nickname: `%${nickname}%` })
+      .getMany();
+  }
+
   public async searchUser(nickname: string, page: number): Promise<User[]> {
     const take = 10;
     const skip = (page - 1) * take;

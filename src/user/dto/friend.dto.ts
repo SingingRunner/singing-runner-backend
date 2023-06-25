@@ -1,7 +1,6 @@
 import { Field, Int, ObjectType } from "@nestjs/graphql";
 import { userActiveStatus } from "../util/user.enum";
 import { characterEnum } from "../util/character.enum";
-import { UserMatchTier } from "src/game/utill/game.enum";
 
 @ObjectType()
 export class FriendDto {
@@ -11,7 +10,7 @@ export class FriendDto {
     userActive: userActiveStatus,
     character: characterEnum,
     userMmr: number,
-    userTier: UserMatchTier
+    userTier: string
   ) {
     this.userId = userId;
     this.nickname = nickname;
@@ -37,5 +36,5 @@ export class FriendDto {
   character: string;
 
   @Field(() => String)
-  userTier: UserMatchTier;
+  userTier: string;
 }
