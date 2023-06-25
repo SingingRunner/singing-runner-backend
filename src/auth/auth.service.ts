@@ -24,7 +24,7 @@ export class AuthService {
   constructor(
     private userService: UserService,
     private jwtService: JwtService,
-    @Inject("HearBeat")
+    @Inject("HeartBeat")
     private hearBeat: HeartBeat
   ) {}
 

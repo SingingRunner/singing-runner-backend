@@ -25,6 +25,6 @@ import { HeartBeatimpl } from "./heartbeat/hearbeat.impl";
       useClass: HeartBeatimpl,
     },
   ],
-  exports: [SocialService, HeartBeatimpl],
+  exports: [SocialService, "HeartBeat"],
 })
 export class SocialModule {}
