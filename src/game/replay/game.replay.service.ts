@@ -9,9 +9,6 @@ import { CreateReplayInput } from "./dto/create-replay.input";
 import { InjectRepository } from "@nestjs/typeorm";
 import { User } from "src/user/entity/user.entity";
 
-const BUCKET_NAME: string = process.env.AWS_S3_BUCKET_NAME as string;
-const BUCKET_URL: string = `https://${BUCKET_NAME}.s3.amazonaws.com/` as string;
-
 const s3 = new AWS.S3();
 
 interface ReplayWithSongInfo
@@ -61,7 +58,9 @@ export class GameReplayService {
       }
       console.log(data);
     });
-    return `${BUCKET_URL}${filename}.txt`;
+    return `https://${
+      process.env.AWS_S3_BUCKET_NAME as string
+    }.s3.amazonaws.com/${filename}.txt`;
   }
 
   public async saveGameEvent(
@@ -144,11 +143,8 @@ export class GameReplayService {
         if (gameEvent.getUserId() !== userId) {
           return;
         }
-      } else if (
-        eventName === "game_terminated" &&
-        gameEvent.userId !== userId
-      ) {
-        return;
+      } else if (eventName === "game_terminated") {
+        gameEvent.eventContent = JSON.parse(gameEvent.eventContent);
       }
       setTimeout(() => {
         user.emit(eventName, gameEvent.eventContent);
