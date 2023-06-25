@@ -87,11 +87,12 @@ export class SocialService {
 
     // 유저의 친구 목록
     const friendList = await this.getFriendList(nickname);
+    const friendIds = friendList.map((user) => user.userId);
 
     // 친구 목록에 없고 별명과 일치하는 유저 찾는 옵션
     const users: User[] = await this.userService.findUserByNickname(nickname);
     const filteredUsers: User[] = users
-      .filter((user) => !friendList.includes(user.userId))
+      .filter((user) => !friendIds.includes(user.userId))
       .slice(skip, skip + take);
 
     const userList: FriendDto[] = [];
