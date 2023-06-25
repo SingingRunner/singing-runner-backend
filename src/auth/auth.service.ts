@@ -64,6 +64,12 @@ export class AuthService {
   generateRefreshToken(userId: string): string {
     const expiresIn = "14d";
     const secret = process.env.SECRET_KEY;
+
+    // 환경변수에 SECRET_KEY가 설정되어 있지 않으면 에러 발생
+    if (!secret) {
+      throw new Error("환경변수에 SECRET_KEY가 설정되어 있지 않습니다.");
+    }
+
     const payload = { userId: userId };
 
     return this.jwtService.sign(payload, { expiresIn });
