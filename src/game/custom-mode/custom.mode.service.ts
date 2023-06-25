@@ -88,11 +88,11 @@ export class CustomModeService {
     return this.gameRoomHandler.findRoomByUserId(roomMaster);
   }
 
-  public acceptInvite(user: Socket, userId: string, host: HostUserDto) {
+  public async acceptInvite(user: Socket, userId: string, host: HostUserDto) {
     const gameRoom: GameRoom = this.gameRoomHandler.findRoomByUserId(
       host.getUserId()
     );
-    this.joinCustomRoom(user, userId, gameRoom);
+    await this.joinCustomRoom(user, userId, gameRoom);
   }
 
   public findUsersInSameRoom(user: Socket): UserGameDto[] {
@@ -163,5 +163,16 @@ export class CustomModeService {
       gameSongDto.songTitle,
       gameSongDto.singer
     );
+  }
+
+  public async getUserMatchDtobyId(userId: string): Promise<UserMatchDto> {
+    const userMatchDto = new UserMatchDto();
+    const user: User = await this.userService.findUserById(userId);
+    userMatchDto.character = user.character;
+    userMatchDto.nickname = user.nickname;
+    userMatchDto.userActive = user.userActive;
+    userMatchDto.userId = user.userId;
+    userMatchDto.userMmr = user.userMmr;
+    return userMatchDto;
   }
 }
