@@ -210,7 +210,11 @@ export class GameGateway
 
   @SubscribeMessage("invite")
   async accpetInvite(@ConnectedSocket() user: Socket, @MessageBody() data) {
-    this.customModeService.acceptInvite(user, data.userId, data.HostUserDto);
+    await this.customModeService.acceptInvite(
+      user,
+      data.userId,
+      data.HostUserDto
+    );
     const customUserList: CustomUserInfoDto[] =
       this.customModeService.setCustomUserInfo(user);
 
@@ -249,10 +253,12 @@ export class GameGateway
   }
 
   @SubscribeMessage("leave_room")
-  leaveRoom(
+  async leaveRoom(
     @ConnectedSocket() user: Socket,
-    @MessageBody() userMatchDto: UserMatchDto
+    @MessageBody() userId: string
   ) {
+    const userMatchDto: UserMatchDto =
+      await this.customModeService.getUserMatchDtobyId(userId);
     this.broadCast(user, "leave_room", userMatchDto.nickname);
     this.customModeService.leaveRoom(user, userMatchDto);
   }
