@@ -133,7 +133,6 @@ export class CustomModeService {
     userGameDto: UserGameDto,
     customUserInfoDto: CustomUserInfoDto
   ) {
-    console.log("after update");
     const friendList = await this.socialService.getFriendList(
       userGameDto.getUserMatchDto().userId
     );

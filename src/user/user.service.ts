@@ -23,7 +23,6 @@ export class UserService {
     if (userRegisterDto.password) {
       await this.transformPassword(userRegisterDto);
     }
-    console.log(userRegisterDto);
     return await this.userRepository.save(userRegisterDto);
   }
 
