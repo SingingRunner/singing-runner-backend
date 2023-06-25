@@ -27,7 +27,7 @@ export class NotificationService {
     date: Date
   ) {
     const notification = await this.userNotificationRepository.findOne({
-      where: [{ userId: userId }, { senderId: senderId }],
+      where: [{ userId: userId, senderId: senderId }],
     });
 
     if (!notification) {
@@ -46,7 +46,7 @@ export class NotificationService {
     const skip = (page - 1) * take;
     const searchResult: UserNotification[] =
       await this.userNotificationRepository.find({
-        where: [{ userId: userId }, { deletedAt: IsNull() }],
+        where: [{ userId: userId, deletedAt: IsNull() }],
         take: take,
         skip: skip,
         relations: ["sender"],
@@ -58,7 +58,7 @@ export class NotificationService {
   public async hasNotification(userId: string): Promise<boolean> {
     const notification: UserNotification | null =
       await this.userNotificationRepository.findOne({
-        where: [{ userId: userId }, { deletedAt: IsNull() }],
+        where: [{ userId: userId, deletedAt: IsNull() }],
       });
     if (!notification) {
       return false;
