@@ -232,6 +232,8 @@ export class GameGateway
     @MessageBody() userMatchDto: UserMatchDto
   ) {
     this.customModeService.createCustomRoom(user, userMatchDto);
+    const gameRoom: GameRoom = this.matchService.findRoomBySocket(user);
+    user.emit("create_custom", gameRoom.getRoomId());
   }
 
   @SubscribeMessage("set_song")
