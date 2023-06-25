@@ -12,6 +12,7 @@ import { MyRoomModule } from "./myroom/myroom.module";
 import { SocialModule } from "./social/social.module";
 import { UserModule } from "./user/user.module";
 import { ConfigModule } from "@nestjs/config";
+import { ScheduleModule } from "@nestjs/schedule";
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { ConfigModule } from "@nestjs/config";
       context: ({ req, res }) => ({ req, res }),
     }),
     TypeOrmModule.forRoot(TypeORMConfig),
+    ScheduleModule.forRoot(),
     GameModule,
     SongModule,
     AuthModule,
