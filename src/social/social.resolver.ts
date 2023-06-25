@@ -14,6 +14,7 @@ export class SocialResolver {
 
   @Mutation(() => PollingDto)
   async longPolling(@Args("userId") userId: string) {
+    this.socialService.setHeartBeat(userId, Date.now());
     await this.socialService.delay(5000);
 
     let pollingDto: PollingDto = await this.socialService.checkWhilePolling(

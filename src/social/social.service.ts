@@ -1,6 +1,7 @@
+import { HeartBeat } from "src/social/heartbeat/hearbeat";
 import { PollingDto } from "./dto/polling.dto";
 import { HostUserDto } from "src/user/dto/host-user.dto";
-import { Injectable } from "@nestjs/common";
+import { Inject, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { UserService } from "src/user/user.service";
 import { Social } from "./entity/social.entity";
@@ -20,7 +21,9 @@ export class SocialService {
     private notificationService: NotificationService,
     @InjectRepository(Social)
     private readonly socialRepository: Repository<Social>,
-    private invite: Invite
+    private invite: Invite,
+    @Inject("HeartBeat")
+    private hearBeat: HeartBeat
   ) {}
 
   public async checkWhilePolling(userId: string): Promise<PollingDto> {
@@ -227,5 +230,9 @@ export class SocialService {
 
   private async hasNotification(userId: string): Promise<boolean> {
     return await this.notificationService.hasNotification(userId);
+  }
+
+  public setHeartBeat(userId: string, updateAt: number) {
+    this.hearBeat.setHeartBeatMap(userId, updateAt);
   }
 }
