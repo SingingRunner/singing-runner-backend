@@ -222,6 +222,6 @@ export class SocialService {
   }
 
   private async hasNotification(userId: string): Promise<boolean> {
-    return await this.hasNotification(userId);
+    return await this.notificationService.hasNotification(userId);
   }
 }

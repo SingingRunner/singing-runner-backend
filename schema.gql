@@ -147,9 +147,9 @@ input HostUserInput {
 
 type Query {
   searchSong(keyword: String!, page: Int!, filter: String!): [GameSongDto!]!
-  getNotification(userId: String!, page: Float!): [RequestDto!]!
-  searchFriend(userId: String!, nickname: String!, page: Float!): [SearchFriendDto!]!
-  searchUser(nickname: String!, page: Float!): [FriendDto!]!
+  getNotification(userId: String!, page: Int!): [RequestDto!]!
+  searchFriend(userId: String!, nickname: String!, page: Int!): [SearchFriendDto!]!
+  searchUser(nickname: String!, page: Int!): [FriendDto!]!
   fetchUserGuard: AuthUserDto!
   fetchUser(userId: String!): AuthUserDto!
   getUserReplays(isMyReplay: Boolean!, pageNumber: Int!, userId: String!): [ReplayWithSongInfo!]!
