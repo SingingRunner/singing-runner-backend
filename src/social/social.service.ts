@@ -44,14 +44,34 @@ export class SocialService {
     if (user === null || friend === null) {
       throw new Error("등록되지 않은 유저 입니다");
     }
-    const social = new Social();
-    social.user = user;
-    social.friend = friend;
-    await this.socialRepository.save(social);
 
-    social.user = friend;
-    social.friend = user;
-    await this.socialRepository.save(social);
+    const userToFriend = await this.socialRepository
+      .createQueryBuilder("social")
+      .where("social.userId = :userId", { userId })
+      .andWhere("social.friendId = :friendId", { friendId })
+      .getOne();
+
+    const friendToUser = await this.socialRepository
+      .createQueryBuilder("social")
+      .where("social.userId = :userId", { userId: friendId })
+      .andWhere("social.friendId = :friendId", { friendId: userId })
+      .getOne();
+
+    if (!userToFriend || !friendToUser) {
+      const social = new Social();
+      social.user = user;
+      social.friend = friend;
+      await this.socialRepository.save(social);
+
+      social.user = friend;
+      social.friend = user;
+      await this.socialRepository.save(social);
+    } else {
+      userToFriend.deletedAt = null;
+      friendToUser.deletedAt = null;
+      await this.socialRepository.save(userToFriend);
+      await this.socialRepository.save(friendToUser);
+    }
   }
 
   public async removeFriend(userId: string, friendId: string, date: Date) {
