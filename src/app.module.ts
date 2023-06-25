@@ -11,9 +11,13 @@ import { ApolloDriver } from "@nestjs/apollo";
 import { MyRoomModule } from "./myroom/myroom.module";
 import { SocialModule } from "./social/social.module";
 import { UserModule } from "./user/user.module";
+import { ConfigModule } from "@nestjs/config";
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
     GraphQLModule.forRoot({
       driver: ApolloDriver,
       autoSchemaFile: "schema.gql",
