@@ -9,12 +9,18 @@ import { HostUserDto } from "src/user/dto/host-user.dto";
 import { UserGameDto } from "src/user/dto/user.game.dto";
 import { UserMatchDto } from "src/user/dto/user.match.dto";
 import { CustomSongDto } from "../utill/custom-song.dto";
+import { UserService } from "src/user/user.service";
+import { SocialService } from "src/social/social.service";
+import { User } from "src/user/entity/user.entity";
+import { CustomUserInfoDto } from "../utill/custom-user.info.dto";
 
 @Injectable()
 export class CustomModeService {
   constructor(
     private gameRoomHandler: GameRoomHandler,
-    private songService: SongService
+    private songService: SongService,
+    private userService: UserService,
+    private socialService: SocialService
   ) {}
 
   public async createCustomRoom(user: Socket, userMatchDto: UserMatchDto) {
@@ -62,12 +68,19 @@ export class CustomModeService {
     gameRoom.setRoomMaster(userId);
   }
 
-  public joinCustomRoom(
-    user: Socket,
-    userMatchDto: UserMatchDto,
+  public async joinCustomRoom(
+    userSocket: Socket,
+    userId: string,
     gameRoom: GameRoom
   ) {
-    const userGameDto: UserGameDto = new UserGameDto(user, userMatchDto);
+    const userMatchDto = new UserMatchDto();
+    const user: User = await this.userService.findUserById(userId);
+    userMatchDto.character = user.character;
+    userMatchDto.nickname = user.nickname;
+    userMatchDto.userActive = user.userActive;
+    userMatchDto.userId = user.userId;
+    userMatchDto.userMmr = user.userMmr;
+    const userGameDto: UserGameDto = new UserGameDto(userSocket, userMatchDto);
     this.addUserToRoom(gameRoom, userGameDto);
   }
 
@@ -75,20 +88,67 @@ export class CustomModeService {
     return this.gameRoomHandler.findRoomByUserId(roomMaster);
   }
 
-  public acceptInvite(
-    user: Socket,
-    userMatchDto: UserMatchDto,
-    host: HostUserDto
-  ) {
+  public acceptInvite(user: Socket, userId: string, host: HostUserDto) {
     const gameRoom: GameRoom = this.gameRoomHandler.findRoomByUserId(
       host.getUserId()
     );
-    this.joinCustomRoom(user, userMatchDto, gameRoom);
+    this.joinCustomRoom(user, userId, gameRoom);
   }
 
   public findUsersInSameRoom(user: Socket): UserGameDto[] {
     const gameRoom: GameRoom = this.gameRoomHandler.findRoomBySocket(user);
     return this.gameRoomHandler.findUsersInRoom(gameRoom);
+  }
+
+  public setCustomUserInfo(user: Socket): CustomUserInfoDto[] {
+    const gameRoom: GameRoom = this.gameRoomHandler.findRoomBySocket(user);
+    const userGameDtoList: UserGameDto[] =
+      this.gameRoomHandler.findUsersInRoom(gameRoom);
+    const hostId: string = gameRoom.getRoomMaster();
+    const customUserList: CustomUserInfoDto[] = [];
+    let hostNickname = " ";
+    for (const userGameDto of userGameDtoList) {
+      if (userGameDto.getUserMatchDto().userId == hostId) {
+        hostNickname = userGameDto.getUserMatchDto().nickname;
+        break;
+      }
+    }
+    for (const userGameDto of userGameDtoList) {
+      const customUserInfoDto: CustomUserInfoDto = new CustomUserInfoDto();
+      customUserInfoDto.character = userGameDto.getUserMatchDto().character;
+      customUserInfoDto.nickname = userGameDto.getUserMatchDto().nickname;
+      customUserInfoDto.userId = userGameDto.getUserMatchDto().userId;
+      customUserInfoDto.userTier = this.userService.determineUserTier(
+        userGameDto.getUserMatchDto().userMmr
+      );
+      customUserInfoDto.hostId = hostId;
+      customUserInfoDto.hostNickname = hostNickname;
+      customUserInfoDto.roomId = gameRoom.getRoomId();
+      customUserList.push(customUserInfoDto);
+    }
+    return customUserList;
+  }
+
+  public async checkFriend(
+    userGameDto: UserGameDto,
+    customUserInfoDto: CustomUserInfoDto
+  ) {
+    console.log("after update");
+    const friendList = await this.socialService.getFriendList(
+      userGameDto.getUserMatchDto().userId
+    );
+
+    if (friendList === null) {
+      return;
+    }
+
+    for (const friend of friendList) {
+      if (friend.userId === customUserInfoDto.userId) {
+        customUserInfoDto.isFriend = true;
+        return;
+      }
+    }
+    customUserInfoDto.isFriend = false;
   }
 
   public async setCustomSong(

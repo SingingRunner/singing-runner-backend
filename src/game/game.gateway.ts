@@ -22,6 +22,8 @@ import { UserInfoDto } from "./utill/user-info.dto";
 import { GameReplayService } from "./replay/game.replay.service";
 import { CustomSongDto } from "./utill/custom-song.dto";
 import { UserMatchDto } from "src/user/dto/user.match.dto";
+import { CustomUserInfoDto } from "./utill/custom-user.info.dto";
+import { checkFetcher } from "@apollo/client";
 
 /**
  * webSocket 통신을 담당하는 Handler
@@ -185,9 +187,11 @@ export class GameGateway
     const gameRoom: GameRoom = this.matchService.findRoomBySocket(user);
     const userList: UserGameDto[] =
       this.matchService.findUsersInSameRoom(gameRoom);
+
     for (const gameTerminated of gameTerminatedList) {
-      this.gameService.setGameTerminatedCharacter(gameTerminated);
+      await this.gameService.setGameTerminatedCharacter(gameTerminated);
     }
+
     for (const userGame of userList) {
       for (const gameTerminated of gameTerminatedList) {
         await this.gameService.setGameTerminatedDto(userGame, gameTerminated);
@@ -205,15 +209,21 @@ export class GameGateway
   }
 
   @SubscribeMessage("invite")
-  accpetInvite(@ConnectedSocket() user: Socket, @MessageBody() data) {
-    this.customModeService.acceptInvite(
-      user,
-      data.userMatchDto,
-      data.HostUserDto
-    );
+  async accpetInvite(@ConnectedSocket() user: Socket, @MessageBody() data) {
+    this.customModeService.acceptInvite(user, data.userId, data.HostUserDto);
+    const customUserList: CustomUserInfoDto[] =
+      this.customModeService.setCustomUserInfo(user);
+
+    const gameRoom: GameRoom = this.matchService.findRoomBySocket(user);
     const userList: UserGameDto[] =
-      this.customModeService.findUsersInSameRoom(user);
-    this.broadCast(user, "invite", userList);
+      this.matchService.findUsersInSameRoom(gameRoom);
+
+    for (const userGame of userList) {
+      for (const customUser of customUserList) {
+        await this.customModeService.checkFriend(userGame, customUser);
+      }
+      userGame.getSocket().emit("invite", customUserList);
+    }
   }
 
   @SubscribeMessage("create_custom")
