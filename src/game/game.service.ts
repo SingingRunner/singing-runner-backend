@@ -150,40 +150,36 @@ export class GameService {
   }
 
   public async setGameTerminatedDto(
-    user: Socket,
+    userGame: UserGameDto,
     gameTerminatedDto: GameTerminatedDto
   ) {
-    this.setSocketAndNickname(user, gameTerminatedDto);
-    await this.updateUserActive(
-      gameTerminatedDto.getUserId(),
-      userActiveStatus.CONNECT
-    );
-    console.log("after update");
-    const friendList = await this.getFriendList(gameTerminatedDto.getUserId());
-    console.log(friendList);
+    this.setTerminatedUserNickname(userGame.getSocket(), gameTerminatedDto);
+    const userMatchDto = userGame.getUserMatchDto();
+    await this.updateUserActive(userMatchDto.userId, userActiveStatus.CONNECT);
+    const friendList = await this.getFriendList(userMatchDto.userId);
     if (friendList === null) {
       return;
     }
     for (const friend of friendList) {
       if (friend === gameTerminatedDto.getUserId()) {
         gameTerminatedDto.setIsFriend(true);
+        return;
       }
+      gameTerminatedDto.setIsFriend(false);
     }
   }
 
-  private setSocketAndNickname(
+  private setTerminatedUserNickname(
     user: Socket,
     gameTerminatedDto: GameTerminatedDto
   ) {
     const gameRoom: GameRoom = this.gameRoomHandler.findRoomBySocket(user);
     const userList: UserGameDto[] =
       this.gameRoomHandler.findUsersInRoom(gameRoom);
-    console.log("length", userList.length);
     for (const userGameDto of userList) {
       if (
         userGameDto.getUserMatchDto().userId === gameTerminatedDto.getUserId()
       ) {
-        // gameTerminatedDto.setUserSocket(userGameDto.getSocket());
         gameTerminatedDto.setNickname(userGameDto.getUserMatchDto().nickname);
         return;
       }
