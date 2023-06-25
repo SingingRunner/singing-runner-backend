@@ -62,12 +62,8 @@ export class AuthService {
 
   // 랜덤으로 refresh token 생성
   generateRefreshToken(userId: string): string {
-    const jwtConstants = {
-      SECRET_KEY: "SECRET_KEY",
-    };
-
     const expiresIn = "14d";
-    const secret = jwtConstants.SECRET_KEY;
+    const secret = process.env.SECRET_KEY;
     const payload = { userId: userId };
 
     return this.jwtService.sign(payload, { expiresIn });
