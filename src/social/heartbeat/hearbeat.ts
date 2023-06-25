@@ -1,5 +1,6 @@
 export interface HeartBeat {
-  updateHeartBeatMap(userId: string, updateAt: Date): void;
+  updateHeartBeatMap(): void;
+  setHeartBeatMap(userId: string, updateAt: number): void;
   deleteHeartBeatMap(userId: string): void;
   updateDB(userId: string): void;
 }

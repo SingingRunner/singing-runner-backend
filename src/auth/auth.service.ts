@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from "uuid";
 import {
   HttpException,
   HttpStatus,
+  Inject,
   Injectable,
   UnauthorizedException,
 } from "@nestjs/common";
@@ -16,12 +17,15 @@ import { JwtService } from "@nestjs/jwt";
 import { characterEnum } from "../user/util/character.enum";
 import { Response } from "express";
 import { userActiveStatus } from "src/user/util/user.enum";
+import { HeartBeat } from "src/social/heartbeat/hearbeat";
 
 @Injectable()
 export class AuthService {
   constructor(
     private userService: UserService,
-    private jwtService: JwtService
+    private jwtService: JwtService,
+    @Inject("HearBeat")
+    private hearBeat: HeartBeat
   ) {}
 
   async registerUser(newUser: UserRegisterDto): Promise<User> {
@@ -94,6 +98,9 @@ export class AuthService {
       throw new UnauthorizedException("비밀번호가 틀렸습니다.");
     }
 
+    //로그인 성공 시 HearbeatMap 에 저장
+    this.hearBeat.setHeartBeatMap(userFind.userId, Date.now());
+
     // 로그인 성공 시, 유저 userActive를 'Connect'(1)로 변경
     userFind.userActive = userActiveStatus.CONNECT;
     await this.userService.saveUser(userFind);
@@ -156,6 +163,7 @@ export class AuthService {
     try {
       user.refreshToken = null;
       user.userActive = userActiveStatus.LOGOUT;
+      this.hearBeat.deleteHeartBeatMap(user.userId);
       await this.userService.saveUser(user);
       return "로그아웃 성공";
     } catch (err) {
