@@ -140,15 +140,15 @@ export class SocialService {
     return resultList;
   }
 
-  public async getFriendList(userId: string): Promise<string[]> {
+  public async getFriendList(userId: string): Promise<User[]> {
     const socialList = await this.socialRepository.find({
       where: [{ userId: userId }],
       relations: ["friend"],
     });
-    const friendList: string[] = [];
+    const friendList: User[] = [];
 
     for (const social of socialList) {
-      friendList.push(social.friendId);
+      friendList.push(social.friend);
     }
 
     return friendList;

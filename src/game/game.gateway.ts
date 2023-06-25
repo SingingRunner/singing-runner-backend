@@ -185,11 +185,19 @@ export class GameGateway
     const gameRoom: GameRoom = this.matchService.findRoomBySocket(user);
     const userList: UserGameDto[] =
       this.matchService.findUsersInSameRoom(gameRoom);
-
+    for (const gameTerminated of gameTerminatedList) {
+      this.gameService.setGameTerminatedCharacter(gameTerminated);
+    }
     for (const userGame of userList) {
       for (const gameTerminated of gameTerminatedList) {
         await this.gameService.setGameTerminatedDto(userGame, gameTerminated);
       }
+      this.gameService.putEvent(
+        gameRoom,
+        "game_terminated",
+        JSON.stringify(gameTerminatedList),
+        user
+      );
       userGame.getSocket().emit("game_terminated", gameTerminatedList);
       console.log(userGame.getUserMatchDto().userId);
       console.log(gameTerminatedList);
