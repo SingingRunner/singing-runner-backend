@@ -33,5 +33,5 @@ export class UserNotification {
 
   @Field(() => Date)
   @Column({ type: "datetime", nullable: true, default: null })
-  deletedAt: Date;
+  deletedAt: Date | null;
 }

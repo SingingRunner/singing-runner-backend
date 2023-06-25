@@ -9,6 +9,7 @@ export enum characterEnum {
   SNOWLEOPARD = "snowleopard",
   NARWHAL = "narwhal",
   PUFFIN = "puffin",
+  MOOSE = "moose",
 }
 
 registerEnumType(characterEnum, {

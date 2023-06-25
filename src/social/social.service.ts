@@ -4,7 +4,7 @@ import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { UserService } from "src/user/user.service";
 import { Social } from "./entity/social.entity";
-import { Repository } from "typeorm";
+import { IsNull, Repository } from "typeorm";
 import { NotificationService } from "./notification/notification.service";
 import { FriendDto } from "src/user/dto/friend.dto";
 import { User } from "src/user/entity/user.entity";
@@ -25,12 +25,16 @@ export class SocialService {
 
   public async checkWhilePolling(userId: string): Promise<PollingDto> {
     const pollingDto: PollingDto = new PollingDto();
+    pollingDto.hostUserDtoList = [];
+    pollingDto.userNotificationList = [];
+
     if (await this.hasInvitation(userId)) {
       pollingDto.hostUserDtoList = this.getAllInvitation(userId);
     }
     if (await this.hasNotification(userId)) {
       pollingDto.userNotificationList = await this.getNotifications(userId, 1);
     }
+
     return pollingDto;
   }
 
@@ -40,14 +44,34 @@ export class SocialService {
     if (user === null || friend === null) {
       throw new Error("등록되지 않은 유저 입니다");
     }
-    const social = new Social();
-    social.user = user;
-    social.friend = friend;
-    await this.socialRepository.save(social);
 
-    social.user = friend;
-    social.friend = user;
-    await this.socialRepository.save(social);
+    const userToFriend = await this.socialRepository
+      .createQueryBuilder("social")
+      .where("social.userId = :userId", { userId })
+      .andWhere("social.friendId = :friendId", { friendId })
+      .getOne();
+
+    const friendToUser = await this.socialRepository
+      .createQueryBuilder("social")
+      .where("social.userId = :userId", { userId: friendId })
+      .andWhere("social.friendId = :friendId", { friendId: userId })
+      .getOne();
+
+    if (!userToFriend || !friendToUser) {
+      const social = new Social();
+      social.user = user;
+      social.friend = friend;
+      await this.socialRepository.save(social);
+
+      social.user = friend;
+      social.friend = user;
+      await this.socialRepository.save(social);
+    } else {
+      userToFriend.deletedAt = null;
+      friendToUser.deletedAt = null;
+      await this.socialRepository.save(userToFriend);
+      await this.socialRepository.save(friendToUser);
+    }
   }
 
   public async removeFriend(userId: string, friendId: string, date: Date) {
@@ -75,6 +99,7 @@ export class SocialService {
   }
 
   public async searchUser(
+    userId: string,
     nickname: string,
     page: number
   ): Promise<FriendDto[]> {
@@ -86,11 +111,14 @@ export class SocialService {
     const skip = (page - 1) * take;
 
     // 유저의 친구 목록
-    const friendList = await this.getFriendList(nickname);
+    const friendList = await this.getFriendList(userId);
     const friendIds = friendList.map((user) => user.userId);
 
     // 친구 목록에 없고 별명과 일치하는 유저 찾는 옵션
-    const users: User[] = await this.userService.findUserByNickname(nickname);
+    const users: User[] = await this.userService.findUserByNickname(
+      userId,
+      nickname
+    );
     const filteredUsers: User[] = users
       .filter((user) => !friendIds.includes(user.userId))
       .slice(skip, skip + take);
@@ -155,7 +183,7 @@ export class SocialService {
 
   public async getFriendList(userId: string): Promise<User[]> {
     const socialList = await this.socialRepository.find({
-      where: [{ userId: userId }],
+      where: [{ userId: userId, deletedAt: IsNull() }],
       relations: ["friend"],
     });
     const friendList: User[] = [];
@@ -193,7 +221,7 @@ export class SocialService {
   }
 
   private getAllInvitation(userId: string): HostUserDto[] {
-    return this.getAllInvitation(userId);
+    return this.invite.getAllInvitation(userId);
   }
 
   public async getNotifications(
@@ -211,7 +239,11 @@ export class SocialService {
     const requestDtoList: RequestDto[] = [];
     for (const notification of notifications) {
       requestDtoList.push(
-        new RequestDto(notification.senderId, notification.sender.nickname)
+        new RequestDto(
+          notification.senderId,
+          notification.sender.nickname,
+          notification.receivedAt
+        )
       );
     }
     return requestDtoList;

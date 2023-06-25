@@ -18,10 +18,12 @@ export class SocialResolver {
       userId
     );
 
-    if (pollingDto.hostUserDtoList || pollingDto.userNotificationList) {
+    if (
+      pollingDto.hostUserDtoList.length !== 0 ||
+      pollingDto.userNotificationList.length !== 0
+    ) {
       return pollingDto;
     }
-
     await this.socialService.delay(5000);
     pollingDto = await this.socialService.checkWhilePolling(userId);
 
@@ -52,10 +54,11 @@ export class SocialResolver {
 
   @Query(() => [FriendDto])
   async searchUser(
+    @Args("userId") userId: string,
     @Args("nickname") nickname: string,
     @Args("page", { type: () => Int }) page: number
   ): Promise<FriendDto[]> {
-    return await this.socialService.searchUser(nickname, page);
+    return await this.socialService.searchUser(userId, nickname, page);
   }
 
   @Mutation(() => String)

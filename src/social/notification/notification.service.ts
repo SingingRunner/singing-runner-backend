@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { IsNull, Repository } from "typeorm";
 import { UserNotification } from "./user.notification.entitiy";
 import { User } from "src/user/entity/user.entity";
 
@@ -15,9 +15,11 @@ export class NotificationService {
     const notification = new UserNotification();
     notification.user = user;
     notification.sender = sender;
-    notification.receivedAt = date;
     notification.content = "친구요청";
-    console.log(notification);
+
+    notification.receivedAt = date;
+    notification.deletedAt = null;
+
     await this.userNotificationRepository.save(notification);
   }
 
@@ -27,7 +29,7 @@ export class NotificationService {
     date: Date
   ) {
     const notification = await this.userNotificationRepository.findOne({
-      where: [{ userId: userId }, { senderId: senderId }],
+      where: [{ userId: userId, senderId: senderId }],
     });
 
     if (!notification) {
@@ -44,10 +46,9 @@ export class NotificationService {
   ): Promise<UserNotification[]> {
     const take = 10;
     const skip = (page - 1) * take;
-    const notDeleted = new Date("1970-01-01");
     const searchResult: UserNotification[] =
       await this.userNotificationRepository.find({
-        where: [{ userId: userId }, { deletedAt: notDeleted }],
+        where: [{ userId: userId, deletedAt: IsNull() }],
         take: take,
         skip: skip,
         relations: ["sender"],
@@ -57,10 +58,9 @@ export class NotificationService {
   }
 
   public async hasNotification(userId: string): Promise<boolean> {
-    const notDeleted = new Date("1970-01-01");
     const notification: UserNotification | null =
       await this.userNotificationRepository.findOne({
-        where: [{ userId: userId }, { deletedAt: notDeleted }],
+        where: [{ userId: userId, deletedAt: IsNull() }],
       });
     if (!notification) {
       return false;

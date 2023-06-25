@@ -62,12 +62,14 @@ export class AuthService {
 
   // 랜덤으로 refresh token 생성
   generateRefreshToken(userId: string): string {
-    const jwtConstants = {
-      SECRET_KEY: "SECRET_KEY",
-    };
-
     const expiresIn = "14d";
-    const secret = jwtConstants.SECRET_KEY;
+    const secret = process.env.SECRET_KEY;
+
+    // 환경변수에 SECRET_KEY가 설정되어 있지 않으면 에러 발생
+    if (!secret) {
+      throw new Error("환경변수에 SECRET_KEY가 설정되어 있지 않습니다.");
+    }
+
     const payload = { userId: userId };
 
     return this.jwtService.sign(payload, { expiresIn });
