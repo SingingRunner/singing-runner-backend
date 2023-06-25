@@ -25,12 +25,16 @@ export class SocialService {
 
   public async checkWhilePolling(userId: string): Promise<PollingDto> {
     const pollingDto: PollingDto = new PollingDto();
+    pollingDto.hostUserDtoList = [];
+    pollingDto.userNotificationList = [];
+
     if (await this.hasInvitation(userId)) {
       pollingDto.hostUserDtoList = this.getAllInvitation(userId);
     }
     if (await this.hasNotification(userId)) {
       pollingDto.userNotificationList = await this.getNotifications(userId, 1);
     }
+
     return pollingDto;
   }
 
@@ -193,7 +197,7 @@ export class SocialService {
   }
 
   private getAllInvitation(userId: string): HostUserDto[] {
-    return this.getAllInvitation(userId);
+    return this.invite.getAllInvitation(userId);
   }
 
   public async getNotifications(
