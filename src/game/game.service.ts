@@ -127,10 +127,8 @@ export class GameService {
 
     this.rankHandler.pushUserScore(gameRoom, userScoreDto);
     if (this.gameRoomHandler.isGameRoomReady(gameRoom)) {
-      console.log("gameTerminatedReady?");
       return true;
     }
-    console.log("all user terminate false");
     return false;
   }
 
@@ -243,7 +241,6 @@ export class GameService {
       userVocal,
       filename
     );
-    // console.log(gameEventJson);
     // 같이 게임한 유저 정보 및 유저 캐릭터 정보도 추가해야함
     if (user === null) {
       return;
@@ -260,7 +257,6 @@ export class GameService {
       player2Character: subCharacter2,
       keynote: userKeynote,
     };
-    // console.log(userVocal);
     return await this.gameReplayService.saveReplay(gameReplayEntity);
   }
 

@@ -20,7 +20,6 @@ export class NotificationService {
     notification.receivedAt = date;
     notification.deletedAt = null;
 
-    console.log(notification);
     await this.userNotificationRepository.save(notification);
   }
 

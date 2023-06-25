@@ -40,8 +40,6 @@ export class AuthResolver {
     @Args("userLoginDto") userLoginDto: UserLoginDto,
     @Context() context: any
   ): Promise<AuthDto> {
-    console.log(context);
-
     const jwt = await this.authService.validateUserAndSetCookie(
       userLoginDto,
       context.res
@@ -64,10 +62,6 @@ export class AuthResolver {
   @UseGuards(GqlAuthAccessGuard)
   @Query(() => AuthUserDto)
   async fetchUserGuard(@Context() context: UserContext): Promise<AuthUserDto> {
-    console.log("================");
-    console.log(context.req.user);
-    console.log("================");
-
     const authUser = new AuthUserDto();
     if (!context.req.user) {
       throw new UnauthorizedException("유저 정보가 없습니다.");

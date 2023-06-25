@@ -22,11 +22,9 @@ export class SocialResolver {
       pollingDto.hostUserDtoList.length !== 0 ||
       pollingDto.userNotificationList.length !== 0
     ) {
-      console.log(" 즉시반환");
       return pollingDto;
     }
     await this.socialService.delay(5000);
-    console.log("long?");
     pollingDto = await this.socialService.checkWhilePolling(userId);
 
     return pollingDto;
