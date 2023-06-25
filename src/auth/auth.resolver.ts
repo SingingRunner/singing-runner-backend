@@ -4,10 +4,10 @@ import { AuthService } from "./auth.service";
 import { UserRegisterDto } from "../user/dto/user.register.dto";
 import { UserLoginDto } from "../user/dto/user.login.dto";
 import { UserService } from "src/user/user.service";
-import { AuthUserDto } from "./dto/auth.user.dto";
+import { AuthUserDto } from "./dto/auth-user.dto";
 import { AuthDto } from "./dto/auth.dto";
-import { AuthTokenDto } from "./dto/auth.token.dto";
-import { UserContext } from "./auth.context";
+import { AuthTokenDto } from "./dto/auth-token.dto";
+import { UserContext } from "./util/auth.context";
 import { GqlAuthAccessGuard } from "./security/auth.guard";
 
 @Resolver()
