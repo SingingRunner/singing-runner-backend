@@ -4,7 +4,7 @@ import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { UserService } from "src/user/user.service";
 import { Social } from "./entity/social.entity";
-import { Repository } from "typeorm";
+import { IsNull, Repository } from "typeorm";
 import { NotificationService } from "./notification/notification.service";
 import { FriendDto } from "src/user/dto/friend.dto";
 import { User } from "src/user/entity/user.entity";
@@ -163,7 +163,7 @@ export class SocialService {
 
   public async getFriendList(userId: string): Promise<User[]> {
     const socialList = await this.socialRepository.find({
-      where: [{ userId: userId }],
+      where: [{ userId: userId, deletedAt: IsNull() }],
       relations: ["friend"],
     });
     const friendList: User[] = [];
