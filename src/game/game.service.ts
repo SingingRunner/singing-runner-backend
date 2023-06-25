@@ -230,8 +230,8 @@ export class GameService {
         subUser1 = users[(i + 1) % 3].getUserMatchDto().userId;
         subUser2 = users[(i + 2) % 3].getUserMatchDto().userId;
         mainCharacter = user.getUserMatchDto().character;
-        subCharacter1 = users[(i + 1) % 3].getUserMatchDto().userId;
-        subCharacter2 = users[(i + 2) % 3].getUserMatchDto().userId;
+        subCharacter1 = users[(i + 1) % 3].getUserMatchDto().character;
+        subCharacter2 = users[(i + 2) % 3].getUserMatchDto().character;
       }
     });
 
