@@ -1,4 +1,3 @@
-import { characterEnum } from "src/user/util/character.enum";
 import { SocialService } from "./../social/social.service";
 import { UserService } from "src/user/user.service";
 import { GameRoomHandler } from "./room/game.room.handler";
