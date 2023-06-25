@@ -239,7 +239,11 @@ export class SocialService {
     const requestDtoList: RequestDto[] = [];
     for (const notification of notifications) {
       requestDtoList.push(
-        new RequestDto(notification.senderId, notification.sender.nickname)
+        new RequestDto(
+          notification.senderId,
+          notification.sender.nickname,
+          notification.receivedAt
+        )
       );
     }
     return requestDtoList;
