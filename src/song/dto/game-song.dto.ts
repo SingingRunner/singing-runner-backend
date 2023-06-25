@@ -24,6 +24,7 @@ export class GameSongDto {
     this.vocalFemaleDown = song.vocalFemaleDown;
   }
 
+  @Field()
   songId: number;
 
   @IsString()
