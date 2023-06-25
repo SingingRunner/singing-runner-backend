@@ -65,6 +65,7 @@ type SearchFriendDto {
 }
 
 type GameSongDto {
+  songId: Float!
   songTitle: String!
   singer: String!
   songLyrics: String!
