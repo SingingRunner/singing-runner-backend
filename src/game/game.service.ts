@@ -235,7 +235,7 @@ export class GameService {
       return;
     }
     const gameReplayEntity: CreateReplayInput = {
-      userId: user,
+      user: user,
       userCharacter: mainCharacter,
       songId: songId,
       userVocal: vocalUrl,

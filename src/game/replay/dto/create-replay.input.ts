@@ -4,7 +4,7 @@ import { User } from "src/user/entity/user.entity";
 @InputType()
 export class CreateReplayInput {
   @Field(() => User)
-  userId: User;
+  user: User;
 
   @Field(() => String)
   userCharacter: string;
