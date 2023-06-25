@@ -9,10 +9,10 @@ import { CreateReplayInput } from "./dto/create-replay.input";
 import { InjectRepository } from "@nestjs/typeorm";
 import { User } from "src/user/entity/user.entity";
 
-const BUCKET_NAME: string = process.env.S3_BUCKET_NAME as string;
-const BUCKET_REGION: string = process.env.S3_BUCKET_REGION as string;
-const BUCKET_ACCESS_KEY: string = process.env.S3_ACCESS_KEY as string;
-const BUCKET_SECRET_KEY: string = process.env.S3_SECRET_KEY as string;
+const BUCKET_NAME: string = process.env.AWS_S3_BUCKET_NAME as string;
+const BUCKET_REGION: string = process.env.AWS_S3_BUCKET_REGION as string;
+const BUCKET_ACCESS_KEY: string = process.env.AWS_ACCESS_KEY as string;
+const BUCKET_SECRET_KEY: string = process.env.AWS_SECRET_ACCESS_KEY as string;
 const BUCKET_URL: string = `https://${BUCKET_NAME}.s3.amazonaws.com/` as string;
 
 const s3 = new AWS.S3();

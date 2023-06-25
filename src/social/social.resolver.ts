@@ -1,6 +1,6 @@
 import { AddFriendDto } from "./dto/add-friend.dto";
 import { SocialService } from "./social.service";
-import { Args, Mutation, Query, Resolver } from "@nestjs/graphql";
+import { Args, Int, Mutation, Query, Resolver } from "@nestjs/graphql";
 import { FriendDto } from "src/user/dto/friend.dto";
 import { HostUserDto } from "src/user/dto/host-user.dto";
 import { PollingDto } from "./dto/polling.dto";
@@ -31,7 +31,7 @@ export class SocialResolver {
   @Query(() => [RequestDto])
   async getNotification(
     @Args("userId") userId: string,
-    @Args("page") page: number
+    @Args("page", { type: () => Int }) page: number
   ) {
     const notifications = await this.socialService.getNotifications(
       userId,
@@ -45,7 +45,7 @@ export class SocialResolver {
   async searchFriend(
     @Args("userId") userId: string,
     @Args("nickname") nickname: string,
-    @Args("page") page: number
+    @Args("page", { type: () => Int }) page: number
   ): Promise<SearchFriendDto[]> {
     return await this.socialService.searchFriend(userId, nickname, page);
   }
@@ -53,7 +53,7 @@ export class SocialResolver {
   @Query(() => [FriendDto])
   async searchUser(
     @Args("nickname") nickname: string,
-    @Args("page") page: number
+    @Args("page", { type: () => Int }) page: number
   ): Promise<FriendDto[]> {
     return await this.socialService.searchUser(nickname, page);
   }

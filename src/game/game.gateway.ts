@@ -182,10 +182,18 @@ export class GameGateway
 
     const gameTerminatedList: GameTerminatedDto[] =
       await this.gameService.calculateRank(user);
-    for (const gameTerminatedDto of gameTerminatedList) {
-      await this.gameService.setGameTerminatedDto(user, gameTerminatedDto);
+    const gameRoom: GameRoom = this.matchService.findRoomBySocket(user);
+    const userList: UserGameDto[] =
+      this.matchService.findUsersInSameRoom(gameRoom);
+
+    for (const userGame of userList) {
+      for (const gameTerminated of gameTerminatedList) {
+        await this.gameService.setGameTerminatedDto(userGame, gameTerminated);
+      }
+      userGame.getSocket().emit("game_terminated", gameTerminatedList);
+      console.log(userGame.getUserMatchDto().userId);
+      console.log(gameTerminatedList);
     }
-    this.broadCast(user, "game_terminated", gameTerminatedList);
   }
 
   @SubscribeMessage("invite")
