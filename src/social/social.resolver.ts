@@ -56,10 +56,11 @@ export class SocialResolver {
 
   @Query(() => [FriendDto])
   async searchUser(
+    @Args("userId") userId: string,
     @Args("nickname") nickname: string,
     @Args("page", { type: () => Int }) page: number
   ): Promise<FriendDto[]> {
-    return await this.socialService.searchUser(nickname, page);
+    return await this.socialService.searchUser(userId, nickname, page);
   }
 
   @Mutation(() => String)

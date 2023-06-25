@@ -79,6 +79,7 @@ export class SocialService {
   }
 
   public async searchUser(
+    userId: string,
     nickname: string,
     page: number
   ): Promise<FriendDto[]> {
@@ -90,11 +91,14 @@ export class SocialService {
     const skip = (page - 1) * take;
 
     // 유저의 친구 목록
-    const friendList = await this.getFriendList(nickname);
+    const friendList = await this.getFriendList(userId);
     const friendIds = friendList.map((user) => user.userId);
 
     // 친구 목록에 없고 별명과 일치하는 유저 찾는 옵션
-    const users: User[] = await this.userService.findUserByNickname(nickname);
+    const users: User[] = await this.userService.findUserByNickname(
+      userId,
+      nickname
+    );
     const filteredUsers: User[] = users
       .filter((user) => !friendIds.includes(user.userId))
       .slice(skip, skip + take);
