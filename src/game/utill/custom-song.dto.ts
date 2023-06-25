@@ -3,9 +3,9 @@ export class CustomSongDto {
   private songTitle: string;
   private singer: string;
 
-  constructor($songId: number, $sontTilte: string, $singer: string) {
+  constructor($songId: number, $sontTitle: string, $singer: string) {
     this.songId = $songId;
-    this.songTitle = $sontTilte;
+    this.songTitle = $sontTitle;
     this.singer = $singer;
   }
 }
