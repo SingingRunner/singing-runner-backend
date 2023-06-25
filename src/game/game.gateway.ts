@@ -75,7 +75,7 @@ export class GameGateway
 
   /**
    * MatchMakingPolicy에 따라 user가 매칭되면 GameRoom에 추가 후
-   * 같이 매칭된 user들(same GameRoom) 과 함께 songTilte, Singer 정보를 전송
+   * 같이 매칭된 user들(same GameRoom) 과 함께 songTitle, Singer 정보를 전송
    */
 
   @SubscribeMessage("match_making")
@@ -231,11 +231,11 @@ export class GameGateway
   }
 
   @SubscribeMessage("create_custom")
-  createCustomRoom(
+  async createCustomRoom(
     @ConnectedSocket() user: Socket,
     @MessageBody() userMatchDto: UserMatchDto
   ) {
-    this.customModeService.createCustomRoom(user, userMatchDto);
+    await this.customModeService.createCustomRoom(user, userMatchDto);
     const gameRoom: GameRoom = this.matchService.findRoomBySocket(user);
     user.emit("create_custom", gameRoom.getRoomId());
   }
