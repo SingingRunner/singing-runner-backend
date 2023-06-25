@@ -5,6 +5,7 @@ import { PassportModule } from "@nestjs/passport";
 import { JwtAccessStrategy } from "./security/passport.jwt.strategy";
 import { AuthResolver } from "./auth.resolver";
 import { UserModule } from "src/user/user.module";
+import { SocialModule } from "src/social/social.module";
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { UserModule } from "src/user/user.module";
     }),
     UserModule,
     PassportModule,
+    SocialModule,
   ],
   providers: [AuthService, JwtAccessStrategy, AuthResolver],
   exports: [AuthService],

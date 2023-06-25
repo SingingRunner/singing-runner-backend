@@ -88,9 +88,9 @@ export class CustomModeService {
     return this.gameRoomHandler.findRoomByUserId(roomMaster);
   }
 
-  public async acceptInvite(user: Socket, userId: string, host: HostUserDto) {
+  public async acceptInvite(user: Socket, userId: string, host) {
     const gameRoom: GameRoom = this.gameRoomHandler.findRoomByUserId(
-      host.getUserId()
+      host.userId
     );
     await this.joinCustomRoom(user, userId, gameRoom);
   }

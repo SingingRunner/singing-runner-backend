@@ -7,15 +7,24 @@ import { SocialResolver } from "./social.resolver";
 import { NotificationService } from "./notification/notification.service";
 import { UserNotification } from "./notification/user.notification.entitiy";
 import { Invite } from "./invite/invite";
-import { User } from "src/user/entity/user.entity";
+import { HeartBeatimpl } from "./heartbeat/hearbeat.impl";
 
 @Module({
   imports: [
     UserModule,
-    TypeOrmModule.forFeature([Social, User]),
+    TypeOrmModule.forFeature([Social]),
     TypeOrmModule.forFeature([UserNotification]),
   ],
-  providers: [SocialService, SocialResolver, NotificationService, Invite],
-  exports: [SocialService],
+  providers: [
+    SocialService,
+    SocialResolver,
+    NotificationService,
+    Invite,
+    {
+      provide: "HeartBeat",
+      useClass: HeartBeatimpl,
+    },
+  ],
+  exports: [SocialService, HeartBeatimpl],
 })
 export class SocialModule {}
