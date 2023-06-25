@@ -50,7 +50,7 @@ export class GameReplayService {
     filename: string
   ): Promise<string> {
     const params = {
-      Bucket: BUCKET_NAME,
+      Bucket: process.env.AWS_S3_BUCKET_NAME as string,
       Key: `${filename}.txt`,
       Body: filebase64,
       ContentType: "text/plain",
@@ -69,7 +69,7 @@ export class GameReplayService {
     filename: string
   ): Promise<string> {
     const params = {
-      Bucket: BUCKET_NAME,
+      Bucket: process.env.AWS_S3_BUCKET_NAME as string,
       Key: `${filename}.json`,
       Body: gameEvent,
       ContentType: "application/json",
@@ -95,7 +95,7 @@ export class GameReplayService {
         const gameSong = gameSongdto;
         const characterList: any = [];
         characterList.push({
-          userId: gameReplay.user,
+          userId: gameReplay.userId,
           character: gameReplay.userCharacter,
         });
         characterList.push({
@@ -109,26 +109,20 @@ export class GameReplayService {
         return {
           gameSong: gameSong,
           characterList: characterList,
-          replayId: replayId,
+          userVocal: gameReplay.userVocal,
         };
       }
     }
   }
 
   public async replayGame(user: Socket, replayId: number, userId: string) {
-    const gameReplay = await this.gameReplayRepository
-      .createQueryBuilder("game_replay_entity")
-      .where("game_replay_entity.replayId = :replayId", {
-        replayId: replayId,
-      })
-      .getOne();
+    const gameReplay = await this.gameReplayRepository.findOne({
+      where: { replayId: replayId },
+    });
     if (!gameReplay) return;
-    const gameEventUrl = gameReplay.gameEvent;
-    console.log(gameEventUrl);
-    console.log("b");
     const params = {
-      Bucket: BUCKET_NAME,
-      Key: "1_1_1687447904529.json",
+      Bucket: process.env.AWS_S3_BUCKET_NAME as string,
+      Key: gameReplay.gameEvent,
     };
     s3.getObject(params, (err, data) => {
       if (err) {
@@ -150,6 +144,11 @@ export class GameReplayService {
         if (gameEvent.getUserId() !== userId) {
           return;
         }
+      } else if (
+        eventName === "game_terminated" &&
+        gameEvent.userId !== userId
+      ) {
+        return;
       }
       setTimeout(() => {
         user.emit(eventName, gameEvent.eventContent);
