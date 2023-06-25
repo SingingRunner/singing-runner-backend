@@ -14,6 +14,8 @@ export class SocialResolver {
 
   @Mutation(() => PollingDto)
   async longPolling(@Args("userId") userId: string) {
+    await this.socialService.delay(5000);
+
     let pollingDto: PollingDto = await this.socialService.checkWhilePolling(
       userId
     );
@@ -22,11 +24,12 @@ export class SocialResolver {
       pollingDto.hostUserDtoList.length !== 0 ||
       pollingDto.userNotificationList.length !== 0
     ) {
-      console.log(" 즉시반환");
+      console.log(" 5초 대기후 반환");
       return pollingDto;
     }
+
     await this.socialService.delay(5000);
-    console.log("long?");
+    console.log("10초 대기 후 반환");
     pollingDto = await this.socialService.checkWhilePolling(userId);
 
     return pollingDto;
