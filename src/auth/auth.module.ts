@@ -10,7 +10,7 @@ import { SocialModule } from "src/social/social.module";
 @Module({
   imports: [
     JwtModule.register({
-      secret: "SECRET_KEY",
+      secret: process.env.SECRET_KEY,
       signOptions: { expiresIn: "300s" },
     }),
     UserModule,

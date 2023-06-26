@@ -23,7 +23,6 @@ export class UserService {
     if (userRegisterDto.password) {
       await this.transformPassword(userRegisterDto);
     }
-    console.log(userRegisterDto);
     return await this.userRepository.save(userRegisterDto);
   }
 
@@ -54,10 +53,14 @@ export class UserService {
     return user;
   }
 
-  public async findUserByNickname(nickname: string): Promise<User[]> {
+  public async findUserByNickname(
+    userId: string,
+    nickname: string
+  ): Promise<User[]> {
     return await this.userRepository
       .createQueryBuilder("user")
       .where("user.nickname LIKE :nickname", { nickname: `%${nickname}%` })
+      .andWhere("user.userId != :userId", { userId }) // 현재 유저 제외
       .getMany();
   }
 

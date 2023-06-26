@@ -9,9 +9,6 @@ import { CreateReplayInput } from "./dto/create-replay.input";
 import { InjectRepository } from "@nestjs/typeorm";
 import { User } from "src/user/entity/user.entity";
 
-const BUCKET_NAME: string = process.env.AWS_S3_BUCKET_NAME as string;
-const BUCKET_URL: string = `https://${BUCKET_NAME}.s3.amazonaws.com/` as string;
-
 const s3 = new AWS.S3();
 
 interface ReplayWithSongInfo
@@ -50,7 +47,7 @@ export class GameReplayService {
     filename: string
   ): Promise<string> {
     const params = {
-      Bucket: BUCKET_NAME,
+      Bucket: process.env.AWS_S3_BUCKET_NAME as string,
       Key: `${filename}.txt`,
       Body: filebase64,
       ContentType: "text/plain",
@@ -61,7 +58,9 @@ export class GameReplayService {
       }
       console.log(data);
     });
-    return `${BUCKET_URL}${filename}.txt`;
+    return `https://${
+      process.env.AWS_S3_BUCKET_NAME as string
+    }.s3.amazonaws.com/${filename}.txt`;
   }
 
   public async saveGameEvent(
@@ -69,7 +68,7 @@ export class GameReplayService {
     filename: string
   ): Promise<string> {
     const params = {
-      Bucket: BUCKET_NAME,
+      Bucket: process.env.AWS_S3_BUCKET_NAME as string,
       Key: `${filename}.json`,
       Body: gameEvent,
       ContentType: "application/json",
@@ -95,7 +94,7 @@ export class GameReplayService {
         const gameSong = gameSongdto;
         const characterList: any = [];
         characterList.push({
-          userId: gameReplay.user,
+          userId: gameReplay.userId,
           character: gameReplay.userCharacter,
         });
         characterList.push({
@@ -109,26 +108,20 @@ export class GameReplayService {
         return {
           gameSong: gameSong,
           characterList: characterList,
-          replayId: replayId,
+          userVocal: gameReplay.userVocal,
         };
       }
     }
   }
 
   public async replayGame(user: Socket, replayId: number, userId: string) {
-    const gameReplay = await this.gameReplayRepository
-      .createQueryBuilder("game_replay_entity")
-      .where("game_replay_entity.replayId = :replayId", {
-        replayId: replayId,
-      })
-      .getOne();
+    const gameReplay = await this.gameReplayRepository.findOne({
+      where: { replayId: replayId },
+    });
     if (!gameReplay) return;
-    const gameEventUrl = gameReplay.gameEvent;
-    console.log(gameEventUrl);
-    console.log("b");
     const params = {
-      Bucket: BUCKET_NAME,
-      Key: "1_1_1687447904529.json",
+      Bucket: process.env.AWS_S3_BUCKET_NAME as string,
+      Key: gameReplay.gameEvent,
     };
     s3.getObject(params, (err, data) => {
       if (err) {
@@ -150,6 +143,8 @@ export class GameReplayService {
         if (gameEvent.getUserId() !== userId) {
           return;
         }
+      } else if (eventName === "game_terminated") {
+        gameEvent.eventContent = JSON.parse(gameEvent.eventContent);
       }
       setTimeout(() => {
         user.emit(eventName, gameEvent.eventContent);

@@ -141,14 +141,11 @@ export class GameGateway
     @ConnectedSocket() user: Socket,
     @MessageBody() useItem: UserItemDto
   ) {
-    console.log("use_item : ", useItem);
-
     this.broadCast(user, "use_item", useItem);
   }
 
   @SubscribeMessage("get_item")
   getItemData(@ConnectedSocket() user: Socket) {
-    console.log("get item");
     const item = this.gameService.getItem();
     user.emit("get_item", item);
   }
@@ -159,7 +156,6 @@ export class GameGateway
     @MessageBody() escapeItem: UserItemDto
   ) {
     const message = "escape_item";
-    console.log("escape item");
     this.broadCast(user, message, escapeItem);
   }
 
@@ -176,7 +172,6 @@ export class GameGateway
     @ConnectedSocket() user: Socket,
     @MessageBody() userScoreDto: UserScoreDto
   ) {
-    console.log("gameterminiated");
     if (!this.gameService.allUsersTerminated(user, userScoreDto)) {
       return;
     }
@@ -202,8 +197,6 @@ export class GameGateway
         user
       );
       userGame.getSocket().emit("game_terminated", gameTerminatedList);
-      console.log(userGame.getUserMatchDto().userId);
-      console.log(gameTerminatedList);
     }
   }
 
@@ -234,6 +227,8 @@ export class GameGateway
     @ConnectedSocket() user: Socket,
     @MessageBody() userMatchDto: UserMatchDto
   ) {
+    console.log("create usermatchdto : ", userMatchDto.character);
+    console.log("create usermatchdto : ", userMatchDto);
     await this.customModeService.createCustomRoom(user, userMatchDto);
     const gameRoom: GameRoom = this.matchService.findRoomBySocket(user);
     user.emit("create_custom", gameRoom.getRoomId());
@@ -278,11 +273,10 @@ export class GameGateway
 
   @SubscribeMessage("start_replay")
   startReplay(@ConnectedSocket() user: Socket, @MessageBody() data) {
-    this.gameReplayService.replayGame(user, data.replayId, data.userId);
+    this.gameReplayService.replayGame(user, data[0], data[1]);
   }
 
   private broadCast(user: Socket, message: string, responseData: any) {
-    // console.log("in broad cast : ", responseData);
     const gameRoom: GameRoom = this.matchService.findRoomBySocket(user);
     this.gameService.putEvent(gameRoom, message, responseData, user);
     const userList: UserGameDto[] =

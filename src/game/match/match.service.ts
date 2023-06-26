@@ -21,7 +21,6 @@ export class MatchService {
       this.matchMakingPolicy.getAvailableUsers(userGameDto);
     userList.push(userGameDto);
     const gameRoom: GameRoom = await this.gameRoomHandler.createRoom();
-    console.log("gameRoom : ", gameRoom);
     for (const user of userList) {
       this.gameRoomHandler.joinRoom(gameRoom, user);
     }
@@ -31,7 +30,6 @@ export class MatchService {
     user: Socket,
     userMatchDto: UserMatchDto
   ): Promise<boolean> {
-    console.log(userMatchDto);
     const userGameDto: UserGameDto = new UserGameDto(user, userMatchDto);
     if (this.matchMakingPolicy.isQueueReady(userGameDto)) {
       await this.matchMaking(userGameDto);

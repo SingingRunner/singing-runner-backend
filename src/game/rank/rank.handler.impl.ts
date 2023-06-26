@@ -28,7 +28,6 @@ export class RankHandlerImpl implements RankHandler {
   }
 
   public calculateRank(gameRoom: GameRoom): GameTerminatedDto[] {
-    console.log("ranHandler");
     if (gameRoom === undefined || gameRoom === null) {
       throw new Error("game room is undefined or null");
     }
@@ -37,11 +36,6 @@ export class RankHandlerImpl implements RankHandler {
     if (userScoreList === undefined) {
       throw new Error("game room is undefined or null");
     }
-    console.log("userScoreList: ", userScoreList);
-    console.log("userScore: ", userScoreList[0]);
-    console.log("userScore. score : ", userScoreList[0].score);
-    console.log("Type: ", typeof userScoreList);
-    console.log("Type: ", typeof userScoreList[0]);
     userScoreList?.sort((a, b) => b.score - a.score);
 
     const gameTerminatedList: GameTerminatedDto[] = [];

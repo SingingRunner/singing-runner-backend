@@ -15,9 +15,11 @@ export class NotificationService {
     const notification = new UserNotification();
     notification.user = user;
     notification.sender = sender;
-    notification.receivedAt = date;
     notification.content = "친구요청";
-    console.log(notification);
+
+    notification.receivedAt = date;
+    notification.deletedAt = null;
+
     await this.userNotificationRepository.save(notification);
   }
 

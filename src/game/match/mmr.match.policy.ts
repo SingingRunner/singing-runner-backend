@@ -47,7 +47,6 @@ export class MMRMatchPolicy implements MatchMakingPolicy {
     const userTier: UserMatchTier = this.transformMMRtoTier(
       userGameDto.getUserMatchDto().userMmr
     );
-    console.log("isQ ready", userTier);
     const readyQueue: UserGameDto[] | undefined =
       this.tierQueueMap.get(userTier);
     if (readyQueue !== undefined && readyQueue.length >= 2) {

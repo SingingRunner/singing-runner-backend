@@ -150,7 +150,7 @@ type Query {
   searchSong(keyword: String!, page: Int!, filter: String!): [GameSongDto!]!
   getNotification(userId: String!, page: Int!): [RequestDto!]!
   searchFriend(userId: String!, nickname: String!, page: Int!): [SearchFriendDto!]!
-  searchUser(nickname: String!, page: Int!): [FriendDto!]!
+  searchUser(userId: String!, nickname: String!, page: Int!): [FriendDto!]!
   fetchUserGuard: AuthUserDto!
   fetchUser(userId: String!): AuthUserDto!
   getUserReplays(isMyReplay: Boolean!, pageNumber: Int!, userId: String!): [ReplayWithSongInfo!]!
