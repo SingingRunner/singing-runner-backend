@@ -25,6 +25,17 @@ export class AuthResolver {
     if (!newUser) {
       throw new Error("데이터가 없습니다.");
     }
+
+    // userEmail 중복 체크
+    if (await this.isEmailTaken(newUser.userEmail)) {
+      throw new Error("이미 존재하는 이메일입니다.");
+    }
+
+    // nickname 중복 체크
+    if (await this.isNicknameTaken(newUser.nickname)) {
+      throw new Error("이미 존재하는 닉네임입니다.");
+    }
+
     const registeredUser = await this.authService.registerUser(newUser);
 
     const userLoginDto = new UserLoginDto();
@@ -33,6 +44,22 @@ export class AuthResolver {
 
     // 자동으로 로그인 되도록 함
     return await this.loginUser(userLoginDto, context);
+  }
+
+  @Query(() => Boolean)
+  async isEmailTaken(@Args("userEmail") userEmail: string): Promise<boolean> {
+    const user = await this.userService.findByFields({
+      where: { userEmail: userEmail },
+    });
+    return user ? true : false;
+  }
+
+  @Query(() => Boolean)
+  async isNicknameTaken(@Args("nickname") nickname: string): Promise<boolean> {
+    const user = await this.userService.findByFields({
+      where: { nickname: nickname },
+    });
+    return user ? true : false;
   }
 
   @Mutation(() => AuthDto)
