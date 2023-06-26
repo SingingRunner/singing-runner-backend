@@ -28,7 +28,6 @@ export class SocialResolver {
       pollingDto.hostUserDtoList.length !== 0 ||
       pollingDto.userNotificationList.length !== 0
     ) {
-
       console.log(" 5초 대기후 반환");
       return pollingDto;
     }

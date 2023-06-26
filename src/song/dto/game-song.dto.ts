@@ -1,7 +1,6 @@
 import { IsString, IsBoolean } from "class-validator";
 import { Song } from "../entities/song.entity";
 import { Field, Int, ObjectType } from "@nestjs/graphql";
-import { type } from "node:os";
 
 @ObjectType()
 export class GameSongDto {
