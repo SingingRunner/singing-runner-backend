@@ -1,4 +1,3 @@
-import { characterEnum } from "src/user/util/character.enum";
 import { SocialService } from "./../social/social.service";
 import { UserService } from "src/user/user.service";
 import { GameRoomHandler } from "./room/game.room.handler";
@@ -16,7 +15,7 @@ import { GameTerminatedDto } from "./rank/game-terminated.dto";
 import { GameReplayService } from "./replay/game.replay.service";
 import { User } from "src/user/entity/user.entity";
 import { userActiveStatus } from "src/user/util/user.enum";
-import { UserInfoDto } from "./utill/user-info.dto";
+import { UserInfoDto } from "./util/user-info.dto";
 
 @Injectable()
 export class GameService {
@@ -165,7 +164,6 @@ export class GameService {
   ) {
     this.setTerminatedUserNickname(userGame.getSocket(), gameTerminatedDto);
     const userMatchDto = userGame.getUserMatchDto();
-    await this.updateUserActive(userMatchDto.userId, userActiveStatus.CONNECT);
     const friendList: User[] = await this.getFriendList(userMatchDto.userId);
 
     if (friendList === null) {

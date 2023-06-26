@@ -2,7 +2,7 @@ import { RankHandlerImpl } from "./rank.handler.impl";
 import { GameRoom } from "../room/game.room";
 import { UserScoreDto } from "./dto/user-score.dto";
 import { GameTerminatedDto } from "./game-terminated.dto";
-import { GameRoomStatus } from "../utill/game.enum";
+import { GameRoomStatus } from "../util/game.enum";
 import { GameSongDto } from "src/song/dto/game-song.dto";
 
 describe("RankHandlerImpl", () => {

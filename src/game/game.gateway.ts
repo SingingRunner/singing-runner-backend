@@ -18,11 +18,11 @@ import { UserScoreDto } from "./rank/dto/user-score.dto";
 import { GameTerminatedDto } from "./rank/game-terminated.dto";
 import { CustomModeService } from "./custom-mode/custom.mode.service";
 import { userActiveStatus } from "src/user/util/user.enum";
-import { UserInfoDto } from "./utill/user-info.dto";
+import { UserInfoDto } from "./util/user-info.dto";
 import { GameReplayService } from "./replay/game.replay.service";
-import { CustomSongDto } from "./utill/custom-song.dto";
+import { CustomSongDto } from "./util/custom-song.dto";
 import { UserMatchDto } from "src/user/dto/user.match.dto";
-import { CustomUserInfoDto } from "./utill/custom-user.info.dto";
+import { CustomUserInfoDto } from "./util/custom-user.info.dto";
 
 /**
  * webSocket 통신을 담당하는 Handler
@@ -187,6 +187,10 @@ export class GameGateway
     }
 
     for (const userGame of userList) {
+      await this.gameService.updateUserActive(
+        userGame.getUserMatchDto().userId,
+        userActiveStatus.CONNECT
+      );
       for (const gameTerminated of gameTerminatedList) {
         await this.gameService.setGameTerminatedDto(userGame, gameTerminated);
       }
@@ -209,7 +213,6 @@ export class GameGateway
     );
     const customUserList: CustomUserInfoDto[] =
       this.customModeService.setCustomUserInfo(user);
-
     const gameRoom: GameRoom = this.matchService.findRoomBySocket(user);
     const userList: UserGameDto[] =
       this.matchService.findUsersInSameRoom(gameRoom);

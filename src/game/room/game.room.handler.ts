@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { Socket } from "socket.io";
 import { GameRoom } from "./game.room";
 import { UserGameDto } from "src/user/dto/user.game.dto";
-import { GameRoomStatus } from "../utill/game.enum";
+import { GameRoomStatus } from "../util/game.enum";
 import { SongService } from "src/song/song.service";
 
 @Injectable()

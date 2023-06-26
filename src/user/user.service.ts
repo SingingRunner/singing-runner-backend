@@ -5,7 +5,7 @@ import { FindOneOptions, Like, Repository } from "typeorm";
 import { User } from "./entity/user.entity";
 import * as bcrypt from "bcrypt";
 import { userActiveStatus } from "./util/user.enum";
-import { UserMatchTier } from "src/game/utill/game.enum";
+import { UserMatchTier } from "src/game/util/game.enum";
 
 @Injectable()
 export class UserService {
@@ -43,6 +43,7 @@ export class UserService {
   }
 
   async findUserById(userId: string): Promise<User> {
+    console.log("update UserId : ", userId);
     const user: User | null = await this.userRepository.findOne({
       where: { userId },
     });
@@ -75,9 +76,18 @@ export class UserService {
   }
 
   public async updateUserActive(userId: string, userActive: userActiveStatus) {
+    console.log("updateuseractive: ", userId);
+    console.log("useractive: ", userActive);
     const user: User | null = await this.findUserById(userId);
     if (user === null) {
       throw new Error("게임룸에 등록되지 않은 유저가 있습니다.");
+    }
+    if (
+      user.userActive === userActiveStatus.IN_GAME &&
+      userActive === userActiveStatus.LOGOUT
+    ) {
+      console.log("ingame");
+      return;
     }
     user.userActive = userActive;
     this.update(user);
@@ -91,6 +101,7 @@ export class UserService {
     user.userMmr += mmrDiff;
     this.update(user);
   }
+
   async saveUser(user: User): Promise<User> {
     return this.userRepository.save(user);
   }
@@ -107,5 +118,13 @@ export class UserService {
     } else {
       return "DIAMOND";
     }
+  }
+
+  async setUserActiveStatus(
+    user: User,
+    userActive: userActiveStatus
+  ): Promise<User> {
+    user.userActive = userActive;
+    return await this.saveUser(user);
   }
 }
