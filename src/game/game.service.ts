@@ -164,7 +164,6 @@ export class GameService {
   ) {
     this.setTerminatedUserNickname(userGame.getSocket(), gameTerminatedDto);
     const userMatchDto = userGame.getUserMatchDto();
-    await this.updateUserActive(userMatchDto.userId, userActiveStatus.CONNECT);
     const friendList: User[] = await this.getFriendList(userMatchDto.userId);
 
     if (friendList === null) {

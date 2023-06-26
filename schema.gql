@@ -53,6 +53,7 @@ type FriendDto {
 type RequestDto {
   senderId: String!
   senderNickname: String!
+  receivedAt: DateTime!
 }
 
 type SearchFriendDto {
@@ -65,7 +66,7 @@ type SearchFriendDto {
 }
 
 type GameSongDto {
-  songId: Float!
+  songId: Int!
   songTitle: String!
   singer: String!
   songLyrics: String!
@@ -121,6 +122,7 @@ enum characterEnum {
   SNOWLEOPARD
   NARWHAL
   PUFFIN
+  MOOSE
 }
 
 type UserKeynoteResponseDto {

@@ -187,6 +187,10 @@ export class GameGateway
     }
 
     for (const userGame of userList) {
+      await this.gameService.updateUserActive(
+        userGame.getUserMatchDto().userId,
+        userActiveStatus.CONNECT
+      );
       for (const gameTerminated of gameTerminatedList) {
         await this.gameService.setGameTerminatedDto(userGame, gameTerminated);
       }
@@ -209,7 +213,6 @@ export class GameGateway
     );
     const customUserList: CustomUserInfoDto[] =
       this.customModeService.setCustomUserInfo(user);
-
     const gameRoom: GameRoom = this.matchService.findRoomBySocket(user);
     const userList: UserGameDto[] =
       this.matchService.findUsersInSameRoom(gameRoom);

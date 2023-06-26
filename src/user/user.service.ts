@@ -77,9 +77,17 @@ export class UserService {
 
   public async updateUserActive(userId: string, userActive: userActiveStatus) {
     console.log("updateuseractive: ", userId);
+    console.log("useractive: ", userActive);
     const user: User | null = await this.findUserById(userId);
     if (user === null) {
       throw new Error("게임룸에 등록되지 않은 유저가 있습니다.");
+    }
+    if (
+      user.userActive === userActiveStatus.IN_GAME &&
+      userActive === userActiveStatus.LOGOUT
+    ) {
+      console.log("ingame");
+      return;
     }
     user.userActive = userActive;
     this.update(user);
