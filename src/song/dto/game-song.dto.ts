@@ -1,6 +1,7 @@
 import { IsString, IsBoolean } from "class-validator";
 import { Song } from "../entities/song.entity";
-import { Field, ObjectType } from "@nestjs/graphql";
+import { Field, Int, ObjectType } from "@nestjs/graphql";
+import { type } from "node:os";
 
 @ObjectType()
 export class GameSongDto {
@@ -24,7 +25,7 @@ export class GameSongDto {
     this.vocalFemaleDown = song.vocalFemaleDown;
   }
 
-  @Field()
+  @Field(() => Int)
   songId: number;
 
   @IsString()

@@ -5,7 +5,6 @@ import { Socket } from "socket.io";
 import { GameSongDto } from "src/song/dto/game-song.dto";
 
 import { SongService } from "src/song/song.service";
-import { HostUserDto } from "src/user/dto/host-user.dto";
 import { UserGameDto } from "src/user/dto/user.game.dto";
 import { UserMatchDto } from "src/user/dto/user.match.dto";
 import { CustomSongDto } from "../utill/custom-song.dto";
