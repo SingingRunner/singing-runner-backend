@@ -7,11 +7,11 @@ import { GameSongDto } from "src/song/dto/game-song.dto";
 import { SongService } from "src/song/song.service";
 import { UserGameDto } from "src/user/dto/user.game.dto";
 import { UserMatchDto } from "src/user/dto/user.match.dto";
-import { CustomSongDto } from "../utill/custom-song.dto";
+import { CustomSongDto } from "../util/custom-song.dto";
 import { UserService } from "src/user/user.service";
 import { SocialService } from "src/social/social.service";
 import { User } from "src/user/entity/user.entity";
-import { CustomUserInfoDto } from "../utill/custom-user.info.dto";
+import { CustomUserInfoDto } from "../util/custom-user.info.dto";
 
 @Injectable()
 export class CustomModeService {

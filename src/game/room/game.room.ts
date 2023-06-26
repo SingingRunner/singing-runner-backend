@@ -1,5 +1,5 @@
 import { GameSongDto } from "src/song/dto/game-song.dto";
-import { GameRoomStatus } from "./../utill/game.enum";
+import { GameRoomStatus } from "../util/game.enum";
 import { GameEventDto } from "../event/dto/game.event.dto";
 
 export class GameRoom {

@@ -1,5 +1,5 @@
 import { MatchMakingPolicy } from "./match.making.policy";
-import { UserMatchTier } from "../utill/game.enum";
+import { UserMatchTier } from "../util/game.enum";
 import { Socket } from "socket.io";
 import { UserGameDto } from "src/user/dto/user.game.dto";
 

@@ -15,7 +15,7 @@ import { GameTerminatedDto } from "./rank/game-terminated.dto";
 import { GameReplayService } from "./replay/game.replay.service";
 import { User } from "src/user/entity/user.entity";
 import { userActiveStatus } from "src/user/util/user.enum";
-import { UserInfoDto } from "./utill/user-info.dto";
+import { UserInfoDto } from "./util/user-info.dto";
 
 @Injectable()
 export class GameService {
