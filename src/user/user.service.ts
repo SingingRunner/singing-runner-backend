@@ -93,6 +93,7 @@ export class UserService {
     user.userMmr += mmrDiff;
     this.update(user);
   }
+
   async saveUser(user: User): Promise<User> {
     return this.userRepository.save(user);
   }
@@ -109,5 +110,13 @@ export class UserService {
     } else {
       return "DIAMOND";
     }
+  }
+
+  async setUserActiveStatus(
+    user: User,
+    userActive: userActiveStatus
+  ): Promise<User> {
+    user.userActive = userActive;
+    return await this.saveUser(user);
   }
 }
