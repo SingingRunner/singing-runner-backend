@@ -7,6 +7,7 @@ import { GameRoomHandler } from "../room/game.room.handler";
 import { MatchMakingPolicy } from "./match.making.policy";
 import { UserMatchDto } from "src/user/dto/user.match.dto";
 import { UserGameDto } from "src/user/dto/user.game.dto";
+import { error } from "console";
 
 @Injectable()
 export class MatchService {
@@ -66,8 +67,13 @@ export class MatchService {
     return this.gameRoomHandler.findRoomBySocket(user);
   }
 
-  public findRoomByUserId(userId: string): GameRoom | undefined {
-    return this.gameRoomHandler.findRoomByUserId(userId);
+  public findRoomByUserId(userId: string): GameRoom {
+    const gameRoom: GameRoom | undefined =
+      this.gameRoomHandler.findRoomByUserId(userId);
+    if (gameRoom === undefined) {
+      throw new Error("room not found");
+    }
+    return gameRoom;
   }
   public updateUserSocket(userId: string, userSocket: Socket) {
     this.gameRoomHandler.updateUserSocket(userId, userSocket);
