@@ -30,8 +30,8 @@ export class GameService {
     private socialService: SocialService
   ) {}
 
-  public loadData(user: Socket) {
-    const gameRoom: GameRoom = this.gameRoomHandler.findRoomBySocket(user);
+  public loadData(userId: string) {
+    const gameRoom: GameRoom = this.findRoomByUserId(userId);
     const userList: UserGameDto[] =
       this.gameRoomHandler.findUsersInRoom(gameRoom);
     const characterList: any = [];
@@ -156,6 +156,15 @@ export class GameService {
       throw new Error("없는 유저입니다");
     }
     gameTerminatedDto.setCharacter(user.character);
+  }
+
+  public findRoomByUserId(userId: string): GameRoom {
+    const gameRoom: GameRoom | undefined =
+      this.gameRoomHandler.findRoomByUserId(userId);
+    if (gameRoom === undefined) {
+      throw new Error("room not found");
+    }
+    return gameRoom;
   }
 
   public async setGameTerminatedDto(

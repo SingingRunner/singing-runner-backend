@@ -118,8 +118,8 @@ export class GameGateway
   }
 
   @SubscribeMessage("loading")
-  loadSongData(@ConnectedSocket() user: Socket) {
-    const data = this.gameService.loadData(user);
+  loadSongData(@ConnectedSocket() user: Socket, @MessageBody() userId: string) {
+    const data = this.gameService.loadData(userId);
     user.emit("loading", data);
   }
 
