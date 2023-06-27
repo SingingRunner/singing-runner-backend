@@ -15,10 +15,10 @@ export class GameRoomHandler {
     this.roomList.get(gameRoom)?.push(user);
   }
 
-  public leaveRoom(gameRoom: GameRoom, user: Socket) {
+  public leaveRoom(gameRoom: GameRoom, userId: string) {
     const users: UserGameDto[] | undefined = this.roomList
       .get(gameRoom)
-      ?.filter((userInfo) => userInfo.getSocket().id !== user.id);
+      ?.filter((userInfo) => userInfo.getUserMatchDto().userId !== userId);
     if (users === undefined) {
       throw new Error("User not found in the game room");
     }
@@ -32,8 +32,11 @@ export class GameRoomHandler {
     return false;
   }
 
-  public increaseAcceptCount(user: Socket) {
-    const gameRoom: GameRoom = this.findRoomBySocket(user);
+  public increaseAcceptCount(userId: string) {
+    const gameRoom: GameRoom | undefined = this.findRoomByUserId(userId);
+    if (gameRoom === undefined) {
+      throw new Error("not found room by userID");
+    }
     gameRoom.increaseAcceptCount();
   }
 
@@ -43,6 +46,18 @@ export class GameRoomHandler {
       throw new Error("User not found in the game room");
     }
     return users;
+  }
+  public updateUserSocket(userId: string, userSocket: Socket) {
+    const gameRoom: GameRoom | undefined = this.findRoomByUserId(userId);
+    if (gameRoom === undefined) {
+      return;
+    }
+    const userGameDtoList: UserGameDto[] = this.findUsersInRoom(gameRoom);
+    for (const userGameDto of userGameDtoList) {
+      if (userGameDto.getUserMatchDto().userId === userId) {
+        userGameDto.setSocket(userSocket);
+      }
+    }
   }
 
   public async createRoom(): Promise<GameRoom> {
@@ -57,8 +72,11 @@ export class GameRoomHandler {
     return gameRoom;
   }
 
-  public deleteRoom(user: Socket) {
-    const gameRoom: GameRoom = this.findRoomBySocket(user);
+  public deleteRoom(userId: string) {
+    const gameRoom: GameRoom | undefined = this.findRoomByUserId(userId);
+    if (gameRoom === undefined) {
+      throw new Error("not found room by userID");
+    }
     this.roomList.delete(gameRoom);
   }
 
@@ -74,17 +92,19 @@ export class GameRoomHandler {
     throw new Error("Room not found");
   }
 
-  public findRoomByUserId(userId: string): GameRoom {
+  public findRoomByUserId(userId: string): GameRoom | undefined {
     for (const key of this.roomList.keys()) {
       const foundUser: UserGameDto | undefined = this.roomList
         .get(key)
         ?.find((userInRoom) => userInRoom.getUserMatchDto().userId === userId);
+      console.log(foundUser);
       if (foundUser !== undefined) {
         return key;
       }
     }
-    throw new Error("Room not found");
+    return undefined;
   }
+
   private roomCount(): number {
     return this.roomList.size;
   }
