@@ -26,10 +26,12 @@ export class CustomModeService {
     const gameRoom: GameRoom = await this.createRoom();
     this.addUserToRoom(gameRoom, userGameDto);
     this.setRoomMaster(gameRoom, userMatchDto.userId);
+    console.log("host : ", gameRoom.getRoomMaster());
   }
 
   public leaveRoom(userMatchDto: UserMatchDto) {
     const gameRoom: GameRoom = this.findRoomByUserId(userMatchDto.userId);
+
     if (this.isRoomMaster(userMatchDto, gameRoom)) {
       this.gameRoomHandler.deleteRoom(userMatchDto.userId);
       return;
@@ -42,9 +44,9 @@ export class CustomModeService {
     gameRoom: GameRoom
   ): boolean {
     if (gameRoom.getRoomMaster() === userMatchDto.userId) {
-      return false;
+      return true;
     }
-    return true;
+    return false;
   }
 
   private createUserGameDto(

@@ -46,6 +46,7 @@ export class MatchService {
   public acceptAllUsers(userId: string): boolean {
     const gameRoom: GameRoom = this.findRoomByUserId(userId);
     this.gameRoomHandler.increaseAcceptCount(userId);
+
     if (this.gameRoomHandler.isGameRoomReady(gameRoom)) {
       gameRoom.resetAcceptCount();
       return true;

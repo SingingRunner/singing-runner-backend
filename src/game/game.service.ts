@@ -209,6 +209,7 @@ export class GameService {
   }
 
   public async updateUserActive(userId: string, userActive: userActiveStatus) {
+    console.log("update,: ", userId);
     await this.userService.updateUserActive(userId, userActive);
   }
 

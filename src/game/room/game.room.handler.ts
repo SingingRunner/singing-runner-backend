@@ -97,6 +97,7 @@ export class GameRoomHandler {
       const foundUser: UserGameDto | undefined = this.roomList
         .get(key)
         ?.find((userInRoom) => userInRoom.getUserMatchDto().userId === userId);
+      console.log(foundUser);
       if (foundUser !== undefined) {
         return key;
       }
