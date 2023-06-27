@@ -8,11 +8,19 @@ import { SongService } from "src/song/song.service";
 @Injectable()
 export class GameRoomHandler {
   private roomList: Map<GameRoom, Array<UserGameDto>> = new Map();
+  private userRoomMap: Map<string, GameRoom> = new Map();
 
   constructor(private songService: SongService) {}
 
   public joinRoom(gameRoom: GameRoom, user: UserGameDto) {
+    const existingRoom: GameRoom | undefined = this.userRoomMap.get(
+      user.getUserMatchDto().userId
+    );
+    if (existingRoom) {
+      this.leaveRoom(existingRoom, user.getUserMatchDto().userId);
+    }
     this.roomList.get(gameRoom)?.push(user);
+    this.userRoomMap.set(user.getUserMatchDto().userId, gameRoom);
   }
 
   public leaveRoom(gameRoom: GameRoom, userId: string) {
@@ -23,6 +31,10 @@ export class GameRoomHandler {
       throw new Error("User not found in the game room");
     }
     this.roomList.set(gameRoom, users);
+    this.userRoomMap.delete(userId);
+    if (this.findUsersInRoom(gameRoom).length === 0) {
+      this.roomList.delete(gameRoom);
+    }
   }
 
   public isGameRoomReady(gameRoom: GameRoom): boolean {
@@ -50,7 +62,7 @@ export class GameRoomHandler {
   }
 
   public findUsersInRoom(gameRoom: GameRoom): UserGameDto[] {
-    const users = this.roomList.get(gameRoom)?.slice();
+    const users = this.roomList.get(gameRoom);
     if (users === undefined) {
       throw new Error("User not found in the game room");
     }
@@ -81,6 +93,7 @@ export class GameRoomHandler {
       gameSongDto
     );
     this.roomList.set(gameRoom, []);
+    console.log("create 이후 현재 roomList : ", this.roomList);
     return gameRoom;
   }
 
@@ -89,7 +102,12 @@ export class GameRoomHandler {
     if (gameRoom === undefined) {
       throw new Error("not found room by userID");
     }
+    const users = this.findUsersInRoom(gameRoom);
+    for (const user of users) {
+      this.userRoomMap.delete(user.getUserMatchDto().userId);
+    }
     this.roomList.delete(gameRoom);
+    console.log("delete 이후 현재 roomList : ", this.roomList);
   }
 
   public findRoomBySocket(user: Socket): GameRoom {
