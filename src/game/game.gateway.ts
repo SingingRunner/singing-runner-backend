@@ -1,3 +1,4 @@
+import { UserMatchDto } from "./../user/dto/user.match.dto";
 import {
   ConnectedSocket,
   MessageBody,
@@ -12,16 +13,13 @@ import { Server, Socket } from "socket.io";
 import { MatchService } from "./match/match.service";
 import { GameService } from "./game.service";
 import { GameRoom } from "./room/game.room";
-import { UserItemDto } from "./item/dto/user-item.dto";
 import { UserGameDto } from "src/user/dto/user.game.dto";
 import { UserScoreDto } from "./rank/dto/user-score.dto";
 import { GameTerminatedDto } from "./rank/game-terminated.dto";
 import { CustomModeService } from "./custom-mode/custom.mode.service";
 import { userActiveStatus } from "src/user/util/user.enum";
-import { UserInfoDto } from "./util/user-info.dto";
 import { GameReplayService } from "./replay/game.replay.service";
 import { CustomSongDto } from "./util/custom-song.dto";
-import { UserMatchDto } from "src/user/dto/user.match.dto";
 import { CustomUserInfoDto } from "./util/custom-user.info.dto";
 
 /**
@@ -45,11 +43,14 @@ export class GameGateway
     console.log(server);
   }
 
-  handleConnection(@ConnectedSocket() user: Socket) {
-    console.log(`Client connected: ${user.id}`);
+  handleConnection(@ConnectedSocket() user: Socket, userId: string) {
+    console.log(`Client connected socketID: ${user.id}`);
+    console.log(`Client connected userID: ${userId}`);
+    this.matchService.updateUserSocket(userId, user);
   }
 
   handleDisconnect(@ConnectedSocket() user: Socket) {
+    console.log("disconnect socketID", user);
     // 게임중일떄 disconnect 시 탈주자처리
     console.log(`Client disconnected: ${user.id}`);
 
@@ -57,12 +58,10 @@ export class GameGateway
     //   this.matchService.matchCancel(user);
     //   return;
     // }
-
     // const userSocketList: Socket[] | undefined =
     //   this.gameService.findUsersSocketInSameRoom(user);
     // const exitUserInfo: UserInfoDto | undefined =
     //   this.gameService.getUserInfoBySocket(user);
-
     // for (const userSocket of userSocketList) {
     //   if (userSocket === user) {
     //     continue;
@@ -82,16 +81,19 @@ export class GameGateway
     console.log("matchmaking connect");
     const message = "match_making";
     if (!data.accept) {
-      this.matchService.matchCancel(user);
+      this.matchService.matchCancel(data.UserMatchDto.userId);
       return;
     }
-    console.log("matchmaking", data.UserMatchDto.nickName);
+    console.log("matchmaking", data.UserMatchDto.nickname);
     if (!(await this.matchService.isMatchMade(user, data.UserMatchDto))) {
       return;
     }
-    const gameRoom: GameRoom = this.matchService.findRoomBySocket(user);
+    const gameRoom: GameRoom = this.matchService.findRoomByUserId(
+      data.UserMatchDto.userId
+    );
+    console.log("gameroom", gameRoom);
     const responseData = this.matchService.getSongInfo(gameRoom);
-    this.broadCast(user, message, responseData);
+    this.broadCast(user, data.UserMatchDto.userId, message, responseData);
     return;
   }
 
@@ -100,48 +102,46 @@ export class GameGateway
    * 한명이라도 거절시 Room 제거, 수락한 user는 readyQueue 에 우선순위가 높게 push
    */
   @SubscribeMessage("accept")
-  matchAcceptData(
-    @ConnectedSocket() user: Socket,
-    @MessageBody() accept: boolean
-  ) {
+  matchAcceptData(@ConnectedSocket() user: Socket, @MessageBody() data) {
     const message = "accept";
-
-    if (accept) {
-      if (!this.matchService.acceptAllUsers(user)) {
+    console.log(data);
+    if (data.accept) {
+      if (!this.matchService.acceptAllUsers(data.userId)) {
         return;
       }
-      this.broadCast(user, message, true);
+      this.broadCast(user, data.userId, message, true);
       return;
     }
 
-    this.matchService.matchDeny(user);
-    this.broadCast(user, message, false);
-    this.matchService.deleteRoom(user);
+    this.matchService.matchDeny(data.userId);
+    this.broadCast(user, data.userId, message, false);
+    this.matchService.deleteRoom(data.userId);
   }
 
   @SubscribeMessage("loading")
-  loadSongData(@ConnectedSocket() user: Socket) {
-    const data = this.gameService.loadData(user);
-    user.emit("loading", data);
+  loadSongData(@ConnectedSocket() user: Socket, @MessageBody() data) {
+    console.log("loading userid", data.userId);
+    const loadData = this.gameService.loadData(data.userId);
+    console.log("loading broadcast", data.userId);
+    user.emit("loading", loadData);
   }
 
   @SubscribeMessage("game_ready")
-  gameReadyData(@ConnectedSocket() user: Socket) {
-    if (this.gameService.isGameReady(user)) {
-      const userIdList: string[] = this.gameService.findUsersIdInSameRoom(user);
+  gameReadyData(@ConnectedSocket() user: Socket, @MessageBody() data) {
+    if (this.gameService.isGameReady(data.userId)) {
+      const userIdList: string[] = this.gameService.findUsersIdInSameRoom(
+        data.userId
+      );
       for (const userId of userIdList) {
         this.gameService.updateUserActive(userId, userActiveStatus.IN_GAME);
       }
-      this.broadCast(user, "game_ready", userIdList);
+      this.broadCast(user, data.userId, "game_ready", userIdList);
     }
   }
 
   @SubscribeMessage("use_item")
-  useItemData(
-    @ConnectedSocket() user: Socket,
-    @MessageBody() useItem: UserItemDto
-  ) {
-    this.broadCast(user, "use_item", useItem);
+  useItemData(@ConnectedSocket() user: Socket, @MessageBody() data) {
+    this.broadCast(user, data.userId, "use_item", data);
   }
 
   @SubscribeMessage("get_item")
@@ -151,12 +151,9 @@ export class GameGateway
   }
 
   @SubscribeMessage("escape_item")
-  escapeFrozenData(
-    @ConnectedSocket() user: Socket,
-    @MessageBody() escapeItem: UserItemDto
-  ) {
+  escapeFrozenData(@ConnectedSocket() user: Socket, @MessageBody() data) {
     const message = "escape_item";
-    this.broadCast(user, message, escapeItem);
+    this.broadCast(user, data.userId, message, data);
   }
 
   @SubscribeMessage("score")
@@ -164,7 +161,7 @@ export class GameGateway
     @ConnectedSocket() user: Socket,
     @MessageBody() userScoreDto: UserScoreDto
   ) {
-    this.broadCast(user, "score", userScoreDto);
+    this.broadCast(user, userScoreDto.userId, "score", userScoreDto);
   }
 
   @SubscribeMessage("game_terminated")
@@ -172,13 +169,15 @@ export class GameGateway
     @ConnectedSocket() user: Socket,
     @MessageBody() userScoreDto: UserScoreDto
   ) {
-    if (!this.gameService.allUsersTerminated(user, userScoreDto)) {
+    if (!this.gameService.allUsersTerminated(userScoreDto)) {
       return;
     }
 
     const gameTerminatedList: GameTerminatedDto[] =
-      await this.gameService.calculateRank(user);
-    const gameRoom: GameRoom = this.matchService.findRoomBySocket(user);
+      await this.gameService.calculateRank(userScoreDto.userId);
+    const gameRoom: GameRoom = this.matchService.findRoomByUserId(
+      userScoreDto.userId
+    );
     const userList: UserGameDto[] =
       this.matchService.findUsersInSameRoom(gameRoom);
 
@@ -233,20 +232,19 @@ export class GameGateway
     console.log("create usermatchdto : ", userMatchDto.character);
     console.log("create usermatchdto : ", userMatchDto);
     await this.customModeService.createCustomRoom(user, userMatchDto);
-    const gameRoom: GameRoom = this.matchService.findRoomBySocket(user);
+    const gameRoom: GameRoom = this.matchService.findRoomByUserId(
+      userMatchDto.userId
+    );
     user.emit("create_custom", gameRoom.getRoomId());
   }
 
   @SubscribeMessage("set_song")
-  async setGameSong(
-    @ConnectedSocket() user: Socket,
-    @MessageBody() songId: number
-  ) {
+  async setGameSong(@ConnectedSocket() user: Socket, @MessageBody() data) {
     const gameSong: CustomSongDto = await this.customModeService.setCustomSong(
-      user,
-      songId
+      data.userId,
+      data.songId
     );
-    this.broadCast(user, "set_song", gameSong);
+    this.broadCast(user, data.userId, "set_song", gameSong);
   }
 
   @SubscribeMessage("leave_room")
@@ -256,13 +254,13 @@ export class GameGateway
   ) {
     const userMatchDto: UserMatchDto =
       await this.customModeService.getUserMatchDtobyId(userId);
-    this.broadCast(user, "leave_room", userMatchDto.nickname);
-    this.customModeService.leaveRoom(user, userMatchDto);
+    this.broadCast(user, userId, "leave_room", userMatchDto.nickname);
+    this.customModeService.leaveRoom(userMatchDto);
   }
 
   @SubscribeMessage("custom_start")
-  startCustom(@ConnectedSocket() user: Socket) {
-    this.broadCast(user, "custom_start", true);
+  startCustom(@ConnectedSocket() user: Socket, @MessageBody() data) {
+    this.broadCast(user, data.userId, "custom_start", true);
   }
 
   @SubscribeMessage("load_replay")
@@ -279,9 +277,14 @@ export class GameGateway
     this.gameReplayService.replayGame(user, data[0], data[1]);
   }
 
-  private broadCast(user: Socket, message: string, responseData: any) {
-    const gameRoom: GameRoom = this.matchService.findRoomBySocket(user);
-    this.gameService.putEvent(gameRoom, message, responseData, user);
+  private broadCast(
+    userSocket: Socket,
+    userId: string,
+    message: string,
+    responseData: any
+  ) {
+    const gameRoom: GameRoom = this.matchService.findRoomByUserId(userId);
+    this.gameService.putEvent(gameRoom, message, responseData, userSocket);
     const userList: UserGameDto[] =
       this.matchService.findUsersInSameRoom(gameRoom);
     for (const user of userList) {

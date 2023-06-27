@@ -6,7 +6,7 @@ export enum characterEnum {
   HUSKY = "husky",
   HARE = "hare",
   LYNX = "lynx",
-  SNOWLEOPARD = "snowleopard",
+  SNOWLEOPARD = "leopard",
   NARWHAL = "narwhal",
   PUFFIN = "puffin",
   MOOSE = "moose",

@@ -153,6 +153,8 @@ type Query {
   getNotification(userId: String!, page: Int!): [RequestDto!]!
   searchFriend(userId: String!, nickname: String!, page: Int!): [SearchFriendDto!]!
   searchUser(userId: String!, nickname: String!, page: Int!): [FriendDto!]!
+  isEmailTaken(userEmail: String!): Boolean!
+  isNicknameTaken(nickname: String!): Boolean!
   fetchUserGuard: AuthUserDto!
   fetchUser(userId: String!): AuthUserDto!
   getUserReplays(isMyReplay: Boolean!, pageNumber: Int!, userId: String!): [ReplayWithSongInfo!]!

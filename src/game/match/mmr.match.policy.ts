@@ -1,6 +1,5 @@
 import { MatchMakingPolicy } from "./match.making.policy";
 import { UserMatchTier } from "../util/game.enum";
-import { Socket } from "socket.io";
 import { UserGameDto } from "src/user/dto/user.game.dto";
 
 export class MMRMatchPolicy implements MatchMakingPolicy {
@@ -29,13 +28,13 @@ export class MMRMatchPolicy implements MatchMakingPolicy {
     this.tierQueueMap.get(userTier)?.unshift(userGameDto);
   }
 
-  public leaveQueue(user: Socket) {
+  public leaveQueue(userId: string) {
     for (const key of this.tierQueueMap.keys()) {
       let usersInQueue = this.tierQueueMap.get(key);
 
       if (usersInQueue !== undefined) {
         usersInQueue = usersInQueue.filter(
-          (userInQueue) => userInQueue.getSocket().id !== user.id
+          (userInQueue) => userInQueue.getUserMatchDto().userId !== userId
         );
 
         this.tierQueueMap.set(key, usersInQueue);
