@@ -7,7 +7,6 @@ import { GameRoomHandler } from "../room/game.room.handler";
 import { MatchMakingPolicy } from "./match.making.policy";
 import { UserMatchDto } from "src/user/dto/user.match.dto";
 import { UserGameDto } from "src/user/dto/user.game.dto";
-import { error } from "console";
 
 @Injectable()
 export class MatchService {
@@ -44,9 +43,9 @@ export class MatchService {
     this.matchMakingPolicy.leaveQueue(userId);
   }
 
-  public acceptAllUsers(user: Socket): boolean {
-    const gameRoom: GameRoom = this.gameRoomHandler.findRoomBySocket(user);
-    this.gameRoomHandler.increaseAcceptCount(user);
+  public acceptAllUsers(userId: string): boolean {
+    const gameRoom: GameRoom = this.findRoomByUserId(userId);
+    this.gameRoomHandler.increaseAcceptCount(userId);
     if (this.gameRoomHandler.isGameRoomReady(gameRoom)) {
       gameRoom.resetAcceptCount();
       return true;
@@ -54,12 +53,12 @@ export class MatchService {
     return false;
   }
 
-  public matchDeny(user: Socket) {
-    const gameRoom: GameRoom = this.gameRoomHandler.findRoomBySocket(user);
+  public matchDeny(userId: string) {
+    const gameRoom: GameRoom = this.findRoomByUserId(userId);
     const userList: Array<UserGameDto> =
       this.gameRoomHandler.findUsersInRoom(gameRoom);
     for (const userInfo of userList) {
-      this.joinQueueWithOutDenyUser(userInfo, user);
+      this.joinQueueWithOutDenyUser(userInfo, userId);
     }
   }
 
@@ -88,12 +87,12 @@ export class MatchService {
     return { songTitle, singer };
   }
 
-  public deleteRoom(user: Socket) {
-    this.gameRoomHandler.deleteRoom(user);
+  public deleteRoom(userId: string) {
+    this.gameRoomHandler.deleteRoom(userId);
   }
 
-  private joinQueueWithOutDenyUser(userInfo: UserGameDto, user: Socket) {
-    if (userInfo.getSocket().id === user.id) {
+  private joinQueueWithOutDenyUser(userInfo: UserGameDto, userId: string) {
+    if (userInfo.getUserMatchDto().userId === userId) {
       return;
     }
     this.matchMakingPolicy.joinQueueAtFront(userInfo);

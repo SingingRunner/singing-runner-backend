@@ -32,8 +32,11 @@ export class GameRoomHandler {
     return false;
   }
 
-  public increaseAcceptCount(user: Socket) {
-    const gameRoom: GameRoom = this.findRoomBySocket(user);
+  public increaseAcceptCount(userId: string) {
+    const gameRoom: GameRoom | undefined = this.findRoomByUserId(userId);
+    if (gameRoom === undefined) {
+      throw new Error("not found room by userID");
+    }
     gameRoom.increaseAcceptCount();
   }
 
@@ -69,8 +72,11 @@ export class GameRoomHandler {
     return gameRoom;
   }
 
-  public deleteRoom(user: Socket) {
-    const gameRoom: GameRoom = this.findRoomBySocket(user);
+  public deleteRoom(userId: string) {
+    const gameRoom: GameRoom | undefined = this.findRoomByUserId(userId);
+    if (gameRoom === undefined) {
+      throw new Error("not found room by userID");
+    }
     this.roomList.delete(gameRoom);
   }
 

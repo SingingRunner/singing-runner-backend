@@ -19,10 +19,8 @@ import { UserScoreDto } from "./rank/dto/user-score.dto";
 import { GameTerminatedDto } from "./rank/game-terminated.dto";
 import { CustomModeService } from "./custom-mode/custom.mode.service";
 import { userActiveStatus } from "src/user/util/user.enum";
-import { UserInfoDto } from "./util/user-info.dto";
 import { GameReplayService } from "./replay/game.replay.service";
 import { CustomSongDto } from "./util/custom-song.dto";
-import { UserMatchDto } from "src/user/dto/user.match.dto";
 import { CustomUserInfoDto } from "./util/custom-user.info.dto";
 
 /**
@@ -103,23 +101,20 @@ export class GameGateway
    * 한명이라도 거절시 Room 제거, 수락한 user는 readyQueue 에 우선순위가 높게 push
    */
   @SubscribeMessage("accept")
-  matchAcceptData(
-    @ConnectedSocket() user: Socket,
-    @MessageBody() accept: boolean
-  ) {
+  matchAcceptData(@ConnectedSocket() user: Socket, @MessageBody() data) {
     const message = "accept";
 
-    if (accept) {
-      if (!this.matchService.acceptAllUsers(user)) {
+    if (data.accept) {
+      if (!this.matchService.acceptAllUsers(data.userId)) {
         return;
       }
       this.broadCast(user, message, true);
       return;
     }
 
-    this.matchService.matchDeny(user);
+    this.matchService.matchDeny(data.userId);
     this.broadCast(user, message, false);
-    this.matchService.deleteRoom(user);
+    this.matchService.deleteRoom(data.userId);
   }
 
   @SubscribeMessage("loading")
