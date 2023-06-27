@@ -7,17 +7,24 @@ export class UserGameDto {
   @IsNotEmpty()
   private socket: Socket;
   private userMatchDto: UserMatchDto;
+  private connected: boolean;
 
   constructor(socket: Socket, userMatchDto: UserMatchDto) {
     this.userMatchDto = userMatchDto;
     this.socket = socket;
+    this.connected = true;
     this.queueEntryTime = 0;
   }
 
   public getUserMatchDto(): UserMatchDto {
     return this.userMatchDto;
   }
-
+  public setConnected(status: boolean) {
+    this.connected = status;
+  }
+  public getConnected(): boolean {
+    return this.connected;
+  }
   public getSocket(): Socket {
     return this.socket;
   }

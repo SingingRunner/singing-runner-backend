@@ -15,7 +15,6 @@ export class SocialResolver {
   @Mutation(() => PollingDto)
   async longPolling(@Args("userId") userId: string) {
     console.log("userId", userId);
-    console.log("pooing");
     console.log("polling recieive :", Date.now());
     this.socialService.setHeartBeat(userId, Date.now());
     await this.socialService.delay(10000);

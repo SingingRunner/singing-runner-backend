@@ -52,11 +52,10 @@ export class GameReplayService {
       Body: filebase64,
       ContentType: "text/plain",
     };
-    s3.upload(params, (err, data) => {
+    s3.upload(params, (err) => {
       if (err) {
         console.log(err);
       }
-      console.log(data);
     });
     return `https://${
       process.env.AWS_S3_BUCKET_NAME as string
@@ -73,11 +72,10 @@ export class GameReplayService {
       Body: gameEvent,
       ContentType: "application/json",
     };
-    s3.upload(params, (err, data) => {
+    s3.upload(params, (err) => {
       if (err) {
         console.log(err);
       }
-      console.log(data);
     });
     return `${filename}.json`;
   }

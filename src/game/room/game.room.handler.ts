@@ -26,7 +26,16 @@ export class GameRoomHandler {
   }
 
   public isGameRoomReady(gameRoom: GameRoom): boolean {
-    if (gameRoom.getAcceptCount() === 3) {
+    let conectCount = 0;
+    const users: UserGameDto[] = this.findUsersInRoom(gameRoom);
+    for (const user of users) {
+      console.log("is connected status : ", user.getConnected());
+      if (user.getConnected()) {
+        conectCount++;
+      }
+    }
+    console.log("gameroomreday Count : ", conectCount);
+    if (gameRoom.getAcceptCount() === conectCount) {
       return true;
     }
     return false;
@@ -50,12 +59,15 @@ export class GameRoomHandler {
   public updateUserSocket(userId: string, userSocket: Socket) {
     const gameRoom: GameRoom | undefined = this.findRoomByUserId(userId);
     if (gameRoom === undefined) {
+      console.log("undefinedROom");
       return;
     }
     const userGameDtoList: UserGameDto[] = this.findUsersInRoom(gameRoom);
     for (const userGameDto of userGameDtoList) {
       if (userGameDto.getUserMatchDto().userId === userId) {
         userGameDto.setSocket(userSocket);
+        userGameDto.setConnected(true);
+        console.log("set new socket");
       }
     }
   }
@@ -97,7 +109,6 @@ export class GameRoomHandler {
       const foundUser: UserGameDto | undefined = this.roomList
         .get(key)
         ?.find((userInRoom) => userInRoom.getUserMatchDto().userId === userId);
-      console.log(foundUser);
       if (foundUser !== undefined) {
         return key;
       }
