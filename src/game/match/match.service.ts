@@ -62,7 +62,17 @@ export class MatchService {
       this.joinQueueWithOutDenyUser(userInfo, userId);
     }
   }
-
+  public updateUserConnected(userSocket: Socket) {
+    const gameRoom: GameRoom =
+      this.gameRoomHandler.findRoomBySocket(userSocket);
+    const users: UserGameDto[] = this.gameRoomHandler.findUsersInRoom(gameRoom);
+    for (const user of users) {
+      if (user.getSocket() === userSocket) {
+        user.setConnected(false);
+        console.log("udapteUserCOnnect :", user.getConnected());
+      }
+    }
+  }
   public findRoomBySocket(user: Socket): GameRoom {
     return this.gameRoomHandler.findRoomBySocket(user);
   }

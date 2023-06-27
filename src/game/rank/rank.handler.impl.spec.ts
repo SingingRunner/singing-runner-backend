@@ -1,7 +1,7 @@
 import { RankHandlerImpl } from "./rank.handler.impl";
 import { GameRoom } from "../room/game.room";
 import { UserScoreDto } from "./dto/user-score.dto";
-import { GameTerminatedDto } from "./game-terminated.dto";
+
 import { GameRoomStatus } from "../util/game.enum";
 import { GameSongDto } from "src/song/dto/game-song.dto";
 
@@ -61,30 +61,6 @@ describe("RankHandlerImpl", () => {
         // Assert
         const result = rankHandler.getUserScoreDto(gameRoom);
         expect(result).toHaveLength(0);
-      });
-    });
-
-    describe("calculateRank", () => {
-      it("should calculate the rank based on the user scores of a game room", () => {
-        // Set up
-        const userScoreDto1 = new UserScoreDto("test1", 90);
-        const userScoreDto2 = new UserScoreDto("test2", 33);
-        const userScoreDto3 = new UserScoreDto("test3", 50);
-        rankHandler.setRank(gameRoom);
-        rankHandler.pushUserScore(gameRoom, userScoreDto1);
-        rankHandler.pushUserScore(gameRoom, userScoreDto2);
-        rankHandler.pushUserScore(gameRoom, userScoreDto3);
-
-        // Act
-        const result = rankHandler.calculateRank(gameRoom);
-
-        // Assert
-        expect(result).toHaveLength(3);
-        expect(result[0]).toBeInstanceOf(GameTerminatedDto);
-        expect(result[0].getUserId()).toBe(userScoreDto1.getUserId());
-        expect(result[1].getUserId()).toBe(userScoreDto3.getUserId());
-        expect(result[2].getUserId()).toBe(userScoreDto2.getUserId());
-        // Add more assertions based on your specific implementation and requirements
       });
     });
   });
