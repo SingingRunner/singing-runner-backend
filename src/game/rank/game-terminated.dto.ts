@@ -6,7 +6,7 @@ export class GameTerminatedDto {
     this.mmrDiff = mmrDiff;
     this.userScore = userScore;
     this.isFriend = false;
-    this.tier = "BRONZE";
+    this.tier = "bronze";
     this.nickname = "오민규리";
   }
 
