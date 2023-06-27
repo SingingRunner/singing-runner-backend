@@ -167,6 +167,11 @@ export class SocialService {
       .getMany();
 
     const friendList: User[] = friends.map((friend) => friend.friend);
+    friendList.sort((a, b) => {
+      const order = { 2: 1, 0: 2, 1: 3 };
+      return order[a.userActive] - order[b.userActive];
+    });
+
     const resultList: SearchFriendDto[] = [];
     for (const friend of friendList) {
       const searchFriendDto = new SearchFriendDto();
