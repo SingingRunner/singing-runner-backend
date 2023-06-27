@@ -7,6 +7,7 @@ import { PollingDto } from "./dto/polling.dto";
 import { NotificationDto } from "./dto/notification.dto";
 import { RequestDto } from "./dto/request-dto";
 import { SearchFriendDto } from "src/user/dto/search-freind.dto";
+import { HttpException, HttpStatus } from "@nestjs/common";
 
 @Resolver()
 export class SocialResolver {
@@ -16,6 +17,9 @@ export class SocialResolver {
   async longPolling(@Args("userId") userId: string) {
     console.log("userId", userId);
     console.log("polling recieive :", Date.now());
+    if (userId.length < 10) {
+      throw new HttpException("Empty userID", HttpStatus.BAD_REQUEST);
+    }
     this.socialService.setHeartBeat(userId, Date.now());
     await this.socialService.delay(10000);
     console.log("첫딜레이 이후:", Date.now());
