@@ -1,3 +1,4 @@
+import { UserMatchDto } from "./../user/dto/user.match.dto";
 import {
   ConnectedSocket,
   MessageBody,
@@ -45,31 +46,31 @@ export class GameGateway
     console.log(server);
   }
 
-  handleConnection(@ConnectedSocket() user: Socket) {
-    console.log(`Client connected: ${user.id}`);
+  handleConnection(@ConnectedSocket() user: Socket, userId: string) {
+    console.log(`Client connected socketID: ${user.id}`);
+    console.log(`Client connected userID: ${userId}`);
+    this.matchService.updateUserSocket(userId, user);
   }
 
   handleDisconnect(@ConnectedSocket() user: Socket) {
+    console.log("disconnect socketID", user);
     // 게임중일떄 disconnect 시 탈주자처리
-    console.log(`Client disconnected: ${user.id}`);
-
-    if (!this.gameService.exitWhileInGame(user)) {
-      this.matchService.matchCancel(user);
-      return;
-    }
-
-    const userSocketList: Socket[] | undefined =
-      this.gameService.findUsersSocketInSameRoom(user);
-    const exitUserInfo: UserInfoDto | undefined =
-      this.gameService.getUserInfoBySocket(user);
-
-    for (const userSocket of userSocketList) {
-      if (userSocket === user) {
-        continue;
-      }
-      userSocket.emit("exit", exitUserInfo);
-    }
-    this.gameService.leaveRoom(user);
+    // console.log(`Client disconnected: ${user.id}`);
+    // if (!this.gameService.exitWhileInGame(user)) {
+    //   this.matchService.matchCancel(user);
+    //   return;
+    // }
+    // const userSocketList: Socket[] | undefined =
+    //   this.gameService.findUsersSocketInSameRoom(user);
+    // const exitUserInfo: UserInfoDto | undefined =
+    //   this.gameService.getUserInfoBySocket(user);
+    // for (const userSocket of userSocketList) {
+    //   if (userSocket === user) {
+    //     continue;
+    //   }
+    //   userSocket.emit("exit", exitUserInfo);
+    // }
+    // this.gameService.leaveRoom(user);
   }
 
   /**
@@ -82,14 +83,16 @@ export class GameGateway
     console.log("matchmaking connect");
     const message = "match_making";
     if (!data.accept) {
-      this.matchService.matchCancel(user);
+      this.matchService.matchCancel(data.UserMatchDto.userId);
       return;
     }
     console.log("matchmaking", data.UserMatchDto.nickName);
     if (!(await this.matchService.isMatchMade(user, data.UserMatchDto))) {
       return;
     }
-    const gameRoom: GameRoom = this.matchService.findRoomBySocket(user);
+    const gameRoom: GameRoom = this.matchService.findRoomByUserId(
+      data.UserMatchDto.userId
+    );
     const responseData = this.matchService.getSongInfo(gameRoom);
     this.broadCast(user, message, responseData);
     return;

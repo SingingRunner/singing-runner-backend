@@ -44,6 +44,18 @@ export class GameRoomHandler {
     }
     return users;
   }
+  public updateUserSocket(userId: string, userSocket: Socket) {
+    const gameRoom: GameRoom | undefined = this.findRoomByUserId(userId);
+    if (gameRoom === undefined) {
+      return;
+    }
+    const userGameDtoList: UserGameDto[] = this.findUsersInRoom(gameRoom);
+    for (const userGameDto of userGameDtoList) {
+      if (userGameDto.getUserMatchDto().userId === userId) {
+        userGameDto.setSocket(userSocket);
+      }
+    }
+  }
 
   public async createRoom(): Promise<GameRoom> {
     const gameSongDto = await this.songService.getRandomSong();
@@ -74,7 +86,7 @@ export class GameRoomHandler {
     throw new Error("Room not found");
   }
 
-  public findRoomByUserId(userId: string): GameRoom {
+  public findRoomByUserId(userId: string): GameRoom | undefined {
     for (const key of this.roomList.keys()) {
       const foundUser: UserGameDto | undefined = this.roomList
         .get(key)
@@ -83,7 +95,7 @@ export class GameRoomHandler {
         return key;
       }
     }
-    throw new Error("Room not found");
+    return undefined;
   }
 
   private roomCount(): number {

@@ -66,10 +66,12 @@ export class MatchService {
     return this.gameRoomHandler.findRoomBySocket(user);
   }
 
-  public findRoomByUserId(userId: string): GameRoom {
+  public findRoomByUserId(userId: string): GameRoom | undefined {
     return this.gameRoomHandler.findRoomByUserId(userId);
   }
-
+  public updateUserSocket(userId: string, userSocket: Socket) {
+    this.gameRoomHandler.updateUserSocket(userId, userSocket);
+  }
   public findUsersInSameRoom(gameRoom: GameRoom): UserGameDto[] {
     return this.gameRoomHandler.findUsersInRoom(gameRoom);
   }

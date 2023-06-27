@@ -22,6 +22,10 @@ export class UserGameDto {
     return this.socket;
   }
 
+  public setSocket(socket: Socket) {
+    this.socket = socket;
+  }
+
   public setQueueEntryTime(time: number) {
     this.queueEntryTime = time;
   }
