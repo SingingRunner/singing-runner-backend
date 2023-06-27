@@ -57,24 +57,12 @@ export class GameGateway
   }
 
   handleDisconnect(@ConnectedSocket() user: Socket) {
-    // console.log("disconnect socketID", user);
-    // 게임중일떄 disconnect 시 탈주자처리
-    // console.log(`Client disconnected: ${user.id}`);
-    if (!this.gameService.exitWhileInGame(user)) {
-      this.matchService.matchCancel(user);
+    console.log("disconnected");
+    try {
+      this.matchService.updateUserConnected(user);
+    } catch {
       return;
     }
-    const userSocketList: Socket[] | undefined =
-      this.gameService.findUsersSocketInSameRoom(user);
-    const exitUserInfo: UserInfoDto | undefined =
-      this.gameService.getUserInfoBySocket(user);
-    for (const userSocket of userSocketList) {
-      if (userSocket === user) {
-        continue;
-      }
-      userSocket.emit("exit", exitUserInfo);
-    }
-    this.gameService.leaveRoom(user);
   }
 
   /**

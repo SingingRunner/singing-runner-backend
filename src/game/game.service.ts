@@ -134,7 +134,12 @@ export class GameService {
 
   public async calculateRank(userId: string): Promise<GameTerminatedDto[]> {
     const gameRoom: GameRoom = this.findRoomByUserId(userId);
-    const gameTerminatedList = this.rankHandler.calculateRank(gameRoom);
+    const userList: UserGameDto[] =
+      this.gameRoomHandler.findUsersInRoom(gameRoom);
+    const gameTerminatedList = this.rankHandler.calculateRank(
+      gameRoom,
+      userList
+    );
     await this.updateMmr(gameTerminatedList);
     return gameTerminatedList;
   }
@@ -147,6 +152,7 @@ export class GameService {
       );
     }
   }
+
   public async setGameTerminatedCharacter(
     gameTerminatedDto: GameTerminatedDto
   ) {

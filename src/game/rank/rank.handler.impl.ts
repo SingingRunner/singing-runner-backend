@@ -3,6 +3,7 @@ import { GameRoom } from "../room/game.room";
 import { UserScoreDto } from "./dto/user-score.dto";
 import { RankHandler } from "./rank.hanlder";
 import { GameTerminatedDto } from "./game-terminated.dto";
+import { UserGameDto } from "src/user/dto/user.game.dto";
 
 @Injectable()
 export class RankHandlerImpl implements RankHandler {
@@ -27,36 +28,44 @@ export class RankHandlerImpl implements RankHandler {
     this.rankMap.set(gameRoom, []);
   }
 
-  public calculateRank(gameRoom: GameRoom): GameTerminatedDto[] {
+  public calculateRank(
+    gameRoom: GameRoom,
+    userList: UserGameDto[]
+  ): GameTerminatedDto[] {
     if (gameRoom === undefined || gameRoom === null) {
       throw new Error("game room is undefined or null");
     }
     const userScoreList: UserScoreDto[] | undefined =
-      this.rankMap.get(gameRoom);
-    if (userScoreList === undefined) {
-      throw new Error("game room is undefined or null");
-    }
+      this.getUserScoreDto(gameRoom);
+
     userScoreList?.sort((a, b) => b.score - a.score);
 
     const gameTerminatedList: GameTerminatedDto[] = [];
-    gameTerminatedList.push(
-      new GameTerminatedDto(
-        userScoreList[0].userId,
-        50,
-        userScoreList[0].score
-      ),
-      new GameTerminatedDto(
-        userScoreList[1].userId,
-        10,
-        userScoreList[1].score
-      ),
-      new GameTerminatedDto(
-        userScoreList[2].userId,
-        -10,
-        userScoreList[2].score
-      )
+    let score = 30;
+    for (const userScore of userScoreList) {
+      gameTerminatedList.push(
+        new GameTerminatedDto(userScore.userId, score, userScore.score)
+      );
+      score -= 20;
+    }
+
+    if (userScoreList.length === 3) {
+      return gameTerminatedList;
+    }
+
+    const userIdsToExclude = new Set(
+      userScoreList.map((userScore) => userScore.userId)
     );
 
+    const filteredUserList = userList.filter(
+      (user) => !userIdsToExclude.has(user.getUserMatchDto().userId)
+    );
+
+    for (const filterUser of filteredUserList) {
+      gameTerminatedList.push(
+        new GameTerminatedDto(filterUser.getUserMatchDto().userId, -30, 0)
+      );
+    }
     return gameTerminatedList;
   }
 }

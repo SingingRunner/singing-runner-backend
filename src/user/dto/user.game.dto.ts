@@ -19,7 +19,12 @@ export class UserGameDto {
   public getUserMatchDto(): UserMatchDto {
     return this.userMatchDto;
   }
-
+  public setConnected(status: boolean) {
+    this.connected = status;
+  }
+  public getConnected(): boolean {
+    return this.connected;
+  }
   public getSocket(): Socket {
     return this.socket;
   }
