@@ -15,10 +15,10 @@ export class GameRoomHandler {
     this.roomList.get(gameRoom)?.push(user);
   }
 
-  public leaveRoom(gameRoom: GameRoom, user: Socket) {
+  public leaveRoom(gameRoom: GameRoom, userId: string) {
     const users: UserGameDto[] | undefined = this.roomList
       .get(gameRoom)
-      ?.filter((userInfo) => userInfo.getSocket().id !== user.id);
+      ?.filter((userInfo) => userInfo.getUserMatchDto().userId !== userId);
     if (users === undefined) {
       throw new Error("User not found in the game room");
     }

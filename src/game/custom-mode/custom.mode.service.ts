@@ -29,13 +29,13 @@ export class CustomModeService {
     this.setRoomMaster(gameRoom, userMatchDto.userId);
   }
 
-  public leaveRoom(user: Socket, userMatchDto: UserMatchDto) {
+  public leaveRoom(userMatchDto: UserMatchDto) {
     const gameRoom: GameRoom = this.findRoomByUserId(userMatchDto.userId);
     if (this.isRoomMaster(userMatchDto, gameRoom)) {
-      this.gameRoomHandler.deleteRoom(user);
+      this.gameRoomHandler.deleteRoom(userMatchDto.userId);
       return;
     }
-    this.gameRoomHandler.leaveRoom(gameRoom, user);
+    this.gameRoomHandler.leaveRoom(gameRoom, userMatchDto.userId);
   }
 
   private isRoomMaster(

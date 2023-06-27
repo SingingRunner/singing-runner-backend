@@ -116,10 +116,10 @@ export class GameService {
     return this.itemPolicy.getItems();
   }
 
-  public allUsersTerminated(user: Socket, userScoreDto: UserScoreDto): boolean {
+  public allUsersTerminated(userScoreDto: UserScoreDto): boolean {
     // 50/20/-10
-    const gameRoom: GameRoom = this.gameRoomHandler.findRoomBySocket(user);
-    this.gameRoomHandler.increaseAcceptCount(user);
+    const gameRoom: GameRoom = this.findRoomByUserId(userScoreDto.userId);
+    this.gameRoomHandler.increaseAcceptCount(userScoreDto.userId);
     if (gameRoom.getAcceptCount() === 1) {
       this.rankHandler.setRank(gameRoom);
     }
@@ -131,8 +131,8 @@ export class GameService {
     return false;
   }
 
-  public async calculateRank(user: Socket): Promise<GameTerminatedDto[]> {
-    const gameRoom: GameRoom = this.gameRoomHandler.findRoomBySocket(user);
+  public async calculateRank(userId: string): Promise<GameTerminatedDto[]> {
+    const gameRoom: GameRoom = this.findRoomByUserId(userId);
     const gameTerminatedList = this.rankHandler.calculateRank(gameRoom);
     await this.updateMmr(gameTerminatedList);
     return gameTerminatedList;
