@@ -13,7 +13,6 @@ import { Server, Socket } from "socket.io";
 import { MatchService } from "./match/match.service";
 import { GameService } from "./game.service";
 import { GameRoom } from "./room/game.room";
-import { UserItemDto } from "./item/dto/user-item.dto";
 import { UserGameDto } from "src/user/dto/user.game.dto";
 import { UserScoreDto } from "./rank/dto/user-score.dto";
 import { GameTerminatedDto } from "./rank/game-terminated.dto";
@@ -128,7 +127,7 @@ export class GameGateway
     @ConnectedSocket() user: Socket,
     @MessageBody() userId: string
   ) {
-    if (this.gameService.isGameReady(user)) {
+    if (this.gameService.isGameReady(userId)) {
       const userIdList: string[] =
         this.gameService.findUsersIdInSameRoom(userId);
       for (const userId of userIdList) {

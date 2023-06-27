@@ -3,7 +3,6 @@ import { GameRoomHandler } from "../room/game.room.handler";
 import { Injectable } from "@nestjs/common";
 import { Socket } from "socket.io";
 import { GameSongDto } from "src/song/dto/game-song.dto";
-
 import { SongService } from "src/song/song.service";
 import { UserGameDto } from "src/user/dto/user.game.dto";
 import { UserMatchDto } from "src/user/dto/user.match.dto";
@@ -83,14 +82,17 @@ export class CustomModeService {
     this.addUserToRoom(gameRoom, userGameDto);
   }
 
-  public findRoomByUserId(roomMaster: string): GameRoom {
-    return this.gameRoomHandler.findRoomByUserId(roomMaster);
+  public findRoomByUserId(userId: string): GameRoom {
+    const gameRoom: GameRoom | undefined =
+      this.gameRoomHandler.findRoomByUserId(userId);
+    if (gameRoom === undefined) {
+      throw new Error("없는 userId");
+    }
+    return gameRoom;
   }
 
   public async acceptInvite(user: Socket, userId: string, host) {
-    const gameRoom: GameRoom = this.gameRoomHandler.findRoomByUserId(
-      host.userId
-    );
+    const gameRoom: GameRoom = this.findRoomByUserId(host.userId);
     await this.joinCustomRoom(user, userId, gameRoom);
   }
 

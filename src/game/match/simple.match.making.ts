@@ -1,6 +1,5 @@
 import { Injectable } from "@nestjs/common";
 import { MatchMakingPolicy } from "./match.making.policy";
-import { Socket } from "socket.io";
 import { UserGameDto } from "src/user/dto/user.game.dto";
 
 @Injectable()

@@ -46,10 +46,10 @@ export class GameService {
     return { gameSong: gameSong, characterList: characterList };
   }
 
-  public isGameReady(user: Socket): boolean {
-    const gameRoom: GameRoom = this.gameRoomHandler.findRoomBySocket(user);
+  public isGameReady(userId: string): boolean {
+    const gameRoom: GameRoom = this.findRoomByUserId(userId);
 
-    this.gameRoomHandler.increaseAcceptCount(user);
+    this.gameRoomHandler.increaseAcceptCount(userId);
     if (this.gameRoomHandler.isGameRoomReady(gameRoom)) {
       gameRoom.setStartTime(new Date().getTime());
       gameRoom.resetAcceptCount();
@@ -96,9 +96,9 @@ export class GameService {
     return false;
   }
 
-  public leaveRoom(user: Socket) {
-    const gameRoom = this.gameRoomHandler.findRoomBySocket(user);
-    this.gameRoomHandler.leaveRoom(gameRoom, user);
+  public leaveRoom(userId: string) {
+    const gameRoom = this.findRoomByUserId(userId);
+    this.gameRoomHandler.leaveRoom(gameRoom, userId);
   }
 
   public findUsersIdInSameRoom(userId: string): string[] {
@@ -171,7 +171,10 @@ export class GameService {
     userGame: UserGameDto,
     gameTerminatedDto: GameTerminatedDto
   ) {
-    this.setTerminatedUserNickname(userGame.getSocket(), gameTerminatedDto);
+    this.setTerminatedUserNickname(
+      userGame.getUserMatchDto().userId,
+      gameTerminatedDto
+    );
     const userMatchDto = userGame.getUserMatchDto();
     const friendList: User[] = await this.getFriendList(userMatchDto.userId);
 
@@ -189,10 +192,10 @@ export class GameService {
   }
 
   private setTerminatedUserNickname(
-    user: Socket,
+    userId: string,
     gameTerminatedDto: GameTerminatedDto
   ) {
-    const gameRoom: GameRoom = this.gameRoomHandler.findRoomBySocket(user);
+    const gameRoom: GameRoom = this.findRoomByUserId(userId);
     const userList: UserGameDto[] =
       this.gameRoomHandler.findUsersInRoom(gameRoom);
     for (const userGameDto of userList) {
@@ -214,7 +217,7 @@ export class GameService {
   }
 
   public async saveReplay(userId: string, userVocal: string) {
-    const gameRoom: GameRoom = this.gameRoomHandler.findRoomByUserId(userId);
+    const gameRoom: GameRoom = this.findRoomByUserId(userId);
     const user: User | null = await this.userService.findUserById(userId);
     const songId = gameRoom.getGameSongDto().songId;
     const filename = `${userId}_${songId}_${new Date().getTime()}`;
