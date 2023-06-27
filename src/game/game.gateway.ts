@@ -21,7 +21,6 @@ import { userActiveStatus } from "src/user/util/user.enum";
 import { GameReplayService } from "./replay/game.replay.service";
 import { CustomSongDto } from "./util/custom-song.dto";
 import { CustomUserInfoDto } from "./util/custom-user.info.dto";
-import { error } from "console";
 
 /**
  * webSocket 통신을 담당하는 Handler
