@@ -53,23 +53,23 @@ export class GameGateway
     // 게임중일떄 disconnect 시 탈주자처리
     console.log(`Client disconnected: ${user.id}`);
 
-    if (!this.gameService.exitWhileInGame(user)) {
-      this.matchService.matchCancel(user);
-      return;
-    }
+    // if (!this.gameService.exitWhileInGame(user)) {
+    //   this.matchService.matchCancel(user);
+    //   return;
+    // }
 
-    const userSocketList: Socket[] | undefined =
-      this.gameService.findUsersSocketInSameRoom(user);
-    const exitUserInfo: UserInfoDto | undefined =
-      this.gameService.getUserInfoBySocket(user);
+    // const userSocketList: Socket[] | undefined =
+    //   this.gameService.findUsersSocketInSameRoom(user);
+    // const exitUserInfo: UserInfoDto | undefined =
+    //   this.gameService.getUserInfoBySocket(user);
 
-    for (const userSocket of userSocketList) {
-      if (userSocket === user) {
-        continue;
-      }
-      userSocket.emit("exit", exitUserInfo);
-    }
-    this.gameService.leaveRoom(user);
+    // for (const userSocket of userSocketList) {
+    //   if (userSocket === user) {
+    //     continue;
+    //   }
+    //   userSocket.emit("exit", exitUserInfo);
+    // }
+    // this.gameService.leaveRoom(user);
   }
 
   /**
