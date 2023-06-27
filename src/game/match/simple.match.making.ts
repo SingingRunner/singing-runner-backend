@@ -13,9 +13,9 @@ export class SimpleMatchMaking implements MatchMakingPolicy {
   public joinQueueAtFront(UserGameDto: UserGameDto) {
     this.readyQueue.unshift(UserGameDto);
   }
-  public leaveQueue(user: Socket) {
+  public leaveQueue(userId: string) {
     this.readyQueue = this.readyQueue.filter(
-      (userInQueue) => userInQueue.getSocket().id !== user.id
+      (userInQueue) => userInQueue.getUserMatchDto().userId !== userId
     );
   }
 

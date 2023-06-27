@@ -39,8 +39,8 @@ export class MatchService {
     return false;
   }
 
-  public matchCancel(user: Socket) {
-    this.matchMakingPolicy.leaveQueue(user);
+  public matchCancel(userId: string) {
+    this.matchMakingPolicy.leaveQueue(userId);
   }
 
   public acceptAllUsers(user: Socket): boolean {
@@ -64,6 +64,10 @@ export class MatchService {
 
   public findRoomBySocket(user: Socket): GameRoom {
     return this.gameRoomHandler.findRoomBySocket(user);
+  }
+
+  public findRoomByUserId(userId: string): GameRoom {
+    return this.gameRoomHandler.findRoomByUserId(userId);
   }
 
   public findUsersInSameRoom(gameRoom: GameRoom): UserGameDto[] {

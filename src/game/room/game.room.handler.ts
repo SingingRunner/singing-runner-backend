@@ -85,6 +85,7 @@ export class GameRoomHandler {
     }
     throw new Error("Room not found");
   }
+
   private roomCount(): number {
     return this.roomList.size;
   }
