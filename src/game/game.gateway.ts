@@ -21,6 +21,7 @@ import { userActiveStatus } from "src/user/util/user.enum";
 import { GameReplayService } from "./replay/game.replay.service";
 import { CustomSongDto } from "./util/custom-song.dto";
 import { CustomUserInfoDto } from "./util/custom-user.info.dto";
+import { error } from "console";
 
 /**
  * webSocket 통신을 담당하는 Handler
@@ -43,32 +44,38 @@ export class GameGateway
     console.log(server);
   }
 
-  handleConnection(@ConnectedSocket() user: Socket, userId: string) {
-    console.log(`Client connected socketID: ${user.id}`);
-    console.log(`Client connected userID: ${userId}`);
+  handleConnection(@ConnectedSocket() user: Socket) {
+    // console.log(`Client connected socketID: ${user.id}`);
+    let { userId } = user.handshake.query;
+    if (userId === undefined) {
+      throw new Error("소켓접속시 userId가 전달되지 않았습니다.");
+    }
+    if (Array.isArray(userId)) {
+      userId = userId.join("");
+    }
+    console.log("SOCKET CONNECT : ", userId);
     this.matchService.updateUserSocket(userId, user);
   }
 
   handleDisconnect(@ConnectedSocket() user: Socket) {
-    console.log("disconnect socketID", user);
+    // console.log("disconnect socketID", user);
     // 게임중일떄 disconnect 시 탈주자처리
-    console.log(`Client disconnected: ${user.id}`);
-
-    // if (!this.gameService.exitWhileInGame(user)) {
-    //   this.matchService.matchCancel(user);
-    //   return;
-    // }
-    // const userSocketList: Socket[] | undefined =
-    //   this.gameService.findUsersSocketInSameRoom(user);
-    // const exitUserInfo: UserInfoDto | undefined =
-    //   this.gameService.getUserInfoBySocket(user);
-    // for (const userSocket of userSocketList) {
-    //   if (userSocket === user) {
-    //     continue;
-    //   }
-    //   userSocket.emit("exit", exitUserInfo);
-    // }
-    // this.gameService.leaveRoom(user);
+    // console.log(`Client disconnected: ${user.id}`);
+    if (!this.gameService.exitWhileInGame(user)) {
+      this.matchService.matchCancel(user);
+      return;
+    }
+    const userSocketList: Socket[] | undefined =
+      this.gameService.findUsersSocketInSameRoom(user);
+    const exitUserInfo: UserInfoDto | undefined =
+      this.gameService.getUserInfoBySocket(user);
+    for (const userSocket of userSocketList) {
+      if (userSocket === user) {
+        continue;
+      }
+      userSocket.emit("exit", exitUserInfo);
+    }
+    this.gameService.leaveRoom(user);
   }
 
   /**
@@ -91,7 +98,7 @@ export class GameGateway
     const gameRoom: GameRoom = this.matchService.findRoomByUserId(
       data.UserMatchDto.userId
     );
-    console.log("gameroom", gameRoom);
+    // console.log("gameroom", gameRoom);
     const responseData = this.matchService.getSongInfo(gameRoom);
     this.broadCast(user, data.UserMatchDto.userId, message, responseData);
     return;
@@ -104,7 +111,7 @@ export class GameGateway
   @SubscribeMessage("accept")
   matchAcceptData(@ConnectedSocket() user: Socket, @MessageBody() data) {
     const message = "accept";
-    console.log(data);
+    console.log("accept!!!!!!!!");
     if (data.accept) {
       if (!this.matchService.acceptAllUsers(data.userId)) {
         return;
@@ -120,9 +127,7 @@ export class GameGateway
 
   @SubscribeMessage("loading")
   loadSongData(@ConnectedSocket() user: Socket, @MessageBody() data) {
-    console.log("loading userid", data.userId);
     const loadData = this.gameService.loadData(data.userId);
-    console.log("loading broadcast", data.userId);
     user.emit("loading", loadData);
   }
 
@@ -229,8 +234,6 @@ export class GameGateway
     @ConnectedSocket() user: Socket,
     @MessageBody() userMatchDto: UserMatchDto
   ) {
-    console.log("create usermatchdto : ", userMatchDto.character);
-    console.log("create usermatchdto : ", userMatchDto);
     await this.customModeService.createCustomRoom(user, userMatchDto);
     const gameRoom: GameRoom = this.matchService.findRoomByUserId(
       userMatchDto.userId

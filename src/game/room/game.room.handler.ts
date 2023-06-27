@@ -26,7 +26,7 @@ export class GameRoomHandler {
   }
 
   public isGameRoomReady(gameRoom: GameRoom): boolean {
-    if (gameRoom.getAcceptCount() === 3) {
+    if (gameRoom.getAcceptCount() === this.findUsersInRoom(gameRoom).length) {
       return true;
     }
     return false;
@@ -56,6 +56,7 @@ export class GameRoomHandler {
     for (const userGameDto of userGameDtoList) {
       if (userGameDto.getUserMatchDto().userId === userId) {
         userGameDto.setSocket(userSocket);
+        console.log("set new socket");
       }
     }
   }
@@ -97,7 +98,6 @@ export class GameRoomHandler {
       const foundUser: UserGameDto | undefined = this.roomList
         .get(key)
         ?.find((userInRoom) => userInRoom.getUserMatchDto().userId === userId);
-      console.log(foundUser);
       if (foundUser !== undefined) {
         return key;
       }

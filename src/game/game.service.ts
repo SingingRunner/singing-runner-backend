@@ -85,11 +85,11 @@ export class GameService {
 
   public exitWhileInGame(user: Socket) {
     const gameRoom = this.gameRoomHandler.findRoomBySocket(user);
-    const users = this.gameRoomHandler.findUsersInRoom(gameRoom);
     if (gameRoom === null || gameRoom === undefined) {
       return false;
     }
-    if (users[0].getUserMatchDto().userActive == userActiveStatus.IN_GAME) {
+    const users = this.gameRoomHandler.findUsersInRoom(gameRoom);
+    if (users[0].getUserMatchDto().userActive === userActiveStatus.IN_GAME) {
       return true;
     }
 
@@ -126,6 +126,7 @@ export class GameService {
 
     this.rankHandler.pushUserScore(gameRoom, userScoreDto);
     if (this.gameRoomHandler.isGameRoomReady(gameRoom)) {
+      gameRoom.resetAcceptCount();
       return true;
     }
     return false;
@@ -268,7 +269,14 @@ export class GameService {
       player2Character: subCharacter2,
       keynote: userKeynote,
     };
-    return await this.gameReplayService.saveReplay(gameReplayEntity);
+    await this.gameReplayService.saveReplay(gameReplayEntity);
+    console.log("acceptCOUNT??");
+    this.gameRoomHandler.increaseAcceptCount(userId);
+    if (this.gameRoomHandler.isGameRoomReady(gameRoom)) {
+      console.log("roomdelete?");
+      this.gameRoomHandler.deleteRoom(userId);
+      return;
+    }
   }
 
   public putEvent(
