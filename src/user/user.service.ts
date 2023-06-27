@@ -108,15 +108,15 @@ export class UserService {
 
   determineUserTier(userMmr: number): string {
     if (userMmr < UserMatchTier.SILVER) {
-      return "BRONZE";
+      return "bronze";
     } else if (userMmr < UserMatchTier.GOLD) {
-      return "SILVER";
+      return "silver";
     } else if (userMmr < UserMatchTier.PLATINUM) {
-      return "GOLD";
+      return "gold";
     } else if (userMmr < UserMatchTier.DIAMOND) {
-      return "PLATINUM";
+      return "platinum";
     } else {
-      return "DIAMOND";
+      return "diamond";
     }
   }
 
