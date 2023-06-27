@@ -101,8 +101,8 @@ export class GameService {
     this.gameRoomHandler.leaveRoom(gameRoom, user);
   }
 
-  public findUsersIdInSameRoom(user: Socket): string[] {
-    const gameRoom: GameRoom = this.gameRoomHandler.findRoomBySocket(user);
+  public findUsersIdInSameRoom(userId: string): string[] {
+    const gameRoom: GameRoom = this.findRoomByUserId(userId);
     const userList: Array<UserGameDto> =
       this.gameRoomHandler.findUsersInRoom(gameRoom);
     const userIdList: string[] = [];

@@ -124,9 +124,13 @@ export class GameGateway
   }
 
   @SubscribeMessage("game_ready")
-  gameReadyData(@ConnectedSocket() user: Socket) {
+  gameReadyData(
+    @ConnectedSocket() user: Socket,
+    @MessageBody() userId: string
+  ) {
     if (this.gameService.isGameReady(user)) {
-      const userIdList: string[] = this.gameService.findUsersIdInSameRoom(user);
+      const userIdList: string[] =
+        this.gameService.findUsersIdInSameRoom(userId);
       for (const userId of userIdList) {
         this.gameService.updateUserActive(userId, userActiveStatus.IN_GAME);
       }
