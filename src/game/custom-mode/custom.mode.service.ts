@@ -150,10 +150,10 @@ export class CustomModeService {
   }
 
   public async setCustomSong(
-    user: Socket,
+    userId: string,
     songId: number
   ): Promise<CustomSongDto> {
-    const gameRoom: GameRoom = this.gameRoomHandler.findRoomBySocket(user);
+    const gameRoom: GameRoom = this.findRoomByUserId(userId);
     const gameSongDto: GameSongDto = await this.songService.getSongById(songId);
     gameRoom.setGameSongDto(gameSongDto);
     return new CustomSongDto(
