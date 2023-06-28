@@ -26,7 +26,6 @@ export class CustomModeService {
     const gameRoom: GameRoom = await this.createRoom();
     this.addUserToRoom(gameRoom, userGameDto);
     this.setRoomMaster(gameRoom, userMatchDto.userId);
-    console.log("host : ", gameRoom.getRoomMaster());
   }
 
   public leaveRoom(userMatchDto: UserMatchDto) {

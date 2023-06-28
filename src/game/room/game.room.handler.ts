@@ -41,12 +41,10 @@ export class GameRoomHandler {
     let conectCount = 0;
     const users: UserGameDto[] = this.findUsersInRoom(gameRoom);
     for (const user of users) {
-      console.log("is connected status : ", user.getConnected());
       if (user.getConnected()) {
         conectCount++;
       }
     }
-    console.log("gameroomreday Count : ", conectCount);
     if (gameRoom.getAcceptCount() === conectCount) {
       return true;
     }
@@ -71,7 +69,6 @@ export class GameRoomHandler {
   public updateUserSocket(userId: string, userSocket: Socket) {
     const gameRoom: GameRoom | undefined = this.findRoomByUserId(userId);
     if (gameRoom === undefined) {
-      console.log("undefinedROom");
       return;
     }
     const userGameDtoList: UserGameDto[] = this.findUsersInRoom(gameRoom);
@@ -79,7 +76,6 @@ export class GameRoomHandler {
       if (userGameDto.getUserMatchDto().userId === userId) {
         userGameDto.setSocket(userSocket);
         userGameDto.setConnected(true);
-        console.log("set new socket");
       }
     }
   }
@@ -93,7 +89,6 @@ export class GameRoomHandler {
       gameSongDto
     );
     this.roomList.set(gameRoom, []);
-    console.log("create 이후 현재 roomList : ", this.roomList);
     return gameRoom;
   }
 
@@ -107,7 +102,6 @@ export class GameRoomHandler {
       this.userRoomMap.delete(user.getUserMatchDto().userId);
     }
     this.roomList.delete(gameRoom);
-    console.log("delete 이후 현재 roomList : ", this.roomList);
   }
 
   public findRoomBySocket(user: Socket): GameRoom {

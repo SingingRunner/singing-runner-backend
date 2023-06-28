@@ -83,7 +83,6 @@ export class UserService {
       user.userActive === userActiveStatus.IN_GAME &&
       userActive === userActiveStatus.LOGOUT
     ) {
-      console.log("ingame");
       return;
     }
     user.userActive = userActive;

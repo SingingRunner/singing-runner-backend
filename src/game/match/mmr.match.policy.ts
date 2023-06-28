@@ -17,7 +17,6 @@ export class MMRMatchPolicy implements MatchMakingPolicy {
     const userTier: UserMatchTier = this.transformMMRtoTier(
       userGameDto.getUserMatchDto().userMmr
     );
-    userGameDto.setQueueEntryTime(Date.now());
     this.tierQueueMap.get(userTier)?.push(userGameDto);
   }
 
@@ -74,34 +73,6 @@ export class MMRMatchPolicy implements MatchMakingPolicy {
     return matchQueue.splice(0, 2);
   }
 
-  //   private checkStarvationUser() {
-  //     const date = Date.now();
-  //     for (const key of this.tierQueueMap.keys()) {
-  //       const usersInQueue: UserGameDto[] = this.tierQueueMap.get(key);
-  //       if (usersInQueue.length == 0) {
-  //         continue;
-  //       }
-  //       if (key == UserMatchTier.BRONZE) {
-  //         continue;
-  //       }
-  //       console.log('key : ', key);
-  //       console.log('userinQueue : ', usersInQueue);
-  //       console.log(date);
-  //       for (const user of usersInQueue) {
-  //         if (date - user.getQueueEntryTime() >= 10000) {
-  //           this.leaveQueue(user);
-  //           const tier: UserMatchTier = user.getUserMatchDto().userMMR;
-  //           console.log('move tier Queue : ', tier - 1000);
-  //           this.tierQueueMap.get(tier - 1000).push(user);
-  //           const userList: UserGameDto[] = this.tierQueueMap.get(tier - 1000);
-  //           for (const user of userList) {
-  //             user.setQueueEntryTime(Date.now());
-  //           }
-  //         }
-  //       }
-  //     }
-  //   }
-
   private transformMMRtoTier(userMMR): UserMatchTier {
     if (userMMR < UserMatchTier.SILVER) {
       return UserMatchTier.BRONZE;
@@ -117,10 +88,4 @@ export class MMRMatchPolicy implements MatchMakingPolicy {
     }
     return UserMatchTier.DIAMOND;
   }
-
-  //   private startQueueMovement(interval: number) {
-  //     setInterval(() => {
-  //       this.checkStarvationUser();
-  //     }, interval);
-  //   }
 }

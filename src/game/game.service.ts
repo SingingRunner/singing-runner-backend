@@ -216,7 +216,6 @@ export class GameService {
   }
 
   public async updateUserActive(userId: string, userActive: userActiveStatus) {
-    console.log("update,: ", userId);
     await this.userService.updateUserActive(userId, userActive);
   }
 
@@ -276,10 +275,8 @@ export class GameService {
       keynote: userKeynote,
     };
     await this.gameReplayService.saveReplay(gameReplayEntity);
-    console.log("acceptCOUNT??");
     this.gameRoomHandler.increaseAcceptCount(userId);
     if (this.gameRoomHandler.isGameRoomReady(gameRoom)) {
-      console.log("roomdelete?");
       this.gameRoomHandler.deleteRoom(userId);
       return;
     }

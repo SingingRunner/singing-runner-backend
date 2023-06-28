@@ -69,7 +69,6 @@ export class MatchService {
     for (const user of users) {
       if (user.getSocket() === userSocket) {
         user.setConnected(false);
-        console.log("udapteUserCOnnect :", user.getConnected());
       }
     }
   }
