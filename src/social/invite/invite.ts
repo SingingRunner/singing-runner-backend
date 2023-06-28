@@ -1,9 +1,10 @@
-import { Injectable } from "@nestjs/common";
+import { ConsoleLogger, Injectable } from "@nestjs/common";
 import { HostUserDto } from "src/user/dto/host-user.dto";
 
 @Injectable()
 export class Invite {
   private inviteMap: Map<string, HostUserDto[]> = new Map();
+  private logger = new ConsoleLogger();
 
   public inviteFriend(friendId: string, host: HostUserDto) {
     let inviteQueue = this.inviteMap.get(friendId);
@@ -12,6 +13,7 @@ export class Invite {
       this.inviteMap.set(friendId, inviteQueue);
     }
     inviteQueue.push(host);
+    this.logger.log(`${host.nickname} 가 ${friendId}를 초대했습니다.`);
   }
 
   public deleteInvite(userId: string) {
@@ -24,7 +26,7 @@ export class Invite {
       throw new Error("userID is undefined or null");
     }
     inviteQueue = inviteQueue.filter(
-      (hostInfo) => hostInfo.getUserId() !== host.getUserId()
+      (hostInfo) => hostInfo.userId !== host.userId
     );
     this.inviteMap.set(userId, inviteQueue);
   }
@@ -40,6 +42,7 @@ export class Invite {
       throw new Error("유저의 초대리스트가 비어있습니다.");
     }
     this.inviteMap.delete(userId);
+    this.logger.log(`${userId}(이)가 초대를 받았습니다.`);
     return invitationList;
   }
 }
