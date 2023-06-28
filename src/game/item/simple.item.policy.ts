@@ -8,7 +8,7 @@ export class SimpleItemPolicy implements ItemPolicy {
   private itemCount = 0;
   private itemIndex = 0;
 
-  getItems(): Item {
+  getItems(userId: string): Item {
     this.itemCount++;
     if (this.itemCount < 3) {
       return Item.NULL;
@@ -16,6 +16,7 @@ export class SimpleItemPolicy implements ItemPolicy {
     if (this.itemIndex >= this.items.length) {
       this.itemIndex = 0;
     }
+    console.log(userId);
     this.itemCount = 0;
     return this.items[this.itemIndex++];
   }
