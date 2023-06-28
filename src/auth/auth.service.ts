@@ -29,9 +29,13 @@ export class AuthService {
   ) {}
 
   async registerUser(newUser: UserRegisterDto): Promise<User> {
-    const userFind: User = await this.userService.findByFields({
+    const userFind: User | null = await this.userService.findByFields({
       where: { userEmail: newUser.userEmail },
     });
+
+    if (userFind) {
+      throw new HttpException("이미 존재하는 user", HttpStatus.BAD_REQUEST);
+    }
 
     const userRegisterDto: UserRegisterDto = {
       userEmail: newUser.userEmail,
