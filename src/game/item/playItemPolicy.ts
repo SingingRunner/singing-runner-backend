@@ -15,7 +15,7 @@ export class PlayItemPolicy implements ItemPolicy {
       Item.CLOUD,
       Item.FROZEN,
     ]);
-    this.userItemMap.set("bcd11577-71ec-4b7e-b291-f37a3dc3aa70ef", [
+    this.userItemMap.set("ddb6c601-e624-4d4a-853b-0e3200c19a80", [
       Item.KEY_DOWN,
       Item.FROZEN,
       Item.CLOUD,
@@ -23,7 +23,7 @@ export class PlayItemPolicy implements ItemPolicy {
       Item.FROZEN,
       Item.KEY_UP,
     ]);
-    this.userItemMap.set("ddb6c601-e624-4d4a-853b-0e3200c19a80", [
+    this.userItemMap.set("bcd11577-71ec-4b7e-b291-f37a3dc3aa70", [
       Item.FROZEN,
       Item.CLOUD,
       Item.KEY_UP,
@@ -32,7 +32,7 @@ export class PlayItemPolicy implements ItemPolicy {
       Item.FROZEN,
     ]);
     this.userCountMap.set("0e4053ce-b313-4104-bb09-44bfbc39b4b4", 0);
-    this.userCountMap.set("bcd11577-71ec-4b7e-b291-f37a3dc3aa70ef", 0);
+    this.userCountMap.set("bcd11577-71ec-4b7e-b291-f37a3dc3aa70", 0);
     this.userCountMap.set("ddb6c601-e624-4d4a-853b-0e3200c19a80", 0);
   }
 
