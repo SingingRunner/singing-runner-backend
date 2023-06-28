@@ -161,27 +161,26 @@ export class SocialService {
         nickname: `%${nickname}%`,
       })
       .andWhere("social.deletedAt IS NULL")
-      .orderBy("friend.nickname")
+      .addSelect(
+        "IF(friend.userActive=2, 1, IF(friend.userActive=0, 2, IF(friend.userActive=1, 3, 4)))",
+        "custom_order"
+      )
+      .orderBy("custom_order", "ASC")
+      .addOrderBy("friend.nickname", "ASC")
       .skip(skip)
       .take(take)
       .getMany();
 
-    const friendList: User[] = friends.map((friend) => friend.friend);
-    friendList.sort((a, b) => {
-      const order = { 2: 1, 0: 2, 1: 3 };
-      return order[a.userActive] - order[b.userActive];
-    });
-
     const resultList: SearchFriendDto[] = [];
-    for (const friend of friendList) {
+    for (const friend of friends) {
       const searchFriendDto = new SearchFriendDto();
-      searchFriendDto.nickname = friend.nickname;
-      searchFriendDto.character = friend.character;
-      searchFriendDto.userActive = friend.userActive;
-      searchFriendDto.userId = friend.userId;
-      searchFriendDto.userMmr = friend.userMmr;
+      searchFriendDto.nickname = friend.friend.nickname;
+      searchFriendDto.character = friend.friend.character;
+      searchFriendDto.userActive = friend.friend.userActive;
+      searchFriendDto.userId = friend.friend.userId;
+      searchFriendDto.userMmr = friend.friend.userMmr;
       searchFriendDto.userTier = this.userService.determineUserTier(
-        friend.userMmr
+        friend.friend.userMmr
       );
       resultList.push(searchFriendDto);
     }

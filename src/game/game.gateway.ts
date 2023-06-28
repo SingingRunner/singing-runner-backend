@@ -103,6 +103,7 @@ export class GameGateway
       if (!this.matchService.acceptAllUsers(data.userId)) {
         return;
       }
+      console.log("마지막에 accept 한 유저", data.userId);
       this.broadCast(user, data.userId, message, true);
       return;
     }
@@ -278,6 +279,7 @@ export class GameGateway
     const userList: UserGameDto[] =
       this.matchService.findUsersInSameRoom(gameRoom);
     for (const user of userList) {
+      console.log("user 닉네임", user.getUserMatchDto().nickname);
       user.getSocket().emit(message, responseData);
     }
   }
