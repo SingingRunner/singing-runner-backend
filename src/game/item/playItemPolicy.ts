@@ -9,27 +9,17 @@ export class PlayItemPolicy implements ItemPolicy {
   constructor() {
     this.userItemMap.set("0e4053ce-b313-4104-bb09-44bfbc39b4b4", [
       Item.MUTE,
-      Item.CLOUD,
-      Item.CLOUD,
       Item.MUTE,
       Item.CLOUD,
-      Item.FROZEN,
     ]);
     this.userItemMap.set("ddb6c601-e624-4d4a-853b-0e3200c19a80", [
-      Item.KEY_DOWN,
-      Item.FROZEN,
-      Item.CLOUD,
       Item.CLOUD,
       Item.FROZEN,
-      Item.KEY_UP,
     ]);
     this.userItemMap.set("bcd11577-71ec-4b7e-b291-f37a3dc3aa70", [
       Item.FROZEN,
-      Item.CLOUD,
       Item.KEY_UP,
-      Item.KEY_DOWN,
-      Item.CLOUD,
-      Item.FROZEN,
+      Item.KEY_UP,
     ]);
     this.userCountMap.set("0e4053ce-b313-4104-bb09-44bfbc39b4b4", 0);
     this.userCountMap.set("bcd11577-71ec-4b7e-b291-f37a3dc3aa70", 0);
@@ -53,6 +43,9 @@ export class PlayItemPolicy implements ItemPolicy {
   }
   useItemAll(item: Item): boolean {
     console.log(item);
+    for (const key of this.userCountMap.keys()) {
+      this.userCountMap.set(key, 0);
+    }
     return true;
   }
   escapeItem(item: Item): boolean {
