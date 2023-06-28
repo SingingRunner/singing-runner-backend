@@ -16,6 +16,7 @@ import { GameReplayService } from "./replay/game.replay.service";
 import { User } from "src/user/entity/user.entity";
 import { userActiveStatus } from "src/user/util/user.enum";
 import { UserInfoDto } from "./util/user-info.dto";
+import { Item } from "./item/item.enum";
 
 @Injectable()
 export class GameService {
@@ -83,6 +84,9 @@ export class GameService {
     }
   }
 
+  public resetItem() {
+    this.itemPolicy.useItemAll(Item.NULL);
+  }
   public exitWhileInGame(user: Socket) {
     const gameRoom = this.gameRoomHandler.findRoomBySocket(user);
     if (gameRoom === null || gameRoom === undefined) {

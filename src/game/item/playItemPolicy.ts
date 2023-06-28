@@ -53,6 +53,9 @@ export class PlayItemPolicy implements ItemPolicy {
   }
   useItemAll(item: Item): boolean {
     console.log(item);
+    for (const key of this.userCountMap.keys()) {
+      this.userCountMap.set(key, 0);
+    }
     return true;
   }
   escapeItem(item: Item): boolean {
