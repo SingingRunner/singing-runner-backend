@@ -1,4 +1,3 @@
-import { error } from "console";
 import { UserMatchDto } from "./../user/dto/user.match.dto";
 import {
   ConnectedSocket,
