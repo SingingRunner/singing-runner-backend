@@ -45,7 +45,7 @@ export class PlayItemPolicy implements ItemPolicy {
     if (item === undefined) {
       return Item.NULL;
     }
-    this.userCountMap.set(userId, count++);
+    this.userCountMap.set(userId, ++count);
     if (count === 6) {
       this.userCountMap.set(userId, 0);
     }
