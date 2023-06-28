@@ -1,4 +1,9 @@
-import { UnauthorizedException, UseGuards } from "@nestjs/common";
+import {
+  HttpException,
+  HttpStatus,
+  UnauthorizedException,
+  UseGuards,
+} from "@nestjs/common";
 import { Resolver, Query, Mutation, Args, Context } from "@nestjs/graphql";
 import { AuthService } from "./auth.service";
 import { UserRegisterDto } from "../user/dto/user.register.dto";
@@ -23,17 +28,10 @@ export class AuthResolver {
     @Context() context: any
   ): Promise<AuthDto> {
     if (!newUser) {
-      throw new Error("데이터가 없습니다.");
-    }
-
-    // userEmail 중복 체크
-    if (await this.isEmailTaken(newUser.userEmail)) {
-      throw new Error("이미 존재하는 이메일입니다.");
-    }
-
-    // nickname 중복 체크
-    if (await this.isNicknameTaken(newUser.nickname)) {
-      throw new Error("이미 존재하는 닉네임입니다.");
+      throw new HttpException(
+        "데이터가 없습니다.",
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
     }
 
     const registeredUser = await this.authService.registerUser(newUser);

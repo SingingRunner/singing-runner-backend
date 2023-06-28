@@ -38,26 +38,22 @@ export class GameGateway
     private gameReplayService: GameReplayService
   ) {}
 
-  afterInit(server: Server) {
-    console.log("Socket.io server initialized in ");
+  afterInit(server: any) {
     console.log(server);
   }
 
   handleConnection(@ConnectedSocket() user: Socket) {
-    // console.log(`Client connected socketID: ${user.id}`);
     let { userId } = user.handshake.query;
     if (userId === undefined) {
-      throw new Error("소켓접속시 userId가 전달되지 않았습니다.");
+      return;
     }
     if (Array.isArray(userId)) {
       userId = userId.join("");
     }
-    console.log("SOCKET CONNECT : ", userId);
     this.matchService.updateUserSocket(userId, user);
   }
 
   handleDisconnect(@ConnectedSocket() user: Socket) {
-    console.log("disconnected");
     try {
       this.matchService.updateUserConnected(user);
     } catch {
@@ -72,20 +68,17 @@ export class GameGateway
 
   @SubscribeMessage("match_making")
   async matchMakingData(@ConnectedSocket() user: Socket, @MessageBody() data) {
-    console.log("matchmaking connect");
     const message = "match_making";
     if (!data.accept) {
       this.matchService.matchCancel(data.UserMatchDto.userId);
       return;
     }
-    console.log("matchmaking", data.UserMatchDto.nickname);
     if (!(await this.matchService.isMatchMade(user, data.UserMatchDto))) {
       return;
     }
     const gameRoom: GameRoom = this.matchService.findRoomByUserId(
       data.UserMatchDto.userId
     );
-    // console.log("gameroom", gameRoom);
     const responseData = this.matchService.getSongInfo(gameRoom);
     this.broadCast(user, data.UserMatchDto.userId, message, responseData);
     return;
@@ -98,12 +91,10 @@ export class GameGateway
   @SubscribeMessage("accept")
   matchAcceptData(@ConnectedSocket() user: Socket, @MessageBody() data) {
     const message = "accept";
-    console.log("accept!!!!!!!!");
     if (data.accept) {
       if (!this.matchService.acceptAllUsers(data.userId)) {
         return;
       }
-      console.log("마지막에 accept 한 유저", data.userId);
       this.broadCast(user, data.userId, message, true);
       return;
     }
@@ -279,7 +270,6 @@ export class GameGateway
     const userList: UserGameDto[] =
       this.matchService.findUsersInSameRoom(gameRoom);
     for (const user of userList) {
-      console.log("user 닉네임", user.getUserMatchDto().nickname);
       user.getSocket().emit(message, responseData);
     }
   }

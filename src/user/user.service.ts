@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { UserRegisterDto } from "./dto/user.register.dto";
 import { FindOneOptions, Like, Repository } from "typeorm";
@@ -14,8 +14,11 @@ export class UserService {
     private readonly userRepository: Repository<User>
   ) {}
 
-  async findByFields(option: FindOneOptions<User>): Promise<User | null> {
+  async findByFields(option: FindOneOptions<User>): Promise<User> {
     const user: User | null = await this.userRepository.findOne(option);
+    if (!user) {
+      throw new HttpException("없는 유저", HttpStatus.BAD_REQUEST);
+    }
     return user;
   }
 
@@ -83,7 +86,6 @@ export class UserService {
       user.userActive === userActiveStatus.IN_GAME &&
       userActive === userActiveStatus.LOGOUT
     ) {
-      console.log("ingame");
       return;
     }
     user.userActive = userActive;

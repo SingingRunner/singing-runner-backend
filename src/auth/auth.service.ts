@@ -29,16 +29,9 @@ export class AuthService {
   ) {}
 
   async registerUser(newUser: UserRegisterDto): Promise<User> {
-    const userFind: User | null = await this.userService.findByFields({
+    const userFind: User = await this.userService.findByFields({
       where: { userEmail: newUser.userEmail },
     });
-
-    if (userFind) {
-      throw new HttpException(
-        "이미 존재하는 이메일입니다.",
-        HttpStatus.BAD_REQUEST
-      );
-    }
 
     const userRegisterDto: UserRegisterDto = {
       userEmail: newUser.userEmail,
@@ -71,7 +64,10 @@ export class AuthService {
 
     // 환경변수에 SECRET_KEY가 설정되어 있지 않으면 에러 발생
     if (!secret) {
-      throw new Error("환경변수에 SECRET_KEY가 설정되어 있지 않습니다.");
+      throw new HttpException(
+        "환경변수에 SECRET_KEY가 설정되어 있지 않습니다.",
+        HttpStatus.BAD_REQUEST
+      );
     }
 
     const payload = { userId: userId };
@@ -170,7 +166,10 @@ export class AuthService {
       this.hearBeat.deleteHeartBeatMap(user.userId);
       return "로그아웃 성공";
     } catch (err) {
-      throw new Error("로그아웃 실패");
+      throw new HttpException(
+        "로그아웃 실패",
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
     }
   }
 }
