@@ -15,6 +15,7 @@ export class PlayItemPolicy implements ItemPolicy {
     this.userItemMap.set("ddb6c601-e624-4d4a-853b-0e3200c19a80", [
       Item.CLOUD,
       Item.FROZEN,
+      Item.CLOUD,
     ]);
     this.userItemMap.set("bcd11577-71ec-4b7e-b291-f37a3dc3aa70", [
       Item.FROZEN,
@@ -36,7 +37,7 @@ export class PlayItemPolicy implements ItemPolicy {
       return Item.NULL;
     }
     this.userCountMap.set(userId, ++count);
-    if (count === 6) {
+    if (count === 3) {
       this.userCountMap.set(userId, 0);
     }
     return item;
