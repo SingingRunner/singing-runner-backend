@@ -10,12 +10,12 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { GameReplayEntity } from "./replay/entity/game.replay.entity";
 import { RankHandlerImpl } from "./rank/rank.handler.impl";
 import { GameReplayService } from "./replay/game.replay.service";
-import { RandomItemPolicy } from "./item/random.item.policy";
 import { GameResolver } from "./game.resolver";
 import { User } from "src/user/entity/user.entity";
 import { CustomModeService } from "./custom-mode/custom.mode.service";
 import { UserModule } from "src/user/user.module";
 import { SocialModule } from "src/social/social.module";
+import { PlayItemPolicy } from "./item/playItemPolicy";
 
 @Module({
   imports: [
@@ -37,7 +37,7 @@ import { SocialModule } from "src/social/social.module";
     GameGateway,
     {
       provide: "ItemPolicy",
-      useClass: RandomItemPolicy,
+      useClass: PlayItemPolicy,
     },
     {
       provide: "RankHandler",
