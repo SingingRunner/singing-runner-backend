@@ -1,3 +1,4 @@
+import { error } from "console";
 import { UserMatchDto } from "./../user/dto/user.match.dto";
 import {
   ConnectedSocket,
@@ -21,6 +22,8 @@ import { userActiveStatus } from "src/user/util/user.enum";
 import { GameReplayService } from "./replay/game.replay.service";
 import { CustomSongDto } from "./util/custom-song.dto";
 import { CustomUserInfoDto } from "./util/custom-user.info.dto";
+import { HttpException, HttpStatus } from "@nestjs/common";
+import { throwError } from "rxjs";
 
 /**
  * webSocket 통신을 담당하는 Handler
@@ -68,20 +71,27 @@ export class GameGateway
 
   @SubscribeMessage("match_making")
   async matchMakingData(@ConnectedSocket() user: Socket, @MessageBody() data) {
-    const message = "match_making";
-    if (!data.accept) {
-      this.matchService.matchCancel(data.UserMatchDto.userId);
+    try {
+      const message = "match_making";
+      if (!data.accept) {
+        this.matchService.matchCancel(data.UserMatchDto.userId);
+        return;
+      }
+      if (!(await this.matchService.isMatchMade(user, data.UserMatchDto))) {
+        return;
+      }
+      const gameRoom: GameRoom = this.matchService.findRoomByUserId(
+        data.UserMatchDto.userId
+      );
+      const responseData = this.matchService.getSongInfo(gameRoom);
+      this.broadCast(user, data.UserMatchDto.userId, message, responseData);
       return;
+    } catch (error) {
+      throw new HttpException(
+        "matchmaking Error",
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
     }
-    if (!(await this.matchService.isMatchMade(user, data.UserMatchDto))) {
-      return;
-    }
-    const gameRoom: GameRoom = this.matchService.findRoomByUserId(
-      data.UserMatchDto.userId
-    );
-    const responseData = this.matchService.getSongInfo(gameRoom);
-    this.broadCast(user, data.UserMatchDto.userId, message, responseData);
-    return;
   }
 
   /**
@@ -91,17 +101,21 @@ export class GameGateway
   @SubscribeMessage("accept")
   matchAcceptData(@ConnectedSocket() user: Socket, @MessageBody() data) {
     const message = "accept";
-    if (data.accept) {
-      if (!this.matchService.acceptAllUsers(data.userId)) {
+    try {
+      if (data.accept) {
+        if (!this.matchService.acceptAllUsers(data.userId)) {
+          return;
+        }
+        this.broadCast(user, data.userId, message, true);
         return;
       }
-      this.broadCast(user, data.userId, message, true);
-      return;
-    }
 
-    this.matchService.matchDeny(data.userId);
-    this.broadCast(user, data.userId, message, false);
-    this.matchService.deleteRoom(data.userId);
+      this.matchService.matchDeny(data.userId);
+      this.broadCast(user, data.userId, message, false);
+      this.matchService.deleteRoom(data.userId);
+    } catch (error) {
+      throw new HttpException("accept Error", HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 
   @SubscribeMessage("loading")
@@ -112,14 +126,21 @@ export class GameGateway
 
   @SubscribeMessage("game_ready")
   gameReadyData(@ConnectedSocket() user: Socket, @MessageBody() data) {
-    if (this.gameService.isGameReady(data.userId)) {
-      const userIdList: string[] = this.gameService.findUsersIdInSameRoom(
-        data.userId
-      );
-      for (const userId of userIdList) {
-        this.gameService.updateUserActive(userId, userActiveStatus.IN_GAME);
+    try {
+      if (this.gameService.isGameReady(data.userId)) {
+        const userIdList: string[] = this.gameService.findUsersIdInSameRoom(
+          data.userId
+        );
+        for (const userId of userIdList) {
+          this.gameService.updateUserActive(userId, userActiveStatus.IN_GAME);
+        }
+        this.broadCast(user, data.userId, "game_ready", userIdList);
       }
-      this.broadCast(user, data.userId, "game_ready", userIdList);
+    } catch (error) {
+      throw new HttpException(
+        "game_ready 실패",
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
     }
   }
 
@@ -153,58 +174,69 @@ export class GameGateway
     @ConnectedSocket() user: Socket,
     @MessageBody() userScoreDto: UserScoreDto
   ) {
-    if (!this.gameService.allUsersTerminated(userScoreDto)) {
-      return;
-    }
-
-    const gameTerminatedList: GameTerminatedDto[] =
-      await this.gameService.calculateRank(userScoreDto.userId);
-    const gameRoom: GameRoom = this.matchService.findRoomByUserId(
-      userScoreDto.userId
-    );
-    const userList: UserGameDto[] =
-      this.matchService.findUsersInSameRoom(gameRoom);
-
-    for (const gameTerminated of gameTerminatedList) {
-      await this.gameService.setGameTerminatedCharacter(gameTerminated);
-    }
-
-    for (const userGame of userList) {
-      await this.gameService.updateUserActive(
-        userGame.getUserMatchDto().userId,
-        userActiveStatus.CONNECT
-      );
-      for (const gameTerminated of gameTerminatedList) {
-        await this.gameService.setGameTerminatedDto(userGame, gameTerminated);
+    try {
+      if (!this.gameService.allUsersTerminated(userScoreDto)) {
+        return;
       }
-      this.gameService.putEvent(
-        gameRoom,
-        "game_terminated",
-        JSON.stringify(gameTerminatedList),
-        user
+
+      const gameTerminatedList: GameTerminatedDto[] =
+        await this.gameService.calculateRank(userScoreDto.userId);
+      const gameRoom: GameRoom = this.matchService.findRoomByUserId(
+        userScoreDto.userId
       );
-      userGame.getSocket().emit("game_terminated", gameTerminatedList);
+      const userList: UserGameDto[] =
+        this.matchService.findUsersInSameRoom(gameRoom);
+
+      for (const gameTerminated of gameTerminatedList) {
+        await this.gameService.setGameTerminatedCharacter(gameTerminated);
+      }
+
+      for (const userGame of userList) {
+        await this.gameService.updateUserActive(
+          userGame.getUserMatchDto().userId,
+          userActiveStatus.CONNECT
+        );
+        for (const gameTerminated of gameTerminatedList) {
+          await this.gameService.setGameTerminatedDto(userGame, gameTerminated);
+        }
+        this.gameService.putEvent(
+          gameRoom,
+          "game_terminated",
+          JSON.stringify(gameTerminatedList),
+          user
+        );
+        userGame.getSocket().emit("game_terminated", gameTerminatedList);
+      }
+    } catch (error) {
+      throw new HttpException(
+        "gameterminiated",
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
     }
   }
 
   @SubscribeMessage("invite")
   async accpetInvite(@ConnectedSocket() user: Socket, @MessageBody() data) {
-    await this.customModeService.acceptInvite(
-      user,
-      data.userId,
-      data.HostUserDto
-    );
-    const customUserList: CustomUserInfoDto[] =
-      this.customModeService.setCustomUserInfo(user);
-    const gameRoom: GameRoom = this.matchService.findRoomBySocket(user);
-    const userList: UserGameDto[] =
-      this.matchService.findUsersInSameRoom(gameRoom);
+    try {
+      await this.customModeService.acceptInvite(
+        user,
+        data.userId,
+        data.HostUserDto
+      );
+      const customUserList: CustomUserInfoDto[] =
+        this.customModeService.setCustomUserInfo(user);
+      const gameRoom: GameRoom = this.matchService.findRoomBySocket(user);
+      const userList: UserGameDto[] =
+        this.matchService.findUsersInSameRoom(gameRoom);
 
-    for (const userGame of userList) {
-      for (const customUser of customUserList) {
-        await this.customModeService.checkFriend(userGame, customUser);
+      for (const userGame of userList) {
+        for (const customUser of customUserList) {
+          await this.customModeService.checkFriend(userGame, customUser);
+        }
+        userGame.getSocket().emit("invite", customUserList);
       }
-      userGame.getSocket().emit("invite", customUserList);
+    } catch (error) {
+      throw new HttpException("accpet error", HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -213,11 +245,18 @@ export class GameGateway
     @ConnectedSocket() user: Socket,
     @MessageBody() userMatchDto: UserMatchDto
   ) {
-    await this.customModeService.createCustomRoom(user, userMatchDto);
-    const gameRoom: GameRoom = this.matchService.findRoomByUserId(
-      userMatchDto.userId
-    );
-    user.emit("create_custom", gameRoom.getRoomId());
+    try {
+      await this.customModeService.createCustomRoom(user, userMatchDto);
+      const gameRoom: GameRoom = this.matchService.findRoomByUserId(
+        userMatchDto.userId
+      );
+      user.emit("create_custom", gameRoom.getRoomId());
+    } catch (error) {
+      throw new HttpException(
+        "create_custom",
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
+    }
   }
 
   @SubscribeMessage("set_song")
@@ -265,12 +304,19 @@ export class GameGateway
     message: string,
     responseData: any
   ) {
-    const gameRoom: GameRoom = this.matchService.findRoomByUserId(userId);
-    this.gameService.putEvent(gameRoom, message, responseData, userSocket);
-    const userList: UserGameDto[] =
-      this.matchService.findUsersInSameRoom(gameRoom);
-    for (const user of userList) {
-      user.getSocket().emit(message, responseData);
+    try {
+      const gameRoom: GameRoom = this.matchService.findRoomByUserId(userId);
+      this.gameService.putEvent(gameRoom, message, responseData, userSocket);
+      const userList: UserGameDto[] =
+        this.matchService.findUsersInSameRoom(gameRoom);
+      for (const user of userList) {
+        user.getSocket().emit(message, responseData);
+      }
+    } catch (error) {
+      throw new HttpException(
+        "broadCastError",
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
     }
   }
 }
