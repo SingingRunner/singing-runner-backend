@@ -1,7 +1,6 @@
 import { SimpleItemPolicy } from "./simple.item.policy";
 import { ItemPolicy } from "./item.policy";
 import { describe } from "node:test";
-import { Item } from "./item.enum";
 
 describe("SimpleItemPolicy", () => {
   let itemPolicy: ItemPolicy;
