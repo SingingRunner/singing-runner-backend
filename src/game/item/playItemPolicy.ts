@@ -7,7 +7,7 @@ export class PlayItemPolicy implements ItemPolicy {
   private userItemMap: Map<string, Item[]> = new Map();
   private userCountMap: Map<string, number> = new Map();
   constructor() {
-    this.userItemMap.set("6be57b4a-6747-414b-bf1e-2171c667bbc1", [
+    this.userItemMap.set("0e4053ce-b313-4104-bb09-44bfbc39b4b4", [
       Item.MUTE,
       Item.CLOUD,
       Item.CLOUD,
@@ -15,7 +15,7 @@ export class PlayItemPolicy implements ItemPolicy {
       Item.CLOUD,
       Item.FROZEN,
     ]);
-    this.userItemMap.set("f5ed40ee-c570-4dad-9a3c-73bc58d475ef", [
+    this.userItemMap.set("bcd11577-71ec-4b7e-b291-f37a3dc3aa70ef", [
       Item.KEY_DOWN,
       Item.FROZEN,
       Item.CLOUD,
@@ -23,7 +23,7 @@ export class PlayItemPolicy implements ItemPolicy {
       Item.FROZEN,
       Item.KEY_UP,
     ]);
-    this.userItemMap.set("b9312ffe-07aa-41de-a66a-a14d35738ff1", [
+    this.userItemMap.set("ddb6c601-e624-4d4a-853b-0e3200c19a80", [
       Item.FROZEN,
       Item.CLOUD,
       Item.KEY_UP,
@@ -31,9 +31,9 @@ export class PlayItemPolicy implements ItemPolicy {
       Item.CLOUD,
       Item.FROZEN,
     ]);
-    this.userCountMap.set("6be57b4a-6747-414b-bf1e-2171c667bbc1", 0);
-    this.userCountMap.set("f5ed40ee-c570-4dad-9a3c-73bc58d475ef", 0);
-    this.userCountMap.set("b9312ffe-07aa-41de-a66a-a14d35738ff1", 0);
+    this.userCountMap.set("0e4053ce-b313-4104-bb09-44bfbc39b4b4", 0);
+    this.userCountMap.set("bcd11577-71ec-4b7e-b291-f37a3dc3aa70ef", 0);
+    this.userCountMap.set("ddb6c601-e624-4d4a-853b-0e3200c19a80", 0);
   }
 
   getItems(userId: string): Item {
