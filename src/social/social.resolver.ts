@@ -19,7 +19,7 @@ export class SocialResolver {
       throw new HttpException("Empty userID", HttpStatus.BAD_REQUEST);
     }
     this.socialService.setHeartBeat(userId, Date.now());
-    await this.socialService.delay(50000);
+    await this.socialService.delay(3000);
     let pollingDto: PollingDto = await this.socialService.checkWhilePolling(
       userId
     );
@@ -31,7 +31,7 @@ export class SocialResolver {
       return pollingDto;
     }
 
-    await this.socialService.delay(5000);
+    await this.socialService.delay(3000);
 
     pollingDto = await this.socialService.checkWhilePolling(userId);
 
