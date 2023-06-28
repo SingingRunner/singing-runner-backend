@@ -1,7 +1,7 @@
 import { SocialService } from "./../social/social.service";
 import { UserService } from "src/user/user.service";
 import { GameRoomHandler } from "./room/game.room.handler";
-import { Inject, Injectable } from "@nestjs/common";
+import { HttpException, HttpStatus, Inject, Injectable } from "@nestjs/common";
 import { Socket } from "socket.io";
 import { GameRoom } from "./room/game.room";
 import { UserGameDto } from "src/user/dto/user.game.dto";
@@ -160,7 +160,7 @@ export class GameService {
       gameTerminatedDto.getUserId()
     );
     if (user === null) {
-      throw new Error("없는 유저입니다");
+      throw new HttpException("없는 유저", HttpStatus.BAD_REQUEST);
     }
     gameTerminatedDto.setCharacter(user.character);
   }
@@ -169,7 +169,10 @@ export class GameService {
     const gameRoom: GameRoom | undefined =
       this.gameRoomHandler.findRoomByUserId(userId);
     if (gameRoom === undefined) {
-      throw new Error("room not found");
+      throw new HttpException(
+        "can not find room by userId",
+        HttpStatus.BAD_REQUEST
+      );
     }
     return gameRoom;
   }
@@ -216,7 +219,6 @@ export class GameService {
   }
 
   public async updateUserActive(userId: string, userActive: userActiveStatus) {
-    console.log("update,: ", userId);
     await this.userService.updateUserActive(userId, userActive);
   }
 
@@ -276,10 +278,8 @@ export class GameService {
       keynote: userKeynote,
     };
     await this.gameReplayService.saveReplay(gameReplayEntity);
-    console.log("acceptCOUNT??");
     this.gameRoomHandler.increaseAcceptCount(userId);
     if (this.gameRoomHandler.isGameRoomReady(gameRoom)) {
-      console.log("roomdelete?");
       this.gameRoomHandler.deleteRoom(userId);
       return;
     }

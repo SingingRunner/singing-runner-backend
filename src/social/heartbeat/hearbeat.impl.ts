@@ -12,11 +12,8 @@ export class HeartBeatimpl implements HeartBeat {
 
   @Cron("* * * * *")
   async updateHeartBeatMap() {
-    console.log("updateHearbeatMap");
-    console.log("hearBeatMap : ", this.heartBeatMap);
     const updateDate: number = Date.now();
     if (this.heartBeatMap.size === 0) {
-      console.log("no login user!");
       return;
     }
     for (const userId of this.heartBeatMap.keys()) {
@@ -29,17 +26,14 @@ export class HeartBeatimpl implements HeartBeat {
   }
 
   public setHeartBeatMap(userId: string, updateAt: number) {
-    console.log("hearbeat set!!", userId);
     this.heartBeatMap.set(userId, updateAt);
   }
 
   public deleteHeartBeatMap(userId: string) {
-    console.log("delete heartbeat");
     this.heartBeatMap.delete(userId);
   }
 
   public async updateDB(userId: string) {
-    console.log("update!!!");
     await this.userService.updateUserActive(userId, userActiveStatus.LOGOUT);
   }
 

@@ -14,15 +14,12 @@ export class SocialResolver {
   constructor(private socialService: SocialService) {}
 
   @Mutation(() => PollingDto)
-  async longPolling(@Args("userId") userId: string) {
-    console.log("userId", userId);
-    console.log("polling recieive :", Date.now());
+  async longPolling(@Args("usereId") userId: string) {
     if (userId.length < 10) {
       throw new HttpException("Empty userID", HttpStatus.BAD_REQUEST);
     }
     this.socialService.setHeartBeat(userId, Date.now());
-    await this.socialService.delay(10000);
-    console.log("첫딜레이 이후:", Date.now());
+    await this.socialService.delay(50000);
     let pollingDto: PollingDto = await this.socialService.checkWhilePolling(
       userId
     );
@@ -31,15 +28,12 @@ export class SocialResolver {
       pollingDto.hostUserDtoList.length !== 0 ||
       pollingDto.userNotificationList.length !== 0
     ) {
-      console.log(" 5초 대기후 반환");
       return pollingDto;
     }
 
-    await this.socialService.delay(10000);
-    console.log("두번쨰 딜레이 이후:", Date.now());
+    await this.socialService.delay(5000);
 
     pollingDto = await this.socialService.checkWhilePolling(userId);
-    console.log("10초 대기 후 반환");
 
     return pollingDto;
   }
