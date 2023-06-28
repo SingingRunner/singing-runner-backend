@@ -162,7 +162,7 @@ type Query {
 
 type Mutation {
   saveReplay(userVocal: String!, userId: String!): Reply!
-  longPolling(usereId: String!): PollingDto!
+  longPolling(userId: String!): PollingDto!
   addFriend(addFriendDto: AddFriendDto!): String!
   removeFriend(addFriendDto: AddFriendDto!): String!
   inviteFriend(friendId: String!, hostUserDto: HostUserInput!): String!
