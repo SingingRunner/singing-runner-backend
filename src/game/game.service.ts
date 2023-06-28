@@ -112,8 +112,8 @@ export class GameService {
     return userIdList;
   }
 
-  public getItem() {
-    return this.itemPolicy.getItems();
+  public getItem(userId: string) {
+    return this.itemPolicy.getItems(userId);
   }
 
   public allUsersTerminated(userScoreDto: UserScoreDto): boolean {

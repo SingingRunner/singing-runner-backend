@@ -1,5 +1,6 @@
 import { Item } from "./item.enum";
 import { ItemPolicy } from "./item.policy";
+
 export class RandomItemPolicy implements ItemPolicy {
   private items: Item[] = [
     Item.KEY_UP,
@@ -9,7 +10,8 @@ export class RandomItemPolicy implements ItemPolicy {
     Item.CLOUD,
   ];
 
-  public getItems(): Item {
+  public getItems(userId: string): Item {
+    console.log(userId);
     const randomIndex = Math.floor(Math.random() * this.items.length);
     return this.items[randomIndex];
   }

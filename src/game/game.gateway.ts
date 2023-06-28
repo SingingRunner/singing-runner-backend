@@ -129,8 +129,8 @@ export class GameGateway
   }
 
   @SubscribeMessage("get_item")
-  getItemData(@ConnectedSocket() user: Socket) {
-    const item = this.gameService.getItem();
+  getItemData(@ConnectedSocket() user: Socket, @MessageBody() userId: string) {
+    const item = this.gameService.getItem(userId);
     user.emit("get_item", item);
   }
 
