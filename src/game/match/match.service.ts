@@ -1,6 +1,6 @@
 import { GameRoom } from "./../room/game.room";
 
-import { Inject, Injectable } from "@nestjs/common";
+import { HttpException, HttpStatus, Inject, Injectable } from "@nestjs/common";
 import { Socket } from "socket.io";
 
 import { GameRoomHandler } from "../room/game.room.handler";
@@ -80,7 +80,10 @@ export class MatchService {
     const gameRoom: GameRoom | undefined =
       this.gameRoomHandler.findRoomByUserId(userId);
     if (gameRoom === undefined) {
-      throw new Error("room not found");
+      throw new HttpException(
+        "can not found room by userId",
+        HttpStatus.BAD_REQUEST
+      );
     }
     return gameRoom;
   }

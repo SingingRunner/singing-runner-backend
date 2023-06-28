@@ -1,6 +1,7 @@
 import { MatchMakingPolicy } from "./match.making.policy";
 import { UserMatchTier } from "../util/game.enum";
 import { UserGameDto } from "src/user/dto/user.game.dto";
+import { HttpException, HttpStatus } from "@nestjs/common";
 
 export class MMRMatchPolicy implements MatchMakingPolicy {
   private tierQueueMap: Map<UserMatchTier, UserGameDto[]> = new Map();
@@ -59,7 +60,10 @@ export class MMRMatchPolicy implements MatchMakingPolicy {
       !userGameDto.getUserMatchDto() ||
       userGameDto.getUserMatchDto().userMmr == null
     ) {
-      throw new Error("Invalid userGameDto or userMMR");
+      throw new HttpException(
+        "Invalid userGameDto or userMMR",
+        HttpStatus.BAD_REQUEST
+      );
     }
 
     const userMMR = userGameDto.getUserMatchDto().userMmr;
@@ -67,7 +71,10 @@ export class MMRMatchPolicy implements MatchMakingPolicy {
 
     const matchQueue = this.tierQueueMap.get(userTier);
     if (!matchQueue || matchQueue.length < 2) {
-      throw new Error("Not enough available users");
+      throw new HttpException(
+        "Invalid userGameDto or userMMR",
+        HttpStatus.BAD_REQUEST
+      );
     }
 
     return matchQueue.splice(0, 2);

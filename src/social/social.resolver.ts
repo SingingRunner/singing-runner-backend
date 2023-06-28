@@ -14,7 +14,7 @@ export class SocialResolver {
   constructor(private socialService: SocialService) {}
 
   @Mutation(() => PollingDto)
-  async longPolling(@Args("userId") userId: string) {
+  async longPolling(@Args("usereId") userId: string) {
     if (userId.length < 10) {
       throw new HttpException("Empty userID", HttpStatus.BAD_REQUEST);
     }

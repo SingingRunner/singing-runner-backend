@@ -45,7 +45,7 @@ export class GameGateway
   handleConnection(@ConnectedSocket() user: Socket) {
     let { userId } = user.handshake.query;
     if (userId === undefined) {
-      throw new Error("소켓접속시 userId가 전달되지 않았습니다.");
+      return;
     }
     if (Array.isArray(userId)) {
       userId = userId.join("");
