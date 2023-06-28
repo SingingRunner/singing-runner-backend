@@ -31,7 +31,7 @@ export class SocialService {
     pollingDto.hostUserDtoList = [];
     pollingDto.userNotificationList = [];
 
-    if (await this.hasInvitation(userId)) {
+    if (this.hasInvitation(userId)) {
       pollingDto.hostUserDtoList = this.getAllInvitation(userId);
     }
     if (await this.hasNotification(userId)) {

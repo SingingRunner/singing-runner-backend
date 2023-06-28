@@ -31,7 +31,7 @@ export class SocialResolver {
       return pollingDto;
     }
 
-    await this.socialService.delay(50000);
+    await this.socialService.delay(5000);
 
     pollingDto = await this.socialService.checkWhilePolling(userId);
 

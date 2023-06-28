@@ -38,6 +38,10 @@ export class GameGateway
     private gameReplayService: GameReplayService
   ) {}
 
+  afterInit(server: any) {
+    console.log(server);
+  }
+
   handleConnection(@ConnectedSocket() user: Socket) {
     let { userId } = user.handshake.query;
     if (userId === undefined) {
