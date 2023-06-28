@@ -48,17 +48,18 @@ export class SocialService {
       throw new Error("등록되지 않은 유저 입니다");
     }
 
-    const userToFriend = await this.socialRepository
-      .createQueryBuilder("social")
-      .where("social.userId = :userId", { userId })
-      .andWhere("social.friendId = :friendId", { friendId })
-      .getOne();
-
-    const friendToUser = await this.socialRepository
-      .createQueryBuilder("social")
-      .where("social.userId = :userId", { userId: friendId })
-      .andWhere("social.friendId = :friendId", { friendId: userId })
-      .getOne();
+    const [userToFriend, friendToUser] = await Promise.all([
+      this.socialRepository
+        .createQueryBuilder("social")
+        .where("social.userId = :userId", { userId })
+        .andWhere("social.friendId = :friendId", { friendId })
+        .getOne(),
+      this.socialRepository
+        .createQueryBuilder("social")
+        .where("social.userId = :userId", { userId: friendId })
+        .andWhere("social.friendId = :friendId", { friendId: userId })
+        .getOne(),
+    ]);
 
     if (!userToFriend || !friendToUser) {
       const social = new Social();
@@ -78,17 +79,18 @@ export class SocialService {
   }
 
   public async removeFriend(userId: string, friendId: string, date: Date) {
-    const userToFriend = await this.socialRepository
-      .createQueryBuilder("social")
-      .where("social.userId = :userId", { userId })
-      .andWhere("social.friendId = :friendId", { friendId })
-      .getOne();
-
-    const friendToUser = await this.socialRepository
-      .createQueryBuilder("social")
-      .where("social.userId = :userId", { userId: friendId })
-      .andWhere("social.friendId = :friendId", { friendId: userId })
-      .getOne();
+    const [userToFriend, friendToUser] = await Promise.all([
+      this.socialRepository
+        .createQueryBuilder("social")
+        .where("social.userId = :userId", { userId })
+        .andWhere("social.friendId = :friendId", { friendId })
+        .getOne(),
+      this.socialRepository
+        .createQueryBuilder("social")
+        .where("social.userId = :userId", { userId: friendId })
+        .andWhere("social.friendId = :friendId", { friendId: userId })
+        .getOne(),
+    ]);
 
     if (!userToFriend || !friendToUser) {
       throw new Error("해당 친구 관계가 존재하지 않습니다.");
