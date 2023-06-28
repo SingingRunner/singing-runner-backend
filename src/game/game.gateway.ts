@@ -175,7 +175,7 @@ export class GameGateway
       if (!this.gameService.allUsersTerminated(userScoreDto)) {
         return;
       }
-
+      this.gameService.resetItem();
       const gameTerminatedList: GameTerminatedDto[] =
         await this.gameService.calculateRank(userScoreDto.userId);
       const gameRoom: GameRoom = this.matchService.findRoomByUserId(
