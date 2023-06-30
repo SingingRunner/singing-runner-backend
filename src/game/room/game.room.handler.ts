@@ -4,13 +4,17 @@ import { GameRoom } from "./game.room";
 import { UserGameDto } from "src/user/dto/user.game.dto";
 import { GameRoomStatus } from "../util/game.enum";
 import { SongService } from "src/song/song.service";
+import { SocketValidator } from "./socket.validator";
 
 @Injectable()
 export class GameRoomHandler {
   private roomList: Map<GameRoom, Array<UserGameDto>> = new Map();
   private userRoomMap: Map<string, GameRoom> = new Map();
 
-  constructor(private songService: SongService) {}
+  constructor(
+    private songService: SongService,
+    private socketValidator: SocketValidator
+  ) {}
 
   public joinRoom(gameRoom: GameRoom, user: UserGameDto) {
     const existingRoom: GameRoom | undefined = this.userRoomMap.get(
@@ -67,6 +71,12 @@ export class GameRoomHandler {
     return users;
   }
   public updateUserSocket(userId: string, userSocket: Socket) {
+    if (!this.socketValidator.IsExistingSocket(userId)) {
+      this.socketValidator.setSocket(userId, userSocket);
+      return;
+    }
+    this.socketValidator.deleteSocket(userId);
+    this.socketValidator.setSocket(userId, userSocket);
     const gameRoom: GameRoom | undefined = this.findRoomByUserId(userId);
     if (gameRoom === undefined) {
       return;
@@ -117,15 +127,7 @@ export class GameRoomHandler {
   }
 
   public findRoomByUserId(userId: string): GameRoom | undefined {
-    for (const key of this.roomList.keys()) {
-      const foundUser: UserGameDto | undefined = this.roomList
-        .get(key)
-        ?.find((userInRoom) => userInRoom.getUserMatchDto().userId === userId);
-      if (foundUser !== undefined) {
-        return key;
-      }
-    }
-    return undefined;
+    return this.userRoomMap.get(userId);
   }
 
   private roomCount(): number {

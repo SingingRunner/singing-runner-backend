@@ -7,12 +7,12 @@ import { PollingDto } from "./dto/polling.dto";
 import { NotificationDto } from "./dto/notification.dto";
 import { RequestDto } from "./dto/request-dto";
 import { SearchFriendDto } from "src/user/dto/search-freind.dto";
-import { HttpException, HttpStatus } from "@nestjs/common";
+import { ConsoleLogger, HttpException, HttpStatus } from "@nestjs/common";
 
 @Resolver()
 export class SocialResolver {
   constructor(private socialService: SocialService) {}
-
+  private logger = new ConsoleLogger(SocialResolver.name);
   @Mutation(() => PollingDto)
   async longPolling(@Args("userId") userId: string) {
     if (userId.length < 10) {
@@ -28,13 +28,30 @@ export class SocialResolver {
       pollingDto.hostUserDtoList.length !== 0 ||
       pollingDto.userNotificationList.length !== 0
     ) {
+      if (pollingDto.hostUserDtoList.length !== 0) {
+        this.logger.log(
+          `${pollingDto.hostUserDtoList[0].nickname}로 부터 초대`
+        );
+      }
+      if (pollingDto.userNotificationList.length !== 0) {
+        this.logger.log(
+          `${pollingDto.userNotificationList[0].sender.nickname} 로 부터 친구요청`
+        );
+      }
       return pollingDto;
     }
 
     await this.socialService.delay(3000);
 
     pollingDto = await this.socialService.checkWhilePolling(userId);
-
+    if (pollingDto.hostUserDtoList.length !== 0) {
+      this.logger.log(`${pollingDto.hostUserDtoList[0].nickname}로 부터 초대`);
+    }
+    if (pollingDto.userNotificationList.length !== 0) {
+      this.logger.log(
+        `${pollingDto.userNotificationList[0].sender.nickname} 로 부터 친구요청`
+      );
+    }
     return pollingDto;
   }
 
