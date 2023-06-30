@@ -18,6 +18,9 @@ import { characterEnum } from "../user/util/character.enum";
 import { Response } from "express";
 import { userActiveStatus } from "src/user/util/user.enum";
 import { HeartBeat } from "src/social/heartbeat/hearbeat";
+import { HttpService } from "@nestjs/axios";
+import { KakaoUserResponseDto } from "src/user/dto/kakao-user-response.dto";
+import { KakaoUserRegisterDto } from "src/user/dto/kakao-user-register.dto";
 
 @Injectable()
 export class AuthService {
@@ -25,7 +28,8 @@ export class AuthService {
     private userService: UserService,
     private jwtService: JwtService,
     @Inject("HeartBeat")
-    private hearBeat: HeartBeat
+    private hearBeat: HeartBeat,
+    private httpService: HttpService
   ) {}
 
   async registerUser(newUser: UserRegisterDto): Promise<User> {
@@ -50,13 +54,47 @@ export class AuthService {
     const user: User = new User();
     user.userId = uuidv4();
     user.userEmail = savedUserDto.userEmail;
-    user.password = savedUserDto.password;
+    user.password = savedUserDto.password || "";
     user.nickname = savedUserDto.nickname;
     user.userActive = 0;
     user.userKeynote = 0;
     user.userMmr = 0;
     user.userPoint = 0;
     user.character = characterEnum.BELUGA;
+
+    return user;
+  }
+
+  async registerUserWithKakao(
+    kakaoUserResponse: KakaoUserResponseDto,
+    nickname: string
+  ): Promise<User> {
+    let user: User | null = await this.userService.findByFields({
+      where: { userId: kakaoUserResponse.id },
+    });
+
+    if (!user) {
+      const kakaoUserRegisterDto: KakaoUserRegisterDto = {
+        userEmail: kakaoUserResponse.kakao_account.email,
+        nickname: nickname,
+      };
+
+      const savedUserDto: KakaoUserRegisterDto =
+        await this.userService.saveWithKakao(kakaoUserRegisterDto);
+
+      user = new User();
+      user.userId = uuidv4();
+      user.userEmail = savedUserDto.userEmail;
+      user.nickname = savedUserDto.nickname;
+      user.password = "";
+      user.userActive = 0;
+      user.userKeynote = 0;
+      user.userMmr = 0;
+      user.userPoint = 0;
+      user.character = characterEnum.BELUGA;
+
+      await this.userService.save(user);
+    }
 
     return user;
   }
@@ -135,6 +173,53 @@ export class AuthService {
     return {
       accessToken: this.jwtService.sign(payload, { expiresIn: "60m" }),
       user: userWithoutRefreshToken as User,
+    };
+  }
+
+  async findUserWithKakao(
+    kakaoUserResponse: KakaoUserResponseDto
+  ): Promise<User> {
+    const user: User | null = await this.userService.findByFields({
+      where: { userEmail: kakaoUserResponse.kakao_account.email },
+    });
+
+    if (!user) {
+      throw new UnauthorizedException(
+        "카카오 계정에 해당하는 사용자를 찾을 수 없습니다."
+      );
+    }
+
+    return user;
+  }
+
+  async createToken(
+    user: User,
+    context: any
+  ): Promise<{ accessToken: string; user: Omit<User, "refreshToken"> }> {
+    const payload: Payload = {
+      userId: user.userId,
+      userEmail: user.userEmail,
+      nickname: user.nickname,
+      userActive: user.userActive,
+      userKeynote: user.userKeynote,
+      userMmr: user.userMmr,
+      userPoint: user.userPoint,
+      character: user.character,
+    };
+
+    const refreshToken: string = this.generateRefreshToken(user.userId);
+    await this.userService.updateRefreshToken(user.userId, refreshToken);
+
+    context.res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      path: "/refresh_token",
+    });
+
+    return {
+      accessToken: this.jwtService.sign(payload, { expiresIn: "60m" }),
+      user: user,
     };
   }
 

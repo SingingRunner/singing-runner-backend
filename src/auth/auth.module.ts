@@ -6,6 +6,7 @@ import { JwtAccessStrategy } from "./security/passport.jwt.strategy";
 import { AuthResolver } from "./auth.resolver";
 import { UserModule } from "src/user/user.module";
 import { SocialModule } from "src/social/social.module";
+import { HttpModule } from "@nestjs/axios";
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { SocialModule } from "src/social/social.module";
     UserModule,
     PassportModule,
     SocialModule,
+    HttpModule,
   ],
   providers: [AuthService, JwtAccessStrategy, AuthResolver],
   exports: [AuthService],

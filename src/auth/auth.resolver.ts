@@ -14,6 +14,7 @@ import { AuthDto } from "./dto/auth.dto";
 import { AuthTokenDto } from "./dto/auth-token.dto";
 import { UserContext } from "./util/auth.context";
 import { GqlAuthAccessGuard } from "./security/auth.guard";
+import { KakaoUserResponseDto } from "src/user/dto/kakao-user-response.dto";
 
 @Resolver()
 export class AuthResolver {
@@ -38,7 +39,7 @@ export class AuthResolver {
 
     const userAuthDto = new UserAuthDto();
     userAuthDto.userEmail = registeredUser.userEmail;
-    userAuthDto.password = newUser.password;
+    userAuthDto.password = newUser.password || "";
 
     // 자동으로 로그인 되도록 함
     return await this.loginUser(userAuthDto, context);
@@ -61,6 +62,18 @@ export class AuthResolver {
   }
 
   @Mutation(() => AuthDto)
+  async registerUserWithKakao(
+    @Args("kakaoUserResponse") kakaoUserResponse: KakaoUserResponseDto,
+    @Args("nickname") nickname: string,
+    @Context() context: any
+  ): Promise<AuthDto> {
+    await this.authService.registerUserWithKakao(kakaoUserResponse, nickname);
+
+    // 자동으로 카카오 로그인 사용자 로그인
+    return await this.loginUserWithKakao(kakaoUserResponse, context);
+  }
+
+  @Mutation(() => AuthDto)
   async loginUser(
     @Args("userAuthDto") userAuthDto: UserAuthDto,
     @Context() context: any
@@ -74,6 +87,17 @@ export class AuthResolver {
       accessToken: jwt.accessToken,
       user: jwt.user,
     };
+  }
+
+  @Mutation(() => AuthDto)
+  async loginUserWithKakao(
+    @Args("kakaoUserResponse") kakaoUserResponse: KakaoUserResponseDto,
+    @Context() context: any
+  ): Promise<AuthDto> {
+    const user = await this.authService.findUserWithKakao(kakaoUserResponse);
+
+    // 로그인되는 유저 정보를 기반으로 토큰 생성
+    return await this.authService.createToken(user, context);
   }
 
   @Mutation(() => AuthTokenDto)
