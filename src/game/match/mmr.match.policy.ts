@@ -18,6 +18,9 @@ export class MMRMatchPolicy implements MatchMakingPolicy {
     const userTier: UserMatchTier = this.transformMMRtoTier(
       userGameDto.getUserMatchDto().userMmr
     );
+    if (this.tierQueueMap.get(userTier)?.includes(userGameDto)) {
+      this.leaveQueue(userGameDto.getUserMatchDto().userId);
+    }
     this.tierQueueMap.get(userTier)?.push(userGameDto);
   }
 
@@ -48,7 +51,19 @@ export class MMRMatchPolicy implements MatchMakingPolicy {
     );
     const readyQueue: UserGameDto[] | undefined =
       this.tierQueueMap.get(userTier);
-    if (readyQueue !== undefined && readyQueue.length >= 2) {
+    if (readyQueue === undefined) {
+      return false;
+    }
+    for (const readyUser of readyQueue) {
+      if (
+        readyUser.getUserMatchDto().userId ===
+        userGameDto.getUserMatchDto().userId
+      ) {
+        this.leaveQueue(readyUser.getUserMatchDto().userId);
+        return false;
+      }
+    }
+    if (readyQueue.length >= 2) {
       return true;
     }
     return false;

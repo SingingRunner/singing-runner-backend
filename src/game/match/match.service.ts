@@ -16,7 +16,7 @@ export class MatchService {
     private matchMakingPolicy: MatchMakingPolicy
   ) {}
 
-  public async matchMaking(userGameDto) {
+  public async matchMaking(userGameDto): Promise<boolean> {
     const userList: Array<UserGameDto> =
       this.matchMakingPolicy.getAvailableUsers(userGameDto);
     userList.push(userGameDto);
@@ -24,6 +24,7 @@ export class MatchService {
     for (const user of userList) {
       this.gameRoomHandler.joinRoom(gameRoom, user);
     }
+    return true;
   }
 
   public async isMatchMade(
@@ -32,8 +33,7 @@ export class MatchService {
   ): Promise<boolean> {
     const userGameDto: UserGameDto = new UserGameDto(user, userMatchDto);
     if (this.matchMakingPolicy.isQueueReady(userGameDto)) {
-      await this.matchMaking(userGameDto);
-      return true;
+      return await this.matchMaking(userGameDto);
     }
     this.matchMakingPolicy.joinQueue(userGameDto);
     return false;
