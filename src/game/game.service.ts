@@ -239,21 +239,25 @@ export class GameService {
     const gameEventJson = JSON.stringify(gameEvent);
     const users = this.gameRoomHandler.findUsersInRoom(gameRoom);
 
-    let subUser1 = users[1].getUserMatchDto().userId;
-    let subUser2 = users[2].getUserMatchDto().userId;
+    let subUser1 = "none";
+    let subUser2 = "none";
     let mainCharacter = users[0].getUserMatchDto().character;
-    let subCharacter1 = users[1].getUserMatchDto().character;
-    let subCharacter2 = users[2].getUserMatchDto().character;
+    let subCharacter1 = "none";
+    let subCharacter2 = "none";
     let userKeynote = users[0].getUserMatchDto().userKeynote;
 
-    users.forEach((user, i) => {
+    users.forEach((user) => {
       if (user.getUserMatchDto().userId === userId) {
         userKeynote = user.getUserMatchDto().userKeynote;
-        subUser1 = users[(i + 1) % 3].getUserMatchDto().userId;
-        subUser2 = users[(i + 2) % 3].getUserMatchDto().userId;
         mainCharacter = user.getUserMatchDto().character;
-        subCharacter1 = users[(i + 1) % 3].getUserMatchDto().character;
-        subCharacter2 = users[(i + 2) % 3].getUserMatchDto().character;
+      } else {
+        if (subUser1 === "none") {
+          subUser1 = user.getUserMatchDto().userId;
+          subCharacter1 = user.getUserMatchDto().character;
+        } else if (subUser2 === "none") {
+          subUser2 = user.getUserMatchDto().userId;
+          subCharacter2 = user.getUserMatchDto().character;
+        }
       }
     });
 
