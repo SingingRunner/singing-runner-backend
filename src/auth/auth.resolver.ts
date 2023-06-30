@@ -7,7 +7,7 @@ import {
 import { Resolver, Query, Mutation, Args, Context } from "@nestjs/graphql";
 import { AuthService } from "./auth.service";
 import { UserRegisterDto } from "../user/dto/user.register.dto";
-import { UserLoginDto } from "../user/dto/user.login.dto";
+import { UserAuthDto } from "../user/dto/user.auth.dto";
 import { UserService } from "src/user/user.service";
 import { AuthUserDto } from "./dto/auth-user.dto";
 import { AuthDto } from "./dto/auth.dto";
@@ -36,12 +36,12 @@ export class AuthResolver {
 
     const registeredUser = await this.authService.registerUser(newUser);
 
-    const userLoginDto = new UserLoginDto();
-    userLoginDto.userEmail = registeredUser.userEmail;
-    userLoginDto.password = newUser.password;
+    const userAuthDto = new UserAuthDto();
+    userAuthDto.userEmail = registeredUser.userEmail;
+    userAuthDto.password = newUser.password;
 
     // 자동으로 로그인 되도록 함
-    return await this.loginUser(userLoginDto, context);
+    return await this.loginUser(userAuthDto, context);
   }
 
   @Query(() => Boolean)
@@ -62,11 +62,11 @@ export class AuthResolver {
 
   @Mutation(() => AuthDto)
   async loginUser(
-    @Args("userLoginDto") userLoginDto: UserLoginDto,
+    @Args("userAuthDto") userAuthDto: UserAuthDto,
     @Context() context: any
   ): Promise<AuthDto> {
     const jwt = await this.authService.validateUserAndSetCookie(
-      userLoginDto,
+      userAuthDto,
       context.res
     );
 

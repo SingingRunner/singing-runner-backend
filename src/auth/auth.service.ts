@@ -9,7 +9,7 @@ import {
 } from "@nestjs/common";
 import { UserRegisterDto } from "../user/dto/user.register.dto";
 import { UserService } from "../user/user.service";
-import { UserLoginDto } from "../user/dto/user.login.dto";
+import { UserAuthDto } from "../user/dto/user.auth.dto";
 import { User } from "../user/entity/user.entity";
 import * as bcrypt from "bcrypt";
 import { Payload } from "./security/payload.interface";
@@ -80,11 +80,11 @@ export class AuthService {
   }
 
   async validateUserAndSetCookie(
-    UserLoginDto: UserLoginDto,
+    UserAuthDto: UserAuthDto,
     res: Response
   ): Promise<{ accessToken: string; user: Omit<User, "refreshToken"> }> {
     const userFind: User | null = await this.userService.findByFields({
-      where: { userEmail: UserLoginDto.userEmail },
+      where: { userEmail: UserAuthDto.userEmail },
     });
 
     if (!userFind) {
@@ -92,7 +92,7 @@ export class AuthService {
     }
 
     const validatePassword = await bcrypt.compare(
-      UserLoginDto.password,
+      UserAuthDto.password,
       userFind.password
     );
 
