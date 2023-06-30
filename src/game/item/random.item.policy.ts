@@ -11,7 +11,7 @@ export class RandomItemPolicy implements ItemPolicy {
   ];
 
   public getItems(userId: string): Item {
-    console.log(userId);
+    userId;
     const randomIndex = Math.floor(Math.random() * this.items.length);
     return this.items[randomIndex];
   }

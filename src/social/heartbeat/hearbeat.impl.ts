@@ -19,7 +19,7 @@ export class HeartBeatimpl implements HeartBeat {
     }
     for (const userId of this.heartBeatMap.keys()) {
       const lastUpdateDate: number = this.getHeratbeatMap(userId);
-      if (lastUpdateDate < updateDate - 50000) {
+      if (lastUpdateDate < updateDate - 150000) {
         await this.updateDB(userId);
         this.deleteHeartBeatMap(userId);
       }
