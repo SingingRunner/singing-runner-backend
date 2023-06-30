@@ -17,7 +17,7 @@ export class SongService {
       this.redis.set("songList", JSON.stringify(songs), "EX", 60 * 60 * 24);
       songs.forEach((song: Song) => {
         this.redis.set(
-          "song:${song.songId}.${song.songTitle}",
+          "song:${song.songId}",
           JSON.stringify(song),
           "EX",
           60 * 60 * 24
@@ -71,9 +71,22 @@ export class SongService {
   }
 
   public async getSongById(songId: number): Promise<GameSongDto> {
-    const song: Song | null = await this.songRepository.findOne({
-      where: { songId: songId },
-    });
+    let song: Song | null = JSON.parse(
+      (await this.redis.get(`song:${songId}`)) || ""
+    );
+    if (song === null || song === undefined) {
+      song = await this.songRepository.findOne({
+        where: { songId: songId },
+      });
+      if (song !== null) {
+        this.redis.set(
+          `song:${songId}`,
+          JSON.stringify(song),
+          "EX",
+          60 * 60 * 24
+        );
+      }
+    }
 
     if (song === null) {
       throw new Error("없는 SongID 입니다.");
