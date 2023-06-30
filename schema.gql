@@ -36,11 +36,6 @@ type HostUserOutput {
   nickname: String!
 }
 
-type PollingDto {
-  hostUserDtoList: [HostUserOutput!]!
-  userNotificationList: [UserNotification!]!
-}
-
 type FriendDto {
   userId: String!
   nickname: String!
@@ -162,7 +157,6 @@ type Query {
 
 type Mutation {
   saveReplay(userVocal: String!, userId: String!): Reply!
-  longPolling(userId: String!): PollingDto!
   addFriend(addFriendDto: AddFriendDto!): String!
   removeFriend(addFriendDto: AddFriendDto!): String!
   inviteFriend(friendId: String!, hostUserDto: HostUserInput!): String!

@@ -46,6 +46,7 @@ import { RandomItemPolicy } from "./item/random.item.policy";
     },
     SocketValidator,
     GameResolver,
+    SocialModule,
   ],
   exports: [GameReplayService],
 })
