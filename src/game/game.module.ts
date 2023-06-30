@@ -15,7 +15,6 @@ import { User } from "src/user/entity/user.entity";
 import { CustomModeService } from "./custom-mode/custom.mode.service";
 import { UserModule } from "src/user/user.module";
 import { SocialModule } from "src/social/social.module";
-import { PlayItemPolicy } from "./item/playItemPolicy";
 import { SocketValidator } from "./room/socket.validator";
 import { RandomItemPolicy } from "./item/random.item.policy";
 

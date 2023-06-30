@@ -153,6 +153,11 @@ export class GameGateway
     user.emit("get_item", item);
   }
 
+  @SubscribeMessage("game_mode")
+  gameMode(@ConnectedSocket() user: Socket, @MessageBody() data) {
+    this.broadCast(user, data.userId, "game_mode", data.gameMode);
+  }
+
   @SubscribeMessage("escape_item")
   escapeFrozenData(@ConnectedSocket() user: Socket, @MessageBody() data) {
     const message = "escape_item";
