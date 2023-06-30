@@ -17,7 +17,7 @@ import { JwtService } from "@nestjs/jwt";
 import { characterEnum } from "../user/util/character.enum";
 import { Response } from "express";
 import { userActiveStatus } from "src/user/util/user.enum";
-import { HeartBeat } from "src/social/heartbeat/hearbeat";
+import { HeartBeat } from "src/social/heartbeat/heartbeat";
 
 @Injectable()
 export class AuthService {
@@ -25,7 +25,7 @@ export class AuthService {
     private userService: UserService,
     private jwtService: JwtService,
     @Inject("HeartBeat")
-    private hearBeat: HeartBeat
+    private heartBeat: HeartBeat
   ) {}
 
   async registerUser(newUser: UserRegisterDto): Promise<User> {
@@ -100,8 +100,8 @@ export class AuthService {
       throw new UnauthorizedException("비밀번호가 틀렸습니다.");
     }
 
-    //로그인 성공 시 HearbeatMap 에 저장
-    this.hearBeat.setHeartBeatMap(userFind.userId, Date.now());
+    //로그인 성공 시 HeartbeatMap 에 저장
+    this.heartBeat.setHeartBeatMap(userFind.userId, Date.now());
 
     // 로그인 성공 시, 유저 userActive를 'Connect'(1)로 변경
     await this.userService.setUserActiveStatus(
@@ -167,7 +167,7 @@ export class AuthService {
     try {
       user.refreshToken = null;
       await this.userService.setUserActiveStatus(user, userActiveStatus.LOGOUT);
-      this.hearBeat.deleteHeartBeatMap(user.userId);
+      this.heartBeat.deleteHeartBeatMap(user.userId);
       return "로그아웃 성공";
     } catch (err) {
       throw new HttpException(
