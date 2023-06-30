@@ -16,6 +16,7 @@ import { CustomModeService } from "./custom-mode/custom.mode.service";
 import { UserModule } from "src/user/user.module";
 import { SocialModule } from "src/social/social.module";
 import { PlayItemPolicy } from "./item/playItemPolicy";
+import { SocketValidator } from "./room/socket.validator";
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { PlayItemPolicy } from "./item/playItemPolicy";
       provide: "RankHandler",
       useClass: RankHandlerImpl,
     },
+    SocketValidator,
     GameResolver,
   ],
   exports: [GameReplayService],

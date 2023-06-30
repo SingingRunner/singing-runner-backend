@@ -4,7 +4,7 @@ import { HostUserDto } from "src/user/dto/host-user.dto";
 @Injectable()
 export class Invite {
   private inviteMap: Map<string, HostUserDto[]> = new Map();
-  private logger = new ConsoleLogger();
+  private logger = new ConsoleLogger(Invite.name);
 
   public inviteFriend(friendId: string, host: HostUserDto) {
     let inviteQueue = this.inviteMap.get(friendId);

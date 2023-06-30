@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { ConsoleLogger, Injectable } from "@nestjs/common";
 import { HeartBeat } from "./hearbeat";
 import { UserService } from "src/user/user.service";
 import { userActiveStatus } from "src/user/util/user.enum";
@@ -7,12 +7,13 @@ import { Cron } from "@nestjs/schedule";
 @Injectable()
 export class HeartBeatimpl implements HeartBeat {
   constructor(private userService: UserService) {}
-
+  private logger = new ConsoleLogger(HeartBeatimpl.name);
   private heartBeatMap: Map<string, number> = new Map();
 
   @Cron("* * * * *")
   async updateHeartBeatMap() {
     const updateDate: number = Date.now();
+    this.logger.debug(JSON.stringify([...this.heartBeatMap]));
     if (this.heartBeatMap.size === 0) {
       return;
     }
