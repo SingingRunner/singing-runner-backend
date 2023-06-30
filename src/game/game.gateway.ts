@@ -21,7 +21,7 @@ import { userActiveStatus } from "src/user/util/user.enum";
 import { GameReplayService } from "./replay/game.replay.service";
 import { CustomSongDto } from "./util/custom-song.dto";
 import { CustomUserInfoDto } from "./util/custom-user.info.dto";
-import { HttpException, HttpStatus } from "@nestjs/common";
+import { ConsoleLogger, HttpException, HttpStatus } from "@nestjs/common";
 /**
  * webSocket 통신을 담당하는 Handler
  */
@@ -30,7 +30,7 @@ export class GameGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
   @WebSocketServer() server: Server;
-
+  private logger = new ConsoleLogger(GameGateway.name);
   constructor(
     private matchService: MatchService,
     private gameService: GameService,
@@ -43,6 +43,7 @@ export class GameGateway
   }
 
   handleConnection(@ConnectedSocket() user: Socket) {
+    this.logger.log(`connected : ${user.id}`);
     let { userId } = user.handshake.query;
     if (userId === undefined) {
       return;
@@ -54,6 +55,7 @@ export class GameGateway
   }
 
   handleDisconnect(@ConnectedSocket() user: Socket) {
+    this.logger.log(`disconnected : ${user.id}`);
     try {
       this.matchService.updateUserConnected(user);
     } catch {
@@ -65,7 +67,6 @@ export class GameGateway
    * MatchMakingPolicy에 따라 user가 매칭되면 GameRoom에 추가 후
    * 같이 매칭된 user들(same GameRoom) 과 함께 songTitle, Singer 정보를 전송
    */
-
   @SubscribeMessage("match_making")
   async matchMakingData(@ConnectedSocket() user: Socket, @MessageBody() data) {
     try {
