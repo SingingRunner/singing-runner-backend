@@ -95,18 +95,23 @@ export class GameReplayService {
           userId: gameReplay.userId,
           character: gameReplay.userCharacter,
         });
-        characterList.push({
-          userId: gameReplay.player1Id,
-          character: gameReplay.player1Character,
-        });
-        characterList.push({
-          userId: gameReplay.player2Id,
-          character: gameReplay.player2Character,
-        });
+        if (gameReplay.player1Id !== "none") {
+          characterList.push({
+            userId: gameReplay.player1Id,
+            character: gameReplay.player1Character,
+          });
+        }
+        if (gameReplay.player2Id !== "none") {
+          characterList.push({
+            userId: gameReplay.player2Id,
+            character: gameReplay.player2Character,
+          });
+        }
         return {
           gameSong: gameSong,
           characterList: characterList,
           userVocal: gameReplay.userVocal,
+          replayKeynote: gameReplay.keynote,
         };
       }
     }
