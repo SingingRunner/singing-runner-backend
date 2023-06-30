@@ -12,6 +12,7 @@ import { ReplayWithSongInfo } from "src/game/replay/dto/replay-with-song-info.dt
 import { ReplayIsPublicResponseDto } from "src/game/replay/dto/replay-ispublic-response.dto";
 import { GqlAuthAccessGuard } from "src/auth/security/auth.guard";
 
+@UseGuards(GqlAuthAccessGuard)
 @Resolver()
 export class MyroomResolver {
   constructor(
@@ -21,7 +22,6 @@ export class MyroomResolver {
     private gameReplayService: GameReplayService
   ) {}
 
-  @UseGuards(GqlAuthAccessGuard)
   @Mutation(() => String)
   async logout(@Args("userId") userId: string): Promise<string> {
     const user = await this.userService.findUserById(userId);
@@ -35,7 +35,6 @@ export class MyroomResolver {
     }
   }
 
-  @UseGuards(GqlAuthAccessGuard)
   @Mutation(() => UserCharacterResponseDto)
   async updateCharacter(
     @Args("userId") userId: string,
@@ -51,7 +50,6 @@ export class MyroomResolver {
     };
   }
 
-  @UseGuards(GqlAuthAccessGuard)
   @Mutation(() => UserKeynoteResponseDto)
   async updateUserKeynote(
     @Args("userId") userId: string,
@@ -68,7 +66,6 @@ export class MyroomResolver {
     };
   }
 
-  @UseGuards(GqlAuthAccessGuard)
   @Query(() => [ReplayWithSongInfo])
   async getUserReplays(
     @Args("isMyReplay", { type: () => Boolean }) isMyReplay: boolean,
@@ -82,7 +79,6 @@ export class MyroomResolver {
     );
   }
 
-  @UseGuards(GqlAuthAccessGuard)
   @Mutation(() => ReplayIsPublicResponseDto)
   async updateReplayIsPublic(
     @Args("replayId", { type: () => Int }) replayId: number,

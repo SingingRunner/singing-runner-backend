@@ -7,12 +7,20 @@ import { PollingDto } from "./dto/polling.dto";
 import { NotificationDto } from "./dto/notification.dto";
 import { RequestDto } from "./dto/request-dto";
 import { SearchFriendDto } from "src/user/dto/search-freind.dto";
-import { ConsoleLogger, HttpException, HttpStatus } from "@nestjs/common";
+import {
+  ConsoleLogger,
+  HttpException,
+  HttpStatus,
+  UseGuards,
+} from "@nestjs/common";
+import { GqlAuthAccessGuard } from "src/auth/security/auth.guard";
 
+@UseGuards(GqlAuthAccessGuard)
 @Resolver()
 export class SocialResolver {
   constructor(private socialService: SocialService) {}
   private logger = new ConsoleLogger(SocialResolver.name);
+
   @Mutation(() => PollingDto)
   async longPolling(@Args("userId") userId: string) {
     if (userId.length < 10) {

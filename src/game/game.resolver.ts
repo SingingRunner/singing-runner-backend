@@ -8,6 +8,8 @@ import {
 } from "@nestjs/graphql";
 import { GameService } from "./game.service";
 import { GameReplayService } from "./replay/game.replay.service";
+import { UseGuards } from "@nestjs/common";
+import { GqlAuthAccessGuard } from "src/auth/security/auth.guard";
 
 @ObjectType()
 class Reply {
@@ -25,6 +27,7 @@ export class GameResolver {
     private gameReplayService: GameReplayService
   ) {}
 
+  @UseGuards(GqlAuthAccessGuard)
   @Mutation(() => Reply)
   async saveReplay(
     @Args({ name: "userVocal", type: () => String })
