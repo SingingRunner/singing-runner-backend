@@ -239,6 +239,11 @@ export class GameGateway
         userGame.getSocket().emit("invite", customUserList);
       }
     } catch (error) {
+      if (error.message === "full") {
+        return "full";
+      } else if (error.message === "inGame") {
+        return "inGame";
+      }
       throw new HttpException("accpet error", HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
