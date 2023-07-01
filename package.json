@@ -57,6 +57,7 @@
     "graphql-upload": "^13.0.0",
     "mysql2": "^3.3.5",
     "passport": "^0.6.0",
+    "passport-google-oauth20": "^2.0.0",
     "passport-jwt": "^4.0.1",
     "passport-kakao": "^1.0.1",
     "reflect-metadata": "^0.1.13",
