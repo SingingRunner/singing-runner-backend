@@ -18,7 +18,6 @@ import { characterEnum } from "../user/util/character.enum";
 import { Response } from "express";
 import { userActiveStatus } from "src/user/util/user.enum";
 import { HeartBeat } from "src/social/heartbeat/heartbeat";
-import { HttpService } from "@nestjs/axios";
 import { KakaoUserResponseDto } from "src/user/dto/kakao-user-response.dto";
 import { KakaoUserRegisterDto } from "src/user/dto/kakao-user-register.dto";
 
@@ -29,7 +28,6 @@ export class AuthService {
     private jwtService: JwtService,
     @Inject("HeartBeat")
     private heartBeat: HeartBeat
-    private httpService: HttpService
   ) {}
 
   async registerUser(newUser: UserRegisterDto): Promise<User> {
