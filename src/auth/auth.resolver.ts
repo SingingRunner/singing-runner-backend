@@ -15,6 +15,7 @@ import { AuthTokenDto } from "./dto/auth-token.dto";
 import { UserContext } from "./util/auth.context";
 import { GqlAuthAccessGuard } from "./security/auth.guard";
 import { KakaoUserResponseDto } from "src/user/dto/kakao-user-response.dto";
+import { GoogleUserResponseDto } from "src/user/dto/google-user-response.dto";
 
 @Resolver()
 export class AuthResolver {
@@ -74,6 +75,18 @@ export class AuthResolver {
   }
 
   @Mutation(() => AuthDto)
+  async registerUserWithGoogle(
+    @Args("googleUserDto") googleUserResponse: GoogleUserResponseDto,
+    @Args("nickname") nickname: string,
+    @Context() context: any
+  ): Promise<AuthDto> {
+    await this.authService.registerUserWithGoogle(googleUserResponse, nickname);
+
+    // 자동으로 Google 로그인 사용자 로그인
+    return await this.loginUserWithGoogle(googleUserResponse, context);
+  }
+
+  @Mutation(() => AuthDto)
   async loginUser(
     @Args("userAuthDto") userAuthDto: UserAuthDto,
     @Context() context: any
@@ -95,6 +108,17 @@ export class AuthResolver {
     @Context() context: any
   ): Promise<AuthDto> {
     const user = await this.authService.findUserWithKakao(kakaoUserResponse);
+
+    // 로그인되는 유저 정보를 기반으로 토큰 생성
+    return await this.authService.createToken(user, context);
+  }
+
+  @Mutation(() => AuthDto)
+  async loginUserWithGoogle(
+    @Args("googleUserResponse") googleUserResponse: GoogleUserResponseDto,
+    @Context() context: any
+  ): Promise<AuthDto> {
+    const user = await this.authService.findUserWithGoogle(googleUserResponse);
 
     // 로그인되는 유저 정보를 기반으로 토큰 생성
     return await this.authService.createToken(user, context);

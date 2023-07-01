@@ -21,6 +21,8 @@ import { HeartBeat } from "src/social/heartbeat/heartbeat";
 import { KakaoUserResponseDto } from "src/user/dto/kakao-user-response.dto";
 import { KakaoUserRegisterDto } from "src/user/dto/kakao-user-register.dto";
 import { Context } from "@nestjs/graphql";
+import { GoogleUserResponseDto } from "src/user/dto/google-user-response.dto";
+import { GoogleUserRegisterDto } from "src/user/dto/google-user-register.dto";
 
 @Injectable()
 export class AuthService {
@@ -79,6 +81,26 @@ export class AuthService {
       };
 
       user = await this.userService.saveWithKakao(kakaoUserRegisterDto);
+    }
+
+    return user;
+  }
+
+  async registerUserWithGoogle(
+    googleUserResponseDto: GoogleUserResponseDto,
+    nickname: string
+  ): Promise<User> {
+    let user: User | null = await this.userService.findByFields({
+      where: { userId: googleUserResponseDto.googleId },
+    });
+
+    if (!user) {
+      const googleUserRegisterDto: GoogleUserRegisterDto = {
+        userEmail: googleUserResponseDto.google_account.email,
+        nickname: nickname,
+      };
+
+      user = await this.userService.saveWithGoogle(googleUserRegisterDto);
     }
 
     return user;
@@ -171,6 +193,22 @@ export class AuthService {
     if (!user) {
       throw new UnauthorizedException(
         "카카오 계정에 해당하는 사용자를 찾을 수 없습니다."
+      );
+    }
+
+    return user;
+  }
+
+  async findUserWithGoogle(
+    googleUserResponse: GoogleUserResponseDto
+  ): Promise<User> {
+    const user: User | null = await this.userService.findByFields({
+      where: { userEmail: googleUserResponse.google_account.email },
+    });
+
+    if (!user) {
+      throw new UnauthorizedException(
+        "구글 계정에 해당하는 사용자를 찾을 수 없습니다."
       );
     }
 
