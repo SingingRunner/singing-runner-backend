@@ -9,11 +9,10 @@ import { Subject } from "rxjs";
 export class NotificationService {
   constructor(
     @InjectRepository(UserNotification)
-    private readonly userNotificationRepository: Repository<UserNotification>,
-    private notificationMap: Map<string, boolean> = new Map(),
-    private evnetsMap: Map<string, Subject<{ alarm: boolean }>> = new Map()
+    private readonly userNotificationRepository: Repository<UserNotification>
   ) {}
-
+  private evnetsMap: Map<string, Subject<{ alarm: boolean }>> = new Map();
+  private notificationMap: Map<string, boolean> = new Map();
   public async addNotification(user: User, sender: User, date: Date) {
     const notification = new UserNotification();
     notification.user = user;

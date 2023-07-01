@@ -222,6 +222,10 @@ export class SocialService {
     this.invite.inviteFriend(friendId, hostUserDto);
   }
 
+  public notificationEvensts(userId: string): Subject<{ alarm: boolean }> {
+    return this.notificationService.notificationEvents(userId);
+  }
+
   public async getNotifications(
     userId: string,
     page: number
