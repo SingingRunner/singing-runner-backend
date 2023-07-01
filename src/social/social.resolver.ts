@@ -15,53 +15,11 @@ import {
 } from "@nestjs/common";
 import { GqlAuthAccessGuard } from "src/auth/security/auth.guard";
 
-@UseGuards(GqlAuthAccessGuard)
+// @UseGuards(GqlAuthAccessGuard)
 @Resolver()
 export class SocialResolver {
   constructor(private socialService: SocialService) {}
   private logger = new ConsoleLogger(SocialResolver.name);
-
-  // @Mutation(() => PollingDto)
-  // async longPolling(@Args("userId") userId: string) {
-  //   if (userId.length < 10) {
-  //     throw new HttpException("Empty userID", HttpStatus.BAD_REQUEST);
-  //   }
-  //   // this.socialService.setHeartBeat(userId, Date.now());
-  //   await this.socialService.delay(3000);
-  //   let pollingDto: PollingDto = await this.socialService.checkWhilePolling(
-  //     userId
-  //   );
-
-  //   if (
-  //     pollingDto.hostUserDtoList.length !== 0 ||
-  //     pollingDto.userNotificationList.length !== 0
-  //   ) {
-  //     if (pollingDto.hostUserDtoList.length !== 0) {
-  //       this.logger.log(
-  //         `${pollingDto.hostUserDtoList[0].nickname}로 부터 초대`
-  //       );
-  //     }
-  //     if (pollingDto.userNotificationList.length !== 0) {
-  //       this.logger.log(
-  //         `${pollingDto.userNotificationList[0].sender.nickname} 로 부터 친구요청`
-  //       );
-  //     }
-  //     return pollingDto;
-  //   }
-
-  //   await this.socialService.delay(3000);
-
-  //   pollingDto = await this.socialService.checkWhilePolling(userId);
-  //   if (pollingDto.hostUserDtoList.length !== 0) {
-  //     this.logger.log(`${pollingDto.hostUserDtoList[0].nickname}로 부터 초대`);
-  //   }
-  //   if (pollingDto.userNotificationList.length !== 0) {
-  //     this.logger.log(
-  //       `${pollingDto.userNotificationList[0].sender.nickname} 로 부터 친구요청`
-  //     );
-  //   }
-  //   return pollingDto;
-  // }
 
   @Query(() => [RequestDto])
   async getNotification(

@@ -21,21 +21,6 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
-type UserNotification {
-  userId: String!
-  senderId: String!
-  user: User!
-  sender: User!
-  content: String!
-  receivedAt: DateTime!
-  deletedAt: DateTime!
-}
-
-type HostUserOutput {
-  userId: String!
-  nickname: String!
-}
-
 type FriendDto {
   userId: String!
   nickname: String!
@@ -138,11 +123,6 @@ type ReplayIsPublicResponseDto {
   isPublic: Int!
 }
 
-input HostUserInput {
-  userId: String!
-  nickname: String!
-}
-
 type Query {
   searchSong(keyword: String!, page: Int!, filter: String!): [GameSongDto!]!
   getNotification(userId: String!, page: Int!): [RequestDto!]!
@@ -174,6 +154,11 @@ type Mutation {
 input AddFriendDto {
   userId: String!
   friendId: String!
+}
+
+input HostUserInput {
+  userId: String!
+  nickname: String!
 }
 
 input NotificationDto {
