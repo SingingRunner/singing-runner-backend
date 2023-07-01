@@ -9,6 +9,7 @@ import { UserMatchTier } from "src/game/util/game.enum";
 import { KakaoUserRegisterDto } from "./dto/kakao-user-register.dto";
 import { characterEnum } from "./util/character.enum";
 import { v4 as uuidv4 } from "uuid";
+import { GoogleUserRegisterDto } from "./dto/google-user-register.dto";
 
 @Injectable()
 export class UserService {
@@ -134,6 +135,25 @@ export class UserService {
   ): Promise<User> {
     const user: User = this.userRepository.create({
       ...kakaoUserRegisterDto,
+      userId: uuidv4(),
+      userActive: 0,
+      userKeynote: 0,
+      userMmr: 0,
+      userPoint: 0,
+      character: characterEnum.BELUGA,
+      password: "",
+    });
+
+    await this.userRepository.save(user);
+
+    return user;
+  }
+
+  async saveWithGoogle(
+    googleUserRegisterDto: GoogleUserRegisterDto
+  ): Promise<User> {
+    const user: User = this.userRepository.create({
+      ...googleUserRegisterDto,
       userId: uuidv4(),
       userActive: 0,
       userKeynote: 0,
