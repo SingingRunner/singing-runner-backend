@@ -77,21 +77,7 @@ export class AuthService {
         nickname: nickname,
       };
 
-      const savedUserDto: KakaoUserRegisterDto =
-        await this.userService.saveWithKakao(kakaoUserRegisterDto);
-
-      user = new User();
-      user.userId = uuidv4();
-      user.userEmail = savedUserDto.userEmail;
-      user.nickname = savedUserDto.nickname;
-      user.password = "";
-      user.userActive = 0;
-      user.userKeynote = 0;
-      user.userMmr = 0;
-      user.userPoint = 0;
-      user.character = characterEnum.BELUGA;
-
-      await this.userService.save(user);
+      user = await this.userService.saveWithKakao(kakaoUserRegisterDto);
     }
 
     return user;
