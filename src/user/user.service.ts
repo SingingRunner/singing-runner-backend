@@ -6,6 +6,7 @@ import { User } from "./entity/user.entity";
 import * as bcrypt from "bcrypt";
 import { userActiveStatus } from "./util/user.enum";
 import { UserMatchTier } from "src/game/util/game.enum";
+import { KakaoUserRegisterDto } from "./dto/kakao-user-register.dto";
 
 @Injectable()
 export class UserService {
@@ -27,7 +28,9 @@ export class UserService {
   }
 
   async transformPassword(userRegister: UserRegisterDto): Promise<void> {
-    userRegister.password = await bcrypt.hash(userRegister.password, 10);
+    if (userRegister.password) {
+      userRegister.password = await bcrypt.hash(userRegister.password, 10);
+    }
     return Promise.resolve();
   }
 
@@ -122,5 +125,20 @@ export class UserService {
   ): Promise<User> {
     user.userActive = userActive;
     return await this.saveUser(user);
+  }
+
+  async saveWithKakao(
+    kakaoUserRegisterDto: KakaoUserRegisterDto
+  ): Promise<UserRegisterDto> {
+    const user: User = this.userRepository.create(kakaoUserRegisterDto);
+    await this.userRepository.save(user);
+
+    const userDto: UserRegisterDto = {
+      userEmail: user.userEmail,
+      nickname: user.nickname,
+      password: undefined,
+    };
+
+    return userDto;
   }
 }
