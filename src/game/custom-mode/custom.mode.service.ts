@@ -178,6 +178,7 @@ export class CustomModeService {
     const gameRoom: GameRoom = this.findRoomByUserId(userId);
     const gameSongDto: GameSongDto = await this.songService.getSongById(songId);
     gameRoom.setGameSongDto(gameSongDto);
+    gameRoom.setIsSetSong(true);
     return new CustomSongDto(
       gameSongDto.songId,
       gameSongDto.songTitle,
