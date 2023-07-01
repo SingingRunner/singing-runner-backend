@@ -199,6 +199,22 @@ export class AuthService {
     return user;
   }
 
+  async findUserWithGoogle(
+    googleUserResponse: GoogleUserResponseDto
+  ): Promise<User> {
+    const user: User | null = await this.userService.findByFields({
+      where: { userEmail: googleUserResponse.google_account.email },
+    });
+
+    if (!user) {
+      throw new UnauthorizedException(
+        "구글 계정에 해당하는 사용자를 찾을 수 없습니다."
+      );
+    }
+
+    return user;
+  }
+
   async createToken(
     user: User,
     context: any
