@@ -94,6 +94,12 @@ export class CustomModeService {
 
   public async acceptInvite(user: Socket, userId: string, host) {
     const gameRoom: GameRoom = this.findRoomByUserId(host.userId);
+    if (gameRoom.getRoomStatus() === "inGame") {
+      throw new Error("inGame");
+    }
+    if (this.gameRoomHandler.findUsersInRoom(gameRoom).length === 3) {
+      throw new Error("full");
+    }
     await this.joinCustomRoom(user, userId, gameRoom);
   }
 
