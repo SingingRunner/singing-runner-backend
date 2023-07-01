@@ -20,6 +20,7 @@ import { userActiveStatus } from "src/user/util/user.enum";
 import { HeartBeat } from "src/social/heartbeat/heartbeat";
 import { KakaoUserResponseDto } from "src/user/dto/kakao-user-response.dto";
 import { KakaoUserRegisterDto } from "src/user/dto/kakao-user-register.dto";
+import { Context } from "@nestjs/graphql";
 
 @Injectable()
 export class AuthService {
@@ -232,11 +233,21 @@ export class AuthService {
     return { accessToken };
   }
 
-  async logout(user: User): Promise<string> {
+  async logout(user: User, @Context() context: any): Promise<string> {
     try {
       user.refreshToken = null;
       await this.userService.setUserActiveStatus(user, userActiveStatus.LOGOUT);
       this.heartBeat.deleteHeartBeatMap(user.userId);
+
+      // refreshToken 쿠키 만료기간 과거로 변경
+      context.res.cookie("refreshToken", "", {
+        expires: new Date(0),
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+        path: "/refresh_token",
+      });
+
       return "로그아웃 성공";
     } catch (err) {
       throw new HttpException(

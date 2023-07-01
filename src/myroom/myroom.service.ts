@@ -12,14 +12,6 @@ export class MyroomService {
     private userService: UserService
   ) {}
 
-  async logout(user: User): Promise<string> {
-    try {
-      return await this.authService.logout(user);
-    } catch (err) {
-      throw new Error("로그아웃에 실패했습니다.");
-    }
-  }
-
   async updateCharacter(
     userId: string,
     character: characterEnum
