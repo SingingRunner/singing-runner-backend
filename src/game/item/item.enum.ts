@@ -4,5 +4,6 @@ export enum Item {
   MUTE = "mute",
   FROZEN = "frozen",
   CLOUD = "cloud",
+  SUPER = "super",
   NULL = "empty",
 }
