@@ -10,3 +10,9 @@ export enum UserMatchTier {
   PLATINUM = 4000,
   DIAMOND = 5000,
 }
+
+export enum GameMode {
+  RANK = 0,
+  ITEM = 1,
+  NORMAL = 2,
+}
