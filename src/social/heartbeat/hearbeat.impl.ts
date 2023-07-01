@@ -46,4 +46,8 @@ export class HeartBeatimpl implements HeartBeat {
     }
     return updateDate;
   }
+
+  public isLoginUser(userId: string): boolean {
+    return this.heartBeatMap.has(userId);
+  }
 }

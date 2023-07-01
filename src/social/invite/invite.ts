@@ -15,7 +15,10 @@ export class Invite {
       this.inviteMap.set(friendId, new Subject());
       return;
     }
-    this.getHost(friendId).next({ userId: friendId, host: host });
+    this.getHost(friendId).next({
+      userId: friendId,
+      host: host,
+    });
     this.logger.log(`${host.nickname} 가 ${friendId}를 초대했습니다.`);
   }
 

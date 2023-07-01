@@ -3,17 +3,10 @@ import { SocialService } from "./social.service";
 import { Args, Int, Mutation, Query, Resolver } from "@nestjs/graphql";
 import { FriendDto } from "src/user/dto/friend.dto";
 import { HostUserDto } from "src/user/dto/host-user.dto";
-import { PollingDto } from "./dto/polling.dto";
 import { NotificationDto } from "./dto/notification.dto";
 import { RequestDto } from "./dto/request-dto";
 import { SearchFriendDto } from "src/user/dto/search-freind.dto";
-import {
-  ConsoleLogger,
-  HttpException,
-  HttpStatus,
-  UseGuards,
-} from "@nestjs/common";
-import { GqlAuthAccessGuard } from "src/auth/security/auth.guard";
+import { ConsoleLogger } from "@nestjs/common";
 
 // @UseGuards(GqlAuthAccessGuard)
 @Resolver()

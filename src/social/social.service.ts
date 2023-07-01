@@ -21,9 +21,9 @@ export class SocialService {
     private notificationService: NotificationService,
     @InjectRepository(Social)
     private readonly socialRepository: Repository<Social>,
-    private invite: Invite,
     @Inject("HeartBeat")
-    private hearBeat: HeartBeat
+    private hearBeat: HeartBeat,
+    private invite: Invite
   ) {}
 
   public inviteEvents(
@@ -196,10 +196,16 @@ export class SocialService {
   }
 
   public async friendRequest(userId: string, senderId: string, date: Date) {
-    const user: User | null = await this.userService.findUserById(userId);
-    const sender: User | null = await this.userService.findUserById(senderId);
+    const [user, sender] = await Promise.all([
+      this.userService.findUserById(userId),
+      this.userService.findUserById(senderId),
+    ]);
+
     if (user === null || sender === null) {
       throw new Error("등록되지 않은 유저 또는 친구입니다");
+    }
+    if (!this.hearBeat.isLoginUser(userId)) {
+      this.notificationService.setNotificationMap(userId);
     }
     await this.notificationService.addNotification(user, sender, date);
   }
@@ -243,13 +249,5 @@ export class SocialService {
 
   public delay(ms: number) {
     return new Promise((resolve) => setTimeout(resolve, ms));
-  }
-
-  private async hasNotification(userId: string): Promise<boolean> {
-    return await this.notificationService.hasNotification(userId);
-  }
-
-  public setHeartBeat(userId: string, updateAt: number) {
-    this.hearBeat.setHeartBeatMap(userId, updateAt);
   }
 }

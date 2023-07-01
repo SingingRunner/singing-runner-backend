@@ -8,7 +8,7 @@ import { NotificationService } from "./notification/notification.service";
 import { UserNotification } from "./notification/user.notification.entitiy";
 import { Invite } from "./invite/invite";
 import { HeartBeatimpl } from "./heartbeat/hearbeat.impl";
-import { SocialController } from './social.controller';
+import { SocialController } from "./social.controller";
 
 @Module({
   imports: [

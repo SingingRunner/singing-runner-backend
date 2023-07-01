@@ -3,12 +3,15 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { IsNull, Repository } from "typeorm";
 import { UserNotification } from "./user.notification.entitiy";
 import { User } from "src/user/entity/user.entity";
+import { Subject } from "rxjs";
 
 @Injectable()
 export class NotificationService {
   constructor(
     @InjectRepository(UserNotification)
-    private readonly userNotificationRepository: Repository<UserNotification>
+    private readonly userNotificationRepository: Repository<UserNotification>,
+    private notificationMap: Map<string, boolean> = new Map(),
+    private evnetsMap: Map<string, Subject<{ alarm: boolean }>> = new Map()
   ) {}
 
   public async addNotification(user: User, sender: User, date: Date) {
@@ -19,7 +22,6 @@ export class NotificationService {
 
     notification.receivedAt = date;
     notification.deletedAt = null;
-
     await this.userNotificationRepository.save(notification);
   }
 
@@ -54,6 +56,9 @@ export class NotificationService {
         relations: ["sender"],
         order: { receivedAt: "DESC" },
       });
+    this.getEvent(userId).next({
+      alarm: true,
+    });
     return searchResult;
   }
 
@@ -66,5 +71,29 @@ export class NotificationService {
       return false;
     }
     return true;
+  }
+
+  public setNotificationMap(userId: string) {
+    this.notificationMap.set(userId, true);
+  }
+
+  public notificationEvents(userId: string): Subject<{ alarm: boolean }> {
+    return this.getEvent(userId);
+  }
+
+  public getEvent(userId: string): Subject<{ alarm: boolean }> {
+    let notification = this.evnetsMap.get(userId);
+    if (this.notificationMap.has(userId)) {
+      this.evnetsMap.set(userId, new Subject());
+      this.evnetsMap.get(userId)?.next({
+        alarm: true,
+      });
+      this.notificationMap.delete(userId);
+    }
+    if (notification === undefined) {
+      this.evnetsMap.set(userId, new Subject());
+      notification = this.evnetsMap.get(userId)!;
+    }
+    return notification;
   }
 }
