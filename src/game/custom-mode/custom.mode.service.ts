@@ -115,6 +115,7 @@ export class CustomModeService {
         break;
       }
     }
+    const isSetSong: boolean = gameRoom.getIsSetSong();
     for (const userGameDto of userGameDtoList) {
       const customUserInfoDto: CustomUserInfoDto = new CustomUserInfoDto();
       customUserInfoDto.character = userGameDto.getUserMatchDto().character;
@@ -126,6 +127,16 @@ export class CustomModeService {
       customUserInfoDto.hostId = hostId;
       customUserInfoDto.hostNickname = hostNickname;
       customUserInfoDto.roomId = gameRoom.getRoomId();
+      customUserInfoDto.gameMode = gameRoom.getGameMode();
+      if (isSetSong) {
+        customUserInfoDto.songId = gameRoom.getGameSongDto().songId;
+        customUserInfoDto.songTitle = gameRoom.getGameSongDto().songTitle;
+        customUserInfoDto.singer = gameRoom.getGameSongDto().singer;
+      } else {
+        customUserInfoDto.songId = 0;
+        customUserInfoDto.songTitle = "";
+        customUserInfoDto.singer = "";
+      }
       customUserList.push(customUserInfoDto);
     }
     return customUserList;
