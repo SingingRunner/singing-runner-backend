@@ -3,4 +3,5 @@ export interface HeartBeat {
   setHeartBeatMap(userId: string, updateAt: number): void;
   deleteHeartBeatMap(userId: string): void;
   updateDB(userId: string): void;
+  isLoginUser(userId: string): boolean;
 }

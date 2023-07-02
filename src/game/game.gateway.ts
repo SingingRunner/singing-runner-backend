@@ -21,21 +21,33 @@ import { userActiveStatus } from "src/user/util/user.enum";
 import { GameReplayService } from "./replay/game.replay.service";
 import { CustomSongDto } from "./util/custom-song.dto";
 import { CustomUserInfoDto } from "./util/custom-user.info.dto";
-import { ConsoleLogger, HttpException, HttpStatus } from "@nestjs/common";
+import {
+  ConsoleLogger,
+  HttpException,
+  HttpStatus,
+  Inject,
+} from "@nestjs/common";
+import { HeartBeat } from "src/social/heartbeat/heartbeat";
+
 /**
  * webSocket 통신을 담당하는 Handler
  */
+
 @WebSocketGateway()
 export class GameGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
   @WebSocketServer() server: Server;
   private logger = new ConsoleLogger(GameGateway.name);
+  private missedQueue: any[] = [];
+
   constructor(
     private matchService: MatchService,
     private gameService: GameService,
     private customModeService: CustomModeService,
-    private gameReplayService: GameReplayService
+    private gameReplayService: GameReplayService,
+    @Inject("HeartBeat")
+    private heartBeat: HeartBeat
   ) {}
 
   afterInit(server: any) {
@@ -51,7 +63,20 @@ export class GameGateway
     if (Array.isArray(userId)) {
       userId = userId.join("");
     }
+    this.heartBeat.setHeartBeatMap(userId, Date.now());
     this.matchService.updateUserSocket(userId, user);
+
+    for (const missed of this.missedQueue) {
+      if (missed.userId === userId) {
+        this.sendEventToUser(missed.userId, user, {
+          message: missed.message,
+          responseData: missed.responseData,
+        });
+      }
+    }
+    this.missedQueue = this.missedQueue.filter(
+      (missed) => missed.userId !== userId
+    );
   }
 
   handleDisconnect(@ConnectedSocket() user: Socket) {
@@ -124,6 +149,7 @@ export class GameGateway
 
   @SubscribeMessage("game_ready")
   gameReadyData(@ConnectedSocket() user: Socket, @MessageBody() data) {
+    this.heartBeat.setHeartBeatMap(data.userId, Date.now());
     try {
       if (this.gameService.isGameReady(data.userId)) {
         const userIdList: string[] = this.gameService.findUsersIdInSameRoom(
@@ -181,6 +207,7 @@ export class GameGateway
     @ConnectedSocket() user: Socket,
     @MessageBody() userScoreDto: UserScoreDto
   ) {
+    this.heartBeat.setHeartBeatMap(userScoreDto.userId, Date.now());
     try {
       if (!this.gameService.allUsersTerminated(userScoreDto)) {
         return;
@@ -212,9 +239,15 @@ export class GameGateway
           JSON.stringify(gameTerminatedList),
           user
         );
-        userGame.getSocket().emit("game_terminated", gameTerminatedList);
+        this.sendEventToUser(
+          userGame.getUserMatchDto().userId,
+          userGame.getSocket(),
+          { message: "game_terminated", responseData: gameTerminatedList }
+        );
+        // userGame.getSocket().emit("game_terminated", gameTerminatedList);
       }
     } catch (error) {
+      console.log(error);
       throw new HttpException(
         "gameterminiated",
         HttpStatus.INTERNAL_SERVER_ERROR
@@ -240,7 +273,12 @@ export class GameGateway
         for (const customUser of customUserList) {
           await this.customModeService.checkFriend(userGame, customUser);
         }
-        userGame.getSocket().emit("invite", customUserList);
+        this.sendEventToUser(
+          userGame.getUserMatchDto().userId,
+          userGame.getSocket(),
+          { message: "invite", responseData: customUserList }
+        );
+        // userGame.getSocket().emit("invite", customUserList);
       }
     } catch (error) {
       if (error.message === "full") {
@@ -322,13 +360,30 @@ export class GameGateway
       const userList: UserGameDto[] =
         this.matchService.findUsersInSameRoom(gameRoom);
       for (const user of userList) {
-        user.getSocket().emit(message, responseData);
+        this.sendEventToUser(user.getUserMatchDto().userId, user.getSocket(), {
+          message,
+          responseData,
+        });
+        // user.getSocket().emit(message, responseData);
       }
     } catch (error) {
       throw new HttpException(
         "broadCastError",
         HttpStatus.INTERNAL_SERVER_ERROR
       );
+    }
+  }
+
+  sendEventToUser(userId: string, user: Socket, event: any) {
+    if (user && user.connected) {
+      user.emit(event.message, event.responseData);
+    } else {
+      console.log("error?");
+      this.missedQueue.push({
+        userId,
+        message: event.message,
+        responseData: event.responseData,
+      });
     }
   }
 }

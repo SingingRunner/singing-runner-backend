@@ -2,11 +2,17 @@ import { PassportStrategy } from "@nestjs/passport";
 import { ExtractJwt, Strategy } from "passport-jwt";
 import { Payload } from "./payload.interface";
 import { ConfigService } from "@nestjs/config";
-import { Injectable } from "@nestjs/common";
+import { Inject, Injectable } from "@nestjs/common";
+import { HeartBeat } from "src/social/heartbeat/heartbeat";
+
 
 @Injectable()
 export class JwtAccessStrategy extends PassportStrategy(Strategy, "access") {
-  constructor(private configService: ConfigService) {
+  constructor(
+    private configService: ConfigService,
+    @Inject("HeartBeat")
+    private heartBeat: HeartBeat
+  ) {
     const secretKey = configService.get<string>("SECRET_KEY"); // 토큰 시크릿 키
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -17,6 +23,7 @@ export class JwtAccessStrategy extends PassportStrategy(Strategy, "access") {
 
   // 토큰이 유효한지 확인 -> console에 payload 출력
   validate(payload: Payload) {
+    this.heartBeat.setHeartBeatMap(payload.userId, Date.now());
     return {
       userId: payload.userId,
       userEmail: payload.userEmail,

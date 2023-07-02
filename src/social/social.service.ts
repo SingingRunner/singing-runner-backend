@@ -1,5 +1,3 @@
-import { HeartBeat } from "src/social/heartbeat/heartbeat";
-import { PollingDto } from "./dto/polling.dto";
 import { HostUserDto } from "src/user/dto/host-user.dto";
 import { Inject, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
@@ -13,6 +11,8 @@ import { Invite } from "./invite/invite";
 import { UserNotification } from "./notification/user.notification.entitiy";
 import { RequestDto } from "./dto/request-dto";
 import { SearchFriendDto } from "src/user/dto/search-freind.dto";
+import { Subject } from "rxjs";
+import { HeartBeat } from "./heartbeat/heartbeat";
 
 @Injectable()
 export class SocialService {
@@ -21,24 +21,15 @@ export class SocialService {
     private notificationService: NotificationService,
     @InjectRepository(Social)
     private readonly socialRepository: Repository<Social>,
-    private invite: Invite,
     @Inject("HeartBeat")
-    private heartBeat: HeartBeat
+    private heartBeat: HeartBeat,
+    private invite: Invite
   ) {}
 
-  public async checkWhilePolling(userId: string): Promise<PollingDto> {
-    const pollingDto: PollingDto = new PollingDto();
-    pollingDto.hostUserDtoList = [];
-    pollingDto.userNotificationList = [];
-
-    if (this.hasInvitation(userId)) {
-      pollingDto.hostUserDtoList = this.getAllInvitation(userId);
-    }
-    if (await this.hasNotification(userId)) {
-      pollingDto.userNotificationList = await this.getNotifications(userId, 1);
-    }
-
-    return pollingDto;
+  public inviteEvents(
+    userId: string
+  ): Subject<{ userId: string; host: HostUserDto }> {
+    return this.invite.inviteEvents(userId);
   }
 
   public async addFriend(userId: string, friendId: string) {
@@ -205,10 +196,16 @@ export class SocialService {
   }
 
   public async friendRequest(userId: string, senderId: string, date: Date) {
-    const user: User | null = await this.userService.findUserById(userId);
-    const sender: User | null = await this.userService.findUserById(senderId);
+    const [user, sender] = await Promise.all([
+      this.userService.findUserById(userId),
+      this.userService.findUserById(senderId),
+    ]);
+
     if (user === null || sender === null) {
       throw new Error("등록되지 않은 유저 또는 친구입니다");
+    }
+    if (!this.heartBeat.isLoginUser(userId)) {
+      this.notificationService.setNotificationMap(userId);
     }
     await this.notificationService.addNotification(user, sender, date);
   }
@@ -225,12 +222,8 @@ export class SocialService {
     this.invite.inviteFriend(friendId, hostUserDto);
   }
 
-  private hasInvitation(userId: string): boolean {
-    return this.invite.hasInvitation(userId);
-  }
-
-  private getAllInvitation(userId: string): HostUserDto[] {
-    return this.invite.getAllInvitation(userId);
+  public notificationEvensts(userId: string): Subject<{ alarm: boolean }> {
+    return this.notificationService.notificationEvents(userId);
   }
 
   public async getNotifications(
@@ -260,13 +253,5 @@ export class SocialService {
 
   public delay(ms: number) {
     return new Promise((resolve) => setTimeout(resolve, ms));
-  }
-
-  private async hasNotification(userId: string): Promise<boolean> {
-    return await this.notificationService.hasNotification(userId);
-  }
-
-  public setHeartBeat(userId: string, updateAt: number) {
-    this.heartBeat.setHeartBeatMap(userId, updateAt);
   }
 }

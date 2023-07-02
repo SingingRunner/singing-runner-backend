@@ -19,7 +19,7 @@ export class HeartBeatimpl implements HeartBeat {
     }
     for (const userId of this.heartBeatMap.keys()) {
       const lastUpdateDate: number = this.getHeratbeatMap(userId);
-      if (lastUpdateDate < updateDate - 150000) {
+      if (lastUpdateDate < updateDate - 210000) {
         await this.updateDB(userId);
         this.deleteHeartBeatMap(userId);
       }
@@ -27,6 +27,7 @@ export class HeartBeatimpl implements HeartBeat {
   }
 
   public setHeartBeatMap(userId: string, updateAt: number) {
+    console.log("setHeartbeat", userId);
     this.heartBeatMap.set(userId, updateAt);
   }
 
@@ -44,5 +45,9 @@ export class HeartBeatimpl implements HeartBeat {
       throw new Error("Heartbeat에 map 에 해당 userId가 존재하지 않습니다");
     }
     return updateDate;
+  }
+
+  public isLoginUser(userId: string): boolean {
+    return this.heartBeatMap.has(userId);
   }
 }
