@@ -45,7 +45,7 @@ export class GameGateway
     console.log(server);
   }
 
-  async handleConnection(@ConnectedSocket() user: Socket) {
+  handleConnection(@ConnectedSocket() user: Socket) {
     this.logger.log(`connected : ${user.id}`);
     let { userId } = user.handshake.query;
     if (userId === undefined) {
@@ -362,7 +362,7 @@ export class GameGateway
     }
   }
 
-  async sendEventToUser(userId: string, user: Socket, event: any) {
+  sendEventToUser(userId: string, user: Socket, event: any) {
     if (user && user.connected) {
       user.emit(event.message, event.responseData);
     } else {
