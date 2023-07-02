@@ -151,4 +151,27 @@ export class AuthResolver {
 
     return authUser;
   }
+
+  @Query(() => AuthUserDto)
+  async fetchUserByUserId(
+    @Args("userId") userId: string
+  ): Promise<AuthUserDto> {
+    const user = await this.userService.findUserById(userId);
+    if (!user) {
+      throw new UnauthorizedException("유저 정보가 없습니다.");
+    }
+    const authUser = new AuthUserDto();
+    authUser.userId = user.userId ?? "No User ID";
+    authUser.userEmail = user.userEmail ?? "No User Email";
+    authUser.nickname = user.nickname ?? "No Nickname";
+    authUser.userActive = user.userActive ?? 0;
+    authUser.userKeynote = user.userKeynote ?? 0;
+    authUser.userMmr = user.userMmr ?? 0;
+    authUser.userPoint = user.userPoint ?? 0;
+    authUser.character = user.character ?? "beluga";
+
+    authUser.userTier = this.userService.determineUserTier(authUser.userMmr);
+
+    return authUser;
+  }
 }
