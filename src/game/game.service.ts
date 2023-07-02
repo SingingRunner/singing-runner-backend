@@ -46,7 +46,6 @@ export class GameService {
     const gameSong = gameSongdto;
     return { gameSong: gameSong, characterList: characterList };
   }
-
   public isGameReady(userId: string): boolean {
     const gameRoom: GameRoom = this.findRoomByUserId(userId);
 
