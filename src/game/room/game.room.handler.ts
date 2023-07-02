@@ -42,14 +42,14 @@ export class GameRoomHandler {
   }
 
   public isGameRoomReady(gameRoom: GameRoom): boolean {
-    let conectCount = 0;
+    let connectCount = 0;
     const users: UserGameDto[] = this.findUsersInRoom(gameRoom);
     for (const user of users) {
       if (user.getConnected()) {
-        conectCount++;
+        connectCount++;
       }
     }
-    if (gameRoom.getAcceptCount() === conectCount) {
+    if (gameRoom.getAcceptCount() === connectCount) {
       return true;
     }
     return false;
