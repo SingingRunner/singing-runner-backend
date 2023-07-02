@@ -141,10 +141,7 @@ export class GameGateway
         this.broadCast(user, data.userId, message, true);
         return;
       }
-      this.gameService.updateUserActive(
-        data.UserMatchDto.userId,
-        userActiveStatus.CONNECT
-      );
+      this.gameService.updateUserActive(data.userId, userActiveStatus.CONNECT);
       this.matchService.matchDeny(data.userId);
       this.broadCast(user, data.userId, message, false);
       this.matchService.deleteRoom(data.userId);
@@ -392,7 +389,7 @@ export class GameGateway
     if (user && user.connected) {
       user.emit(event.message, event.responseData);
     } else {
-      console.log("error?");
+      // console.log("error?");
       this.missedQueue.push({
         userId,
         message: event.message,
