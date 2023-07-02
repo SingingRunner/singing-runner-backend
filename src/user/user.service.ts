@@ -6,6 +6,10 @@ import { User } from "./entity/user.entity";
 import * as bcrypt from "bcrypt";
 import { userActiveStatus } from "./util/user.enum";
 import { UserMatchTier } from "src/game/util/game.enum";
+import { KakaoUserRegisterDto } from "./dto/kakao-user-register.dto";
+import { characterEnum } from "./util/character.enum";
+import { v4 as uuidv4 } from "uuid";
+import { GoogleUserRegisterDto } from "./dto/google-user-register.dto";
 
 @Injectable()
 export class UserService {
@@ -27,7 +31,9 @@ export class UserService {
   }
 
   async transformPassword(userRegister: UserRegisterDto): Promise<void> {
-    userRegister.password = await bcrypt.hash(userRegister.password, 10);
+    if (userRegister.password) {
+      userRegister.password = await bcrypt.hash(userRegister.password, 10);
+    }
     return Promise.resolve();
   }
 
@@ -122,5 +128,43 @@ export class UserService {
   ): Promise<User> {
     user.userActive = userActive;
     return await this.saveUser(user);
+  }
+
+  async saveWithKakao(
+    kakaoUserRegisterDto: KakaoUserRegisterDto
+  ): Promise<User> {
+    const user: User = this.userRepository.create({
+      ...kakaoUserRegisterDto,
+      userId: uuidv4(),
+      userActive: 0,
+      userKeynote: 0,
+      userMmr: 0,
+      userPoint: 0,
+      character: characterEnum.BELUGA,
+      password: "",
+    });
+
+    await this.userRepository.save(user);
+
+    return user;
+  }
+
+  async saveWithGoogle(
+    googleUserRegisterDto: GoogleUserRegisterDto
+  ): Promise<User> {
+    const user: User = this.userRepository.create({
+      ...googleUserRegisterDto,
+      userId: uuidv4(),
+      userActive: 0,
+      userKeynote: 0,
+      userMmr: 0,
+      userPoint: 0,
+      character: characterEnum.BELUGA,
+      password: "",
+    });
+
+    await this.userRepository.save(user);
+
+    return user;
   }
 }

@@ -153,6 +153,15 @@ export class GameGateway
     user.emit("get_item", item);
   }
 
+  @SubscribeMessage("game_mode")
+  gameMode(@ConnectedSocket() user: Socket, @MessageBody() data) {
+    const gameRoom: GameRoom = this.matchService.findRoomByUserId(data.userId);
+    gameRoom.setGameMode(
+      gameRoom.getGameMode() === "아이템" ? "일반" : "아이템"
+    );
+    this.broadCast(user, data.userId, "game_mode", data.gameMode);
+  }
+
   @SubscribeMessage("escape_item")
   escapeFrozenData(@ConnectedSocket() user: Socket, @MessageBody() data) {
     const message = "escape_item";
@@ -234,6 +243,11 @@ export class GameGateway
         userGame.getSocket().emit("invite", customUserList);
       }
     } catch (error) {
+      if (error.message === "full") {
+        return "full";
+      } else if (error.message === "inGame") {
+        return "inGame";
+      }
       throw new HttpException("accpet error", HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }

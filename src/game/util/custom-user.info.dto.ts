@@ -7,4 +7,8 @@ export class CustomUserInfoDto {
   hostNickname: string;
   isFriend: boolean;
   roomId: number;
+  gameMode: string;
+  songId: number;
+  songTitle: string;
+  singer: string;
 }

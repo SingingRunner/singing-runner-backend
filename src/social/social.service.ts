@@ -1,4 +1,4 @@
-import { HeartBeat } from "src/social/heartbeat/hearbeat";
+import { HeartBeat } from "src/social/heartbeat/heartbeat";
 import { PollingDto } from "./dto/polling.dto";
 import { HostUserDto } from "src/user/dto/host-user.dto";
 import { Inject, Injectable } from "@nestjs/common";
@@ -23,7 +23,7 @@ export class SocialService {
     private readonly socialRepository: Repository<Social>,
     private invite: Invite,
     @Inject("HeartBeat")
-    private hearBeat: HeartBeat
+    private heartBeat: HeartBeat
   ) {}
 
   public async checkWhilePolling(userId: string): Promise<PollingDto> {
@@ -267,6 +267,6 @@ export class SocialService {
   }
 
   public setHeartBeat(userId: string, updateAt: number) {
-    this.hearBeat.setHeartBeatMap(userId, updateAt);
+    this.heartBeat.setHeartBeatMap(userId, updateAt);
   }
 }

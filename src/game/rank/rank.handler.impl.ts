@@ -8,6 +8,12 @@ import { UserGameDto } from "src/user/dto/user.game.dto";
 @Injectable()
 export class RankHandlerImpl implements RankHandler {
   private rankMap: Map<GameRoom, UserScoreDto[]> = new Map();
+  private scoreList = [
+    [30, 10, -10],
+    [30, 5, 5],
+    [15, 15, -10],
+    [10, 10, 10],
+  ];
 
   public getUserScoreDto(gameRoom: GameRoom): UserScoreDto[] {
     const userScoreList = this.rankMap.get(gameRoom);
@@ -41,12 +47,22 @@ export class RankHandlerImpl implements RankHandler {
     userScoreList?.sort((a, b) => b.score - a.score);
 
     const gameTerminatedList: GameTerminatedDto[] = [];
-    let score = 30;
-    for (const userScore of userScoreList) {
-      gameTerminatedList.push(
-        new GameTerminatedDto(userScore.userId, score, userScore.score)
-      );
-      score -= 20;
+    if (gameRoom.getGameMode() === "랭크") {
+      let tie = 0;
+      tie += userScoreList[0].score === userScoreList[1].score ? 2 : 0;
+      tie += userScoreList[1].score === userScoreList[2].score ? 1 : 0;
+      const score = this.scoreList[tie];
+      userScoreList.forEach((userScore, idx) => {
+        gameTerminatedList.push(
+          new GameTerminatedDto(userScore.userId, score[idx], userScore.score)
+        );
+      });
+    } else {
+      for (const userScore of userScoreList) {
+        gameTerminatedList.push(
+          new GameTerminatedDto(userScore.userId, 0, userScore.score)
+        );
+      }
     }
 
     if (userScoreList.length === 3) {

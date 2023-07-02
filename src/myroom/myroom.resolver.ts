@@ -1,5 +1,5 @@
 import { UseGuards } from "@nestjs/common";
-import { Args, Int, Mutation, Query, Resolver } from "@nestjs/graphql";
+import { Args, Context, Int, Mutation, Query, Resolver } from "@nestjs/graphql";
 import { UserService } from "src/user/user.service";
 import { AuthService } from "src/auth/auth.service";
 import { MyroomService } from "./myroom.service";
@@ -12,6 +12,7 @@ import { ReplayWithSongInfo } from "src/game/replay/dto/replay-with-song-info.dt
 import { ReplayIsPublicResponseDto } from "src/game/replay/dto/replay-ispublic-response.dto";
 import { GqlAuthAccessGuard } from "src/auth/security/auth.guard";
 
+@UseGuards(GqlAuthAccessGuard)
 @Resolver()
 export class MyroomResolver {
   constructor(
@@ -21,21 +22,22 @@ export class MyroomResolver {
     private gameReplayService: GameReplayService
   ) {}
 
-  @UseGuards(GqlAuthAccessGuard)
   @Mutation(() => String)
-  async logout(@Args("userId") userId: string): Promise<string> {
+  async logout(
+    @Args("userId") userId: string,
+    @Context() context: any
+  ): Promise<string> {
     const user = await this.userService.findUserById(userId);
     if (!user) {
       throw new Error("해당하는 유저가 없습니다.");
     }
     try {
-      return await this.authService.logout(user);
+      return await this.authService.logout(user, context);
     } catch (err) {
       throw new Error("로그아웃에 실패했습니다.");
     }
   }
 
-  @UseGuards(GqlAuthAccessGuard)
   @Mutation(() => UserCharacterResponseDto)
   async updateCharacter(
     @Args("userId") userId: string,
@@ -51,7 +53,6 @@ export class MyroomResolver {
     };
   }
 
-  @UseGuards(GqlAuthAccessGuard)
   @Mutation(() => UserKeynoteResponseDto)
   async updateUserKeynote(
     @Args("userId") userId: string,
@@ -68,7 +69,6 @@ export class MyroomResolver {
     };
   }
 
-  @UseGuards(GqlAuthAccessGuard)
   @Query(() => [ReplayWithSongInfo])
   async getUserReplays(
     @Args("isMyReplay", { type: () => Boolean }) isMyReplay: boolean,
@@ -82,7 +82,6 @@ export class MyroomResolver {
     );
   }
 
-  @UseGuards(GqlAuthAccessGuard)
   @Mutation(() => ReplayIsPublicResponseDto)
   async updateReplayIsPublic(
     @Args("replayId", { type: () => Int }) replayId: number,
