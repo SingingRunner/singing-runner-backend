@@ -173,13 +173,13 @@ export class AuthService {
       httpOnly: true,
       secure: true,
       sameSite: "none",
-      path: "/refresh_token",
+      path: "/",
     });
 
     const { refreshToken: _, ...userWithoutRefreshToken } = userFind;
 
     return {
-      accessToken: this.jwtService.sign(payload, { expiresIn: "60m" }),
+      accessToken: this.jwtService.sign(payload, { expiresIn: "15s" }),
       user: userWithoutRefreshToken as User,
     };
   }
@@ -238,11 +238,11 @@ export class AuthService {
       httpOnly: true,
       secure: true,
       sameSite: "none",
-      path: "/refresh_token",
+      path: "/",
     });
 
     return {
-      accessToken: this.jwtService.sign(payload, { expiresIn: "60m" }),
+      accessToken: this.jwtService.sign(payload, { expiresIn: "15s" }),
       user: user,
     };
   }
@@ -267,7 +267,7 @@ export class AuthService {
       character: user.character,
     };
 
-    const accessToken = this.jwtService.sign(payload, { expiresIn: "60m" });
+    const accessToken = this.jwtService.sign(payload, { expiresIn: "15s" });
 
     return { accessToken };
   }
@@ -284,7 +284,7 @@ export class AuthService {
         httpOnly: true,
         secure: true,
         sameSite: "none",
-        path: "/refresh_token",
+        path: "/",
       });
 
       return "로그아웃 성공";

@@ -27,7 +27,6 @@ export class HeartBeatimpl implements HeartBeat {
   }
 
   public setHeartBeatMap(userId: string, updateAt: number) {
-    console.log("setHeartbeat", userId);
     this.heartBeatMap.set(userId, updateAt);
   }
 
