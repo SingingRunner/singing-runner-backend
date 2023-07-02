@@ -179,7 +179,7 @@ export class AuthService {
     const { refreshToken: _, ...userWithoutRefreshToken } = userFind;
 
     return {
-      accessToken: this.jwtService.sign(payload, { expiresIn: "60m" }),
+      accessToken: this.jwtService.sign(payload, { expiresIn: "15s" }),
       user: userWithoutRefreshToken as User,
     };
   }
@@ -242,7 +242,7 @@ export class AuthService {
     });
 
     return {
-      accessToken: this.jwtService.sign(payload, { expiresIn: "60m" }),
+      accessToken: this.jwtService.sign(payload, { expiresIn: "15s" }),
       user: user,
     };
   }
@@ -267,7 +267,7 @@ export class AuthService {
       character: user.character,
     };
 
-    const accessToken = this.jwtService.sign(payload, { expiresIn: "60m" });
+    const accessToken = this.jwtService.sign(payload, { expiresIn: "15s" });
 
     return { accessToken };
   }

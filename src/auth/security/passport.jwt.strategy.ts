@@ -5,7 +5,6 @@ import { ConfigService } from "@nestjs/config";
 import { Inject, Injectable } from "@nestjs/common";
 import { HeartBeat } from "src/social/heartbeat/heartbeat";
 
-
 @Injectable()
 export class JwtAccessStrategy extends PassportStrategy(Strategy, "access") {
   constructor(
