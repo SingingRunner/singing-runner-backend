@@ -7,6 +7,7 @@ import { SocialResolver } from "./social.resolver";
 import { NotificationService } from "./notification/notification.service";
 import { UserNotification } from "./notification/user.notification.entitiy";
 import { Invite } from "./invite/invite";
+import { SocialController } from "./social.controller";
 import { HeartBeatimpl } from "./heartbeat/heartbeat.impl";
 
 @Module({
@@ -26,5 +27,6 @@ import { HeartBeatimpl } from "./heartbeat/heartbeat.impl";
     },
   ],
   exports: [SocialService, "HeartBeat"],
+  controllers: [SocialController],
 })
 export class SocialModule {}

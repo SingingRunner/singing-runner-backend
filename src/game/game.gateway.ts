@@ -21,11 +21,18 @@ import { userActiveStatus } from "src/user/util/user.enum";
 import { GameReplayService } from "./replay/game.replay.service";
 import { CustomSongDto } from "./util/custom-song.dto";
 import { CustomUserInfoDto } from "./util/custom-user.info.dto";
-import { ConsoleLogger, HttpException, HttpStatus } from "@nestjs/common";
+import {
+  ConsoleLogger,
+  HttpException,
+  HttpStatus,
+  Inject,
+} from "@nestjs/common";
+import { HeartBeat } from "src/social/heartbeat/heartbeat";
 
 /**
  * webSocket 통신을 담당하는 Handler
  */
+
 @WebSocketGateway()
 export class GameGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
@@ -38,7 +45,9 @@ export class GameGateway
     private matchService: MatchService,
     private gameService: GameService,
     private customModeService: CustomModeService,
-    private gameReplayService: GameReplayService
+    private gameReplayService: GameReplayService,
+    @Inject("HeartBeat")
+    private heartBeat: HeartBeat
   ) {}
 
   afterInit(server: any) {
@@ -54,6 +63,7 @@ export class GameGateway
     if (Array.isArray(userId)) {
       userId = userId.join("");
     }
+    this.heartBeat.setHeartBeatMap(userId, Date.now());
     this.matchService.updateUserSocket(userId, user);
 
     for (const missed of this.missedQueue) {
@@ -139,6 +149,7 @@ export class GameGateway
 
   @SubscribeMessage("game_ready")
   gameReadyData(@ConnectedSocket() user: Socket, @MessageBody() data) {
+    this.heartBeat.setHeartBeatMap(data.userId, Date.now());
     try {
       if (this.gameService.isGameReady(data.userId)) {
         const userIdList: string[] = this.gameService.findUsersIdInSameRoom(
@@ -196,6 +207,7 @@ export class GameGateway
     @ConnectedSocket() user: Socket,
     @MessageBody() userScoreDto: UserScoreDto
   ) {
+    this.heartBeat.setHeartBeatMap(userScoreDto.userId, Date.now());
     try {
       if (!this.gameService.allUsersTerminated(userScoreDto)) {
         return;
