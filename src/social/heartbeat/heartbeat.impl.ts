@@ -12,14 +12,14 @@ export class HeartBeatimpl implements HeartBeat {
 
   @Cron("* * * * *")
   async updateHeartBeatMap() {
-    const updateDate: number = Date.now();
+    const updatedDate: number = Date.now();
     this.logger.debug(JSON.stringify([...this.heartBeatMap]));
     if (this.heartBeatMap.size === 0) {
       return;
     }
     for (const userId of this.heartBeatMap.keys()) {
-      const lastUpdateDate: number = this.getHeratbeatMap(userId);
-      if (lastUpdateDate < updateDate - 210000) {
+      const lastUpdate: number = this.getHeratbeatMap(userId);
+      if (lastUpdate < updatedDate - 300000) {
         await this.updateDB(userId);
         this.deleteHeartBeatMap(userId);
       }
