@@ -27,7 +27,7 @@ import {
   HttpStatus,
   Inject,
 } from "@nestjs/common";
-import { HeartBeat } from "src/social/heartbeat/hearbeat";
+import { HeartBeat } from "src/social/heartbeat/heartbeat";
 
 /**
  * webSocket 통신을 담당하는 Handler
@@ -47,7 +47,7 @@ export class GameGateway
     private customModeService: CustomModeService,
     private gameReplayService: GameReplayService,
     @Inject("HeartBeat")
-    private hearBeat: HeartBeat
+    private heartBeat: HeartBeat
   ) {}
 
   afterInit(server: any) {
@@ -63,7 +63,7 @@ export class GameGateway
     if (Array.isArray(userId)) {
       userId = userId.join("");
     }
-    this.hearBeat.setHeartBeatMap(userId, Date.now());
+    this.heartBeat.setHeartBeatMap(userId, Date.now());
     this.matchService.updateUserSocket(userId, user);
 
     for (const missed of this.missedQueue) {
@@ -149,7 +149,7 @@ export class GameGateway
 
   @SubscribeMessage("game_ready")
   gameReadyData(@ConnectedSocket() user: Socket, @MessageBody() data) {
-    this.hearBeat.setHeartBeatMap(data.userId, Date.now());
+    this.heartBeat.setHeartBeatMap(data.userId, Date.now());
     try {
       if (this.gameService.isGameReady(data.userId)) {
         const userIdList: string[] = this.gameService.findUsersIdInSameRoom(
@@ -207,7 +207,7 @@ export class GameGateway
     @ConnectedSocket() user: Socket,
     @MessageBody() userScoreDto: UserScoreDto
   ) {
-    this.hearBeat.setHeartBeatMap(userScoreDto.userId, Date.now());
+    this.heartBeat.setHeartBeatMap(userScoreDto.userId, Date.now());
     try {
       if (!this.gameService.allUsersTerminated(userScoreDto)) {
         return;

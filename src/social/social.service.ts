@@ -1,4 +1,3 @@
-import { HeartBeat } from "src/social/heartbeat/hearbeat";
 import { HostUserDto } from "src/user/dto/host-user.dto";
 import { Inject, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
@@ -13,6 +12,7 @@ import { UserNotification } from "./notification/user.notification.entitiy";
 import { RequestDto } from "./dto/request-dto";
 import { SearchFriendDto } from "src/user/dto/search-freind.dto";
 import { Subject } from "rxjs";
+import { HeartBeat } from "./heartbeat/heartbeat";
 
 @Injectable()
 export class SocialService {
@@ -22,7 +22,7 @@ export class SocialService {
     @InjectRepository(Social)
     private readonly socialRepository: Repository<Social>,
     @Inject("HeartBeat")
-    private hearBeat: HeartBeat,
+    private heartBeat: HeartBeat,
     private invite: Invite
   ) {}
 
@@ -204,7 +204,7 @@ export class SocialService {
     if (user === null || sender === null) {
       throw new Error("등록되지 않은 유저 또는 친구입니다");
     }
-    if (!this.hearBeat.isLoginUser(userId)) {
+    if (!this.heartBeat.isLoginUser(userId)) {
       this.notificationService.setNotificationMap(userId);
     }
     await this.notificationService.addNotification(user, sender, date);
