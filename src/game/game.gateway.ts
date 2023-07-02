@@ -290,6 +290,7 @@ export class GameGateway
           userGame.getSocket(),
           { message: "invite", responseData: customUserList }
         );
+        return "success";
         // userGame.getSocket().emit("invite", customUserList);
       }
     } catch (error) {
