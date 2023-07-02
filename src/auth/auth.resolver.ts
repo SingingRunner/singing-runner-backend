@@ -131,10 +131,9 @@ export class AuthResolver {
     return { accessToken: accessToken.accessToken };
   }
 
-  // 권한 부여된 유저만 접근 가능하도록 하는 fetchUser
   @UseGuards(GqlAuthAccessGuard)
   @Query(() => AuthUserDto)
-  async fetchUserGuard(@Context() context: UserContext): Promise<AuthUserDto> {
+  async fetchUser(@Context() context: UserContext): Promise<AuthUserDto> {
     const authUser = new AuthUserDto();
     if (!context.req.user) {
       throw new UnauthorizedException("유저 정보가 없습니다.");
@@ -147,29 +146,6 @@ export class AuthResolver {
     authUser.userMmr = context.req.user.userMmr ?? 0;
     authUser.userPoint = context.req.user.userPoint ?? 0;
     authUser.character = context.req.user.character ?? "beluga";
-
-    authUser.userTier = this.userService.determineUserTier(authUser.userMmr);
-
-    return authUser;
-  }
-
-  // 권한 부여되지 않아도 되는 fetchUser
-  @Query(() => AuthUserDto)
-  async fetchUser(@Args("userId") userId: string): Promise<AuthUserDto> {
-    const user = await this.userService.findUserById(userId);
-    if (!user) {
-      throw new UnauthorizedException("유저 정보가 없습니다.");
-    }
-
-    const authUser = new AuthUserDto();
-    authUser.userId = user.userId ?? "No User ID";
-    authUser.userEmail = user.userEmail ?? "No User Email";
-    authUser.nickname = user.nickname ?? "No Nickname";
-    authUser.userActive = user.userActive ?? 0;
-    authUser.userKeynote = user.userKeynote ?? 0;
-    authUser.userMmr = user.userMmr ?? 0;
-    authUser.userPoint = user.userPoint ?? 0;
-    authUser.character = user.character ?? "beluga";
 
     authUser.userTier = this.userService.determineUserTier(authUser.userMmr);
 
