@@ -173,7 +173,7 @@ export class AuthService {
       httpOnly: true,
       secure: true,
       sameSite: "none",
-      path: "/refresh_token",
+      path: "/",
     });
 
     const { refreshToken: _, ...userWithoutRefreshToken } = userFind;
@@ -238,7 +238,7 @@ export class AuthService {
       httpOnly: true,
       secure: true,
       sameSite: "none",
-      path: "/refresh_token",
+      path: "/",
     });
 
     return {
@@ -284,7 +284,7 @@ export class AuthService {
         httpOnly: true,
         secure: true,
         sameSite: "none",
-        path: "/refresh_token",
+        path: "/",
       });
 
       return "로그아웃 성공";
