@@ -1,3 +1,4 @@
+import { UserMatchDto } from "src/user/dto/user.match.dto";
 import { UserMatchDto } from "./../user/dto/user.match.dto";
 import {
   ConnectedSocket,
@@ -96,8 +97,16 @@ export class GameGateway
   async matchMakingData(@ConnectedSocket() user: Socket, @MessageBody() data) {
     try {
       const message = "match_making";
+      this.gameService.updateUserActive(
+        data.UserMatchDto.userId,
+        userActiveStatus.IN_GAME
+      );
       if (!data.accept) {
         this.matchService.matchCancel(data.UserMatchDto.userId);
+        this.gameService.updateUserActive(
+          data.UserMatchDto.userId,
+          userActiveStatus.CONNECT
+        );
         return;
       }
       if (!(await this.matchService.isMatchMade(user, data.UserMatchDto))) {
@@ -132,7 +141,10 @@ export class GameGateway
         this.broadCast(user, data.userId, message, true);
         return;
       }
-
+      this.gameService.updateUserActive(
+        data.UserMatchDto.userId,
+        userActiveStatus.CONNECT
+      );
       this.matchService.matchDeny(data.userId);
       this.broadCast(user, data.userId, message, false);
       this.matchService.deleteRoom(data.userId);
