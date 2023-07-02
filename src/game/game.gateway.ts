@@ -1,4 +1,3 @@
-import { UserMatchDto } from "src/user/dto/user.match.dto";
 import { UserMatchDto } from "./../user/dto/user.match.dto";
 import {
   ConnectedSocket,
@@ -29,6 +28,7 @@ import {
   Inject,
 } from "@nestjs/common";
 import { HeartBeat } from "src/social/heartbeat/heartbeat";
+import { GameRoomStatus } from "./util/game.enum";
 
 /**
  * webSocket 통신을 담당하는 Handler
@@ -290,13 +290,13 @@ export class GameGateway
           userGame.getSocket(),
           { message: "invite", responseData: customUserList }
         );
-        // userGame.getSocket().emit("invite", customUserList);
       }
+      return { message: "success", data: customUserList };
     } catch (error) {
       if (error.message === "full") {
-        return "full";
+        return { message: "full" };
       } else if (error.message === "inGame") {
-        return "inGame";
+        return { message: "inGame" };
       }
       throw new HttpException("accpet error", HttpStatus.INTERNAL_SERVER_ERROR);
     }
@@ -343,6 +343,8 @@ export class GameGateway
 
   @SubscribeMessage("custom_start")
   startCustom(@ConnectedSocket() user: Socket, @MessageBody() data) {
+    const gameRoom: GameRoom = this.matchService.findRoomByUserId(data.userId);
+    gameRoom.setRoomStatus(GameRoomStatus.IN_GAME);
     this.broadCast(user, data.userId, "custom_start", true);
   }
 
