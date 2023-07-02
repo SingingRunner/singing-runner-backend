@@ -23,6 +23,7 @@ import { KakaoUserRegisterDto } from "src/user/dto/kakao-user-register.dto";
 import { Context } from "@nestjs/graphql";
 import { GoogleUserResponseDto } from "src/user/dto/google-user-response.dto";
 import { GoogleUserRegisterDto } from "src/user/dto/google-user-register.dto";
+import { Any, IsNull, Not } from "typeorm";
 
 @Injectable()
 export class AuthService {
@@ -132,7 +133,7 @@ export class AuthService {
       where: { userEmail: UserAuthDto.userEmail },
     });
 
-    if (!userFind) {
+    if (!userFind || !userFind.password || userFind.password === "") {
       throw new UnauthorizedException("유저를 찾을 수 없습니다.");
     }
 
