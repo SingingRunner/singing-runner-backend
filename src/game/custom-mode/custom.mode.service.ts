@@ -12,6 +12,7 @@ import { SocialService } from "src/social/social.service";
 import { User } from "src/user/entity/user.entity";
 import { CustomUserInfoDto } from "../util/custom-user.info.dto";
 import { userActiveStatus } from "src/user/util/user.enum";
+import { GameRoomStatus } from "../util/game.enum";
 
 @Injectable()
 export class CustomModeService {
@@ -103,7 +104,7 @@ export class CustomModeService {
 
   public async acceptInvite(user: Socket, userId: string, host) {
     const gameRoom: GameRoom = this.findRoomByUserId(host.userId);
-    if (gameRoom.getRoomStatus() === "inGame") {
+    if (gameRoom.getRoomStatus() === GameRoomStatus.IN_GAME) {
       throw new Error("inGame");
     }
     if (this.gameRoomHandler.findUsersInRoom(gameRoom).length === 3) {
