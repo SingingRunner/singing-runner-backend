@@ -22,8 +22,6 @@ import { GameReplayService } from "./replay/game.replay.service";
 import { CustomSongDto } from "./util/custom-song.dto";
 import { CustomUserInfoDto } from "./util/custom-user.info.dto";
 import { ConsoleLogger, HttpException, HttpStatus } from "@nestjs/common";
-import { InjectQueue } from "@nestjs/bull";
-import { Queue } from "bull";
 
 /**
  * webSocket 통신을 담당하는 Handler
@@ -34,20 +32,20 @@ export class GameGateway
 {
   @WebSocketServer() server: Server;
   private logger = new ConsoleLogger(GameGateway.name);
+  private missedQueue: any[] = [];
 
   constructor(
     private matchService: MatchService,
     private gameService: GameService,
     private customModeService: CustomModeService,
-    private gameReplayService: GameReplayService,
-    @InjectQueue("missed") private missedQueue: Queue
+    private gameReplayService: GameReplayService
   ) {}
 
   afterInit(server: any) {
     console.log(server);
   }
 
-  async handleConnection(@ConnectedSocket() user: Socket) {
+  handleConnection(@ConnectedSocket() user: Socket) {
     this.logger.log(`connected : ${user.id}`);
     let { userId } = user.handshake.query;
     if (userId === undefined) {
@@ -58,17 +56,17 @@ export class GameGateway
     }
     this.matchService.updateUserSocket(userId, user);
 
-    const jobs = await this.missedQueue.getJobs(["waiting", "active"]);
-    for (const job of jobs) {
-      const { data } = job;
-      if (data.userId === userId) {
-        this.sendEventToUser(data.userId, user, {
-          message: data.message,
-          responseData: data.responseData,
+    for (const missed of this.missedQueue) {
+      if (missed.userId === userId) {
+        this.sendEventToUser(missed.userId, user, {
+          message: missed.message,
+          responseData: missed.responseData,
         });
-        await job.remove();
       }
     }
+    this.missedQueue = this.missedQueue.filter(
+      (missed) => missed.userId !== userId
+    );
   }
 
   handleDisconnect(@ConnectedSocket() user: Socket) {
@@ -364,12 +362,16 @@ export class GameGateway
     }
   }
 
-  async sendEventToUser(userId: string, user: Socket, event: any) {
+  sendEventToUser(userId: string, user: Socket, event: any) {
     if (user && user.connected) {
       user.emit(event.message, event.responseData);
     } else {
       console.log("error?");
-      await this.missedQueue.add("missed", { userId, event });
+      this.missedQueue.push({
+        userId,
+        message: event.message,
+        responseData: event.responseData,
+      });
     }
   }
 }
