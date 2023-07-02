@@ -11,6 +11,7 @@ import { UserService } from "src/user/user.service";
 import { SocialService } from "src/social/social.service";
 import { User } from "src/user/entity/user.entity";
 import { CustomUserInfoDto } from "../util/custom-user.info.dto";
+import { userActiveStatus } from "src/user/util/user.enum";
 
 @Injectable()
 export class CustomModeService {
@@ -27,11 +28,18 @@ export class CustomModeService {
     gameRoom.setGameMode("아이템");
     this.addUserToRoom(gameRoom, userGameDto);
     this.setRoomMaster(gameRoom, userMatchDto.userId);
+    this.userService.updateUserActive(
+      userMatchDto.userId,
+      userActiveStatus.IN_GAME
+    );
   }
 
   public leaveRoom(userMatchDto: UserMatchDto) {
     const gameRoom: GameRoom = this.findRoomByUserId(userMatchDto.userId);
-
+    this.userService.updateUserActive(
+      userMatchDto.userId,
+      userActiveStatus.CONNECT
+    );
     if (this.isRoomMaster(userMatchDto, gameRoom)) {
       this.gameRoomHandler.deleteRoom(userMatchDto.userId);
       return;
@@ -101,6 +109,7 @@ export class CustomModeService {
     if (this.gameRoomHandler.findUsersInRoom(gameRoom).length === 3) {
       throw new Error("full");
     }
+    this.userService.updateUserActive(userId, userActiveStatus.IN_GAME);
     await this.joinCustomRoom(user, userId, gameRoom);
   }
 
