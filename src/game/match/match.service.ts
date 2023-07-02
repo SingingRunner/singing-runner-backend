@@ -7,7 +7,6 @@ import { GameRoomHandler } from "../room/game.room.handler";
 import { MatchMakingPolicy } from "./match.making.policy";
 import { UserMatchDto } from "src/user/dto/user.match.dto";
 import { UserGameDto } from "src/user/dto/user.game.dto";
-import { GameMode } from "../util/game.enum";
 
 @Injectable()
 export class MatchService {
@@ -22,7 +21,7 @@ export class MatchService {
       this.matchMakingPolicy.getAvailableUsers(userGameDto);
     userList.push(userGameDto);
     const gameRoom: GameRoom = await this.gameRoomHandler.createRoom();
-    gameRoom.setGameMode(GameMode.RANK);
+    gameRoom.setGameMode("랭크");
     for (const user of userList) {
       this.gameRoomHandler.joinRoom(gameRoom, user);
     }

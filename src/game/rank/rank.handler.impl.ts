@@ -4,7 +4,6 @@ import { UserScoreDto } from "./dto/user-score.dto";
 import { RankHandler } from "./rank.hanlder";
 import { GameTerminatedDto } from "./game-terminated.dto";
 import { UserGameDto } from "src/user/dto/user.game.dto";
-import { GameMode } from "../util/game.enum";
 
 @Injectable()
 export class RankHandlerImpl implements RankHandler {
@@ -48,7 +47,7 @@ export class RankHandlerImpl implements RankHandler {
     userScoreList?.sort((a, b) => b.score - a.score);
 
     const gameTerminatedList: GameTerminatedDto[] = [];
-    if (gameRoom.getGameMode() === GameMode.RANK) {
+    if (gameRoom.getGameMode() === "랭크") {
       let tie = 0;
       tie += userScoreList[0].score === userScoreList[1].score ? 2 : 0;
       tie += userScoreList[1].score === userScoreList[2].score ? 1 : 0;

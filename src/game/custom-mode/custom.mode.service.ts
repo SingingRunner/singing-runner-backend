@@ -11,7 +11,6 @@ import { UserService } from "src/user/user.service";
 import { SocialService } from "src/social/social.service";
 import { User } from "src/user/entity/user.entity";
 import { CustomUserInfoDto } from "../util/custom-user.info.dto";
-import { GameMode } from "../util/game.enum";
 
 @Injectable()
 export class CustomModeService {
@@ -25,7 +24,7 @@ export class CustomModeService {
   public async createCustomRoom(user: Socket, userMatchDto: UserMatchDto) {
     const userGameDto: UserGameDto = this.createUserGameDto(user, userMatchDto);
     const gameRoom: GameRoom = await this.createRoom();
-    gameRoom.setGameMode(GameMode.ITEM);
+    gameRoom.setGameMode("아이템");
     this.addUserToRoom(gameRoom, userGameDto);
     this.setRoomMaster(gameRoom, userMatchDto.userId);
   }

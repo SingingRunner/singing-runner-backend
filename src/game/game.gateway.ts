@@ -155,6 +155,10 @@ export class GameGateway
 
   @SubscribeMessage("game_mode")
   gameMode(@ConnectedSocket() user: Socket, @MessageBody() data) {
+    const gameRoom: GameRoom = this.matchService.findRoomByUserId(data.userId);
+    gameRoom.setGameMode(
+      gameRoom.getGameMode() === "아이템" ? "일반" : "아이템"
+    );
     this.broadCast(user, data.userId, "game_mode", data.gameMode);
   }
 
