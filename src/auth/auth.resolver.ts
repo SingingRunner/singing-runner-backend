@@ -152,6 +152,7 @@ export class AuthResolver {
     return authUser;
   }
 
+  @UseGuards(GqlAuthAccessGuard)
   @Query(() => AuthUserDto)
   async fetchUserByUserId(
     @Args("userId") userId: string
