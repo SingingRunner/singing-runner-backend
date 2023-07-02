@@ -130,8 +130,8 @@ type Query {
   searchUser(userId: String!, nickname: String!, page: Int!): [FriendDto!]!
   isEmailTaken(userEmail: String!): Boolean!
   isNicknameTaken(nickname: String!): Boolean!
-  fetchUserGuard: AuthUserDto!
-  fetchUser(userId: String!): AuthUserDto!
+  fetchUser: AuthUserDto!
+  fetchUserByUserId(userId: String!): AuthUserDto!
   getUserReplays(isMyReplay: Boolean!, pageNumber: Int!, userId: String!): [ReplayWithSongInfo!]!
 }
 
@@ -143,7 +143,11 @@ type Mutation {
   friendRequest(notificationDto: NotificationDto!): String!
   deleteNotification(notificationDto: NotificationDto!): String!
   registerUser(newUser: UserRegisterDto!): AuthDto!
-  loginUser(userLoginDto: UserLoginDto!): AuthDto!
+  registerUserWithKakao(kakaoUserResponse: KakaoUserResponseDto!, nickname: String!): AuthDto!
+  registerUserWithGoogle(googleUserDto: GoogleUserResponseDto!, nickname: String!): AuthDto!
+  loginUser(userAuthDto: UserAuthDto!): AuthDto!
+  loginUserWithKakao(kakaoUserResponse: KakaoUserResponseDto!): AuthDto!
+  loginUserWithGoogle(googleUserResponse: GoogleUserResponseDto!): AuthDto!
   refreshAccessToken: AuthTokenDto!
   logout(userId: String!): String!
   updateCharacter(userId: String!, character: String!): UserCharacterResponseDto!
@@ -168,11 +172,29 @@ input NotificationDto {
 
 input UserRegisterDto {
   userEmail: String!
-  password: String!
+  password: String
   nickname: String!
 }
 
-input UserLoginDto {
+input KakaoUserResponseDto {
+  id: String!
+  kakao_account: KakaoAccount!
+}
+
+input KakaoAccount {
+  email: String!
+}
+
+input GoogleUserResponseDto {
+  googleId: String!
+  google_account: GoogleAccount!
+}
+
+input GoogleAccount {
+  email: String!
+}
+
+input UserAuthDto {
   userEmail: String!
   password: String!
 }
