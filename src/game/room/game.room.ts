@@ -11,7 +11,7 @@ export class GameRoom {
   private songListInCustom: GameSongDto[];
   private gameEventList: string[];
   private startTime: number;
-  private gameMode: number;
+  private gameMode: string;
   private isSetSong: boolean;
 
   constructor(
@@ -97,11 +97,11 @@ export class GameRoom {
     this.isSetSong = isSetSong;
   }
 
-  public getGameMode(): number {
+  public getGameMode(): string {
     return this.gameMode;
   }
 
-  public setGameMode(gameMode: number) {
+  public setGameMode(gameMode: string) {
     this.gameMode = gameMode;
   }
 }
