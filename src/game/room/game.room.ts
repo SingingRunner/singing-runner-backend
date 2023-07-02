@@ -37,6 +37,10 @@ export class GameRoom {
     return this.gameRoomStatus;
   }
 
+  public setRoomStatus(gameRoomStatus: GameRoomStatus) {
+    this.gameRoomStatus = gameRoomStatus;
+  }
+
   public getAcceptCount(): number {
     return this.acceptCount;
   }
