@@ -28,6 +28,7 @@ import {
   Inject,
 } from "@nestjs/common";
 import { HeartBeat } from "src/social/heartbeat/heartbeat";
+import { GameRoomStatus } from "./util/game.enum";
 
 /**
  * webSocket 통신을 담당하는 Handler
@@ -343,6 +344,8 @@ export class GameGateway
 
   @SubscribeMessage("custom_start")
   startCustom(@ConnectedSocket() user: Socket, @MessageBody() data) {
+    const gameRoom: GameRoom = this.matchService.findRoomByUserId(data.userId);
+    gameRoom.setRoomStatus(GameRoomStatus.IN_GAME);
     this.broadCast(user, data.userId, "custom_start", true);
   }
 
