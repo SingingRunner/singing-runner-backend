@@ -131,7 +131,7 @@ export class GameGateway
    * 한명이라도 거절시 Room 제거, 수락한 user는 readyQueue 에 우선순위가 높게 push
    */
   @SubscribeMessage("accept")
-  matchAcceptData(@ConnectedSocket() user: Socket, @MessageBody() data) {
+  async matchAcceptData(@ConnectedSocket() user: Socket, @MessageBody() data) {
     const message = "accept";
     try {
       if (data.accept) {
@@ -141,8 +141,8 @@ export class GameGateway
         this.broadCast(user, data.userId, message, true);
         return;
       }
-      this.gameService.updateUserActive(
-        data.UserMatchDto.userId,
+      await this.gameService.updateUserActive(
+        data.userId,
         userActiveStatus.CONNECT
       );
       this.matchService.matchDeny(data.userId);
@@ -392,7 +392,7 @@ export class GameGateway
     if (user && user.connected) {
       user.emit(event.message, event.responseData);
     } else {
-      console.log("error?");
+      // console.log("error?");
       this.missedQueue.push({
         userId,
         message: event.message,
