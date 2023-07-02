@@ -7,6 +7,9 @@ export class SocketValidator {
 
   public setSocket(userId: string, socket: Socket) {
     this.socketMap.set(userId, socket);
+    socket.on("disconnect", () => {
+      this.socketMap.delete(userId);
+    });
   }
 
   public deleteSocket(userId: string) {
@@ -19,5 +22,13 @@ export class SocketValidator {
       return false;
     }
     return true;
+  }
+
+  public getSocket(userId: string): Socket {
+    const socket: Socket | undefined = this.socketMap.get(userId);
+    if (socket === undefined) {
+      throw new Error("Socket not found");
+    }
+    return socket;
   }
 }

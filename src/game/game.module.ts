@@ -17,6 +17,8 @@ import { UserModule } from "src/user/user.module";
 import { SocialModule } from "src/social/social.module";
 import { SocketValidator } from "./room/socket.validator";
 import { RandomItemPolicy } from "./item/random.item.policy";
+import { BullModule } from "@nestjs/bull";
+import { MissedQueueProcesser } from "./missed-queue/missed-queue.processer";
 
 @Module({
   imports: [
@@ -24,6 +26,9 @@ import { RandomItemPolicy } from "./item/random.item.policy";
     SongModule,
     TypeOrmModule.forFeature([GameReplayEntity, User]),
     SocialModule,
+    BullModule.registerQueue({
+      name: "missed",
+    }),
   ],
   providers: [
     GameService,
@@ -46,6 +51,7 @@ import { RandomItemPolicy } from "./item/random.item.policy";
     },
     SocketValidator,
     GameResolver,
+    MissedQueueProcesser,
   ],
   exports: [GameReplayService],
 })
