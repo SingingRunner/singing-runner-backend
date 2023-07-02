@@ -24,6 +24,7 @@ export class CustomModeService {
   public async createCustomRoom(user: Socket, userMatchDto: UserMatchDto) {
     const userGameDto: UserGameDto = this.createUserGameDto(user, userMatchDto);
     const gameRoom: GameRoom = await this.createRoom();
+    gameRoom.setGameMode("아이템");
     this.addUserToRoom(gameRoom, userGameDto);
     this.setRoomMaster(gameRoom, userMatchDto.userId);
   }
@@ -94,6 +95,12 @@ export class CustomModeService {
 
   public async acceptInvite(user: Socket, userId: string, host) {
     const gameRoom: GameRoom = this.findRoomByUserId(host.userId);
+    if (gameRoom.getRoomStatus() === "inGame") {
+      throw new Error("inGame");
+    }
+    if (this.gameRoomHandler.findUsersInRoom(gameRoom).length === 3) {
+      throw new Error("full");
+    }
     await this.joinCustomRoom(user, userId, gameRoom);
   }
 
@@ -115,6 +122,7 @@ export class CustomModeService {
         break;
       }
     }
+    const isSetSong: boolean = gameRoom.getIsSetSong();
     for (const userGameDto of userGameDtoList) {
       const customUserInfoDto: CustomUserInfoDto = new CustomUserInfoDto();
       customUserInfoDto.character = userGameDto.getUserMatchDto().character;
@@ -126,6 +134,16 @@ export class CustomModeService {
       customUserInfoDto.hostId = hostId;
       customUserInfoDto.hostNickname = hostNickname;
       customUserInfoDto.roomId = gameRoom.getRoomId();
+      customUserInfoDto.gameMode = gameRoom.getGameMode();
+      if (isSetSong) {
+        customUserInfoDto.songId = gameRoom.getGameSongDto().songId;
+        customUserInfoDto.songTitle = gameRoom.getGameSongDto().songTitle;
+        customUserInfoDto.singer = gameRoom.getGameSongDto().singer;
+      } else {
+        customUserInfoDto.songId = 0;
+        customUserInfoDto.songTitle = "";
+        customUserInfoDto.singer = "";
+      }
       customUserList.push(customUserInfoDto);
     }
     return customUserList;
@@ -159,6 +177,7 @@ export class CustomModeService {
     const gameRoom: GameRoom = this.findRoomByUserId(userId);
     const gameSongDto: GameSongDto = await this.songService.getSongById(songId);
     gameRoom.setGameSongDto(gameSongDto);
+    gameRoom.setIsSetSong(true);
     return new CustomSongDto(
       gameSongDto.songId,
       gameSongDto.songTitle,

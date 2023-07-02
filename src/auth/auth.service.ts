@@ -9,7 +9,7 @@ import {
 } from "@nestjs/common";
 import { UserRegisterDto } from "../user/dto/user.register.dto";
 import { UserService } from "../user/user.service";
-import { UserLoginDto } from "../user/dto/user.login.dto";
+import { UserAuthDto } from "../user/dto/user.auth.dto";
 import { User } from "../user/entity/user.entity";
 import * as bcrypt from "bcrypt";
 import { Payload } from "./security/payload.interface";
@@ -17,7 +17,13 @@ import { JwtService } from "@nestjs/jwt";
 import { characterEnum } from "../user/util/character.enum";
 import { Response } from "express";
 import { userActiveStatus } from "src/user/util/user.enum";
-import { HeartBeat } from "src/social/heartbeat/hearbeat";
+import { HeartBeat } from "src/social/heartbeat/heartbeat";
+import { KakaoUserResponseDto } from "src/user/dto/kakao-user-response.dto";
+import { KakaoUserRegisterDto } from "src/user/dto/kakao-user-register.dto";
+import { Context } from "@nestjs/graphql";
+import { GoogleUserResponseDto } from "src/user/dto/google-user-response.dto";
+import { GoogleUserRegisterDto } from "src/user/dto/google-user-register.dto";
+import { Any, IsNull, Not } from "typeorm";
 
 @Injectable()
 export class AuthService {
@@ -25,7 +31,7 @@ export class AuthService {
     private userService: UserService,
     private jwtService: JwtService,
     @Inject("HeartBeat")
-    private hearBeat: HeartBeat
+    private heartBeat: HeartBeat
   ) {}
 
   async registerUser(newUser: UserRegisterDto): Promise<User> {
@@ -50,13 +56,53 @@ export class AuthService {
     const user: User = new User();
     user.userId = uuidv4();
     user.userEmail = savedUserDto.userEmail;
-    user.password = savedUserDto.password;
+    user.password = savedUserDto.password || "";
     user.nickname = savedUserDto.nickname;
     user.userActive = 0;
     user.userKeynote = 0;
     user.userMmr = 0;
     user.userPoint = 0;
     user.character = characterEnum.BELUGA;
+
+    return user;
+  }
+
+  async registerUserWithKakao(
+    kakaoUserResponse: KakaoUserResponseDto,
+    nickname: string
+  ): Promise<User> {
+    let user: User | null = await this.userService.findByFields({
+      where: { userId: kakaoUserResponse.id },
+    });
+
+    if (!user) {
+      const kakaoUserRegisterDto: KakaoUserRegisterDto = {
+        userEmail: kakaoUserResponse.kakao_account.email,
+        nickname: nickname,
+      };
+
+      user = await this.userService.saveWithKakao(kakaoUserRegisterDto);
+    }
+
+    return user;
+  }
+
+  async registerUserWithGoogle(
+    googleUserResponseDto: GoogleUserResponseDto,
+    nickname: string
+  ): Promise<User> {
+    let user: User | null = await this.userService.findByFields({
+      where: { userId: googleUserResponseDto.googleId },
+    });
+
+    if (!user) {
+      const googleUserRegisterDto: GoogleUserRegisterDto = {
+        userEmail: googleUserResponseDto.google_account.email,
+        nickname: nickname,
+      };
+
+      user = await this.userService.saveWithGoogle(googleUserRegisterDto);
+    }
 
     return user;
   }
@@ -80,19 +126,19 @@ export class AuthService {
   }
 
   async validateUserAndSetCookie(
-    UserLoginDto: UserLoginDto,
+    UserAuthDto: UserAuthDto,
     res: Response
   ): Promise<{ accessToken: string; user: Omit<User, "refreshToken"> }> {
     const userFind: User | null = await this.userService.findByFields({
-      where: { userEmail: UserLoginDto.userEmail },
+      where: { userEmail: UserAuthDto.userEmail },
     });
 
-    if (!userFind) {
+    if (!userFind || !userFind.password || userFind.password === "") {
       throw new UnauthorizedException("유저를 찾을 수 없습니다.");
     }
 
     const validatePassword = await bcrypt.compare(
-      UserLoginDto.password,
+      UserAuthDto.password,
       userFind.password
     );
 
@@ -100,8 +146,8 @@ export class AuthService {
       throw new UnauthorizedException("비밀번호가 틀렸습니다.");
     }
 
-    //로그인 성공 시 HearbeatMap 에 저장
-    this.hearBeat.setHeartBeatMap(userFind.userId, Date.now());
+    //로그인 성공 시 HeartbeatMap 에 저장
+    this.heartBeat.setHeartBeatMap(userFind.userId, Date.now());
 
     // 로그인 성공 시, 유저 userActive를 'Connect'(1)로 변경
     await this.userService.setUserActiveStatus(
@@ -138,6 +184,69 @@ export class AuthService {
     };
   }
 
+  async findUserWithKakao(
+    kakaoUserResponse: KakaoUserResponseDto
+  ): Promise<User> {
+    const user: User | null = await this.userService.findByFields({
+      where: { userEmail: kakaoUserResponse.kakao_account.email },
+    });
+
+    if (!user) {
+      throw new UnauthorizedException(
+        "카카오 계정에 해당하는 사용자를 찾을 수 없습니다."
+      );
+    }
+
+    return user;
+  }
+
+  async findUserWithGoogle(
+    googleUserResponse: GoogleUserResponseDto
+  ): Promise<User> {
+    const user: User | null = await this.userService.findByFields({
+      where: { userEmail: googleUserResponse.google_account.email },
+    });
+
+    if (!user) {
+      throw new UnauthorizedException(
+        "구글 계정에 해당하는 사용자를 찾을 수 없습니다."
+      );
+    }
+
+    return user;
+  }
+
+  async createToken(
+    user: User,
+    context: any
+  ): Promise<{ accessToken: string; user: Omit<User, "refreshToken"> }> {
+    const payload: Payload = {
+      userId: user.userId,
+      userEmail: user.userEmail,
+      nickname: user.nickname,
+      userActive: user.userActive,
+      userKeynote: user.userKeynote,
+      userMmr: user.userMmr,
+      userPoint: user.userPoint,
+      character: user.character,
+    };
+
+    const refreshToken: string = this.generateRefreshToken(user.userId);
+    await this.userService.updateRefreshToken(user.userId, refreshToken);
+
+    context.res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      path: "/refresh_token",
+    });
+
+    return {
+      accessToken: this.jwtService.sign(payload, { expiresIn: "60m" }),
+      user: user,
+    };
+  }
+
   async refreshAccessToken(token: string): Promise<{ accessToken: string }> {
     const user: User | null = await this.userService.findByFields({
       where: { refreshToken: token }, // refreshToken 필드로 유저 검색
@@ -163,11 +272,21 @@ export class AuthService {
     return { accessToken };
   }
 
-  async logout(user: User): Promise<string> {
+  async logout(user: User, @Context() context: any): Promise<string> {
     try {
       user.refreshToken = null;
       await this.userService.setUserActiveStatus(user, userActiveStatus.LOGOUT);
-      this.hearBeat.deleteHeartBeatMap(user.userId);
+      this.heartBeat.deleteHeartBeatMap(user.userId);
+
+      // refreshToken 쿠키 만료기간 과거로 변경
+      context.res.cookie("refreshToken", "", {
+        expires: new Date(0),
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+        path: "/refresh_token",
+      });
+
       return "로그아웃 성공";
     } catch (err) {
       throw new HttpException(

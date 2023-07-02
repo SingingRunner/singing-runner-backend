@@ -1,5 +1,5 @@
 import { ConsoleLogger, Injectable } from "@nestjs/common";
-import { HeartBeat } from "./hearbeat";
+import { HeartBeat } from "./heartbeat";
 import { UserService } from "src/user/user.service";
 import { userActiveStatus } from "src/user/util/user.enum";
 import { Cron } from "@nestjs/schedule";

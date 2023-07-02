@@ -11,6 +11,8 @@ export class GameRoom {
   private songListInCustom: GameSongDto[];
   private gameEventList: string[];
   private startTime: number;
+  private gameMode: string;
+  private isSetSong: boolean;
 
   constructor(
     roomId: number,
@@ -85,5 +87,21 @@ export class GameRoom {
 
   public getGameEvent(): string[] {
     return this.gameEventList;
+  }
+
+  public getIsSetSong(): boolean {
+    return this.isSetSong;
+  }
+
+  public setIsSetSong(isSetSong: boolean) {
+    this.isSetSong = isSetSong;
+  }
+
+  public getGameMode(): string {
+    return this.gameMode;
+  }
+
+  public setGameMode(gameMode: string) {
+    this.gameMode = gameMode;
   }
 }

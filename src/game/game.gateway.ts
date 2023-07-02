@@ -39,6 +39,8 @@ export class GameGateway
 {
   @WebSocketServer() server: Server;
   private logger = new ConsoleLogger(GameGateway.name);
+  private missedQueue: any[] = [];
+
   constructor(
     private matchService: MatchService,
     private gameService: GameService,
@@ -63,6 +65,18 @@ export class GameGateway
     }
     this.hearBeat.setHeartBeatMap(userId, Date.now());
     this.matchService.updateUserSocket(userId, user);
+
+    for (const missed of this.missedQueue) {
+      if (missed.userId === userId) {
+        this.sendEventToUser(missed.userId, user, {
+          message: missed.message,
+          responseData: missed.responseData,
+        });
+      }
+    }
+    this.missedQueue = this.missedQueue.filter(
+      (missed) => missed.userId !== userId
+    );
   }
 
   handleDisconnect(@ConnectedSocket() user: Socket) {
@@ -167,6 +181,10 @@ export class GameGateway
 
   @SubscribeMessage("game_mode")
   gameMode(@ConnectedSocket() user: Socket, @MessageBody() data) {
+    const gameRoom: GameRoom = this.matchService.findRoomByUserId(data.userId);
+    gameRoom.setGameMode(
+      gameRoom.getGameMode() === "아이템" ? "일반" : "아이템"
+    );
     this.broadCast(user, data.userId, "game_mode", data.gameMode);
   }
 
@@ -221,9 +239,15 @@ export class GameGateway
           JSON.stringify(gameTerminatedList),
           user
         );
-        userGame.getSocket().emit("game_terminated", gameTerminatedList);
+        this.sendEventToUser(
+          userGame.getUserMatchDto().userId,
+          userGame.getSocket(),
+          { message: "game_terminated", responseData: gameTerminatedList }
+        );
+        // userGame.getSocket().emit("game_terminated", gameTerminatedList);
       }
     } catch (error) {
+      console.log(error);
       throw new HttpException(
         "gameterminiated",
         HttpStatus.INTERNAL_SERVER_ERROR
@@ -249,9 +273,19 @@ export class GameGateway
         for (const customUser of customUserList) {
           await this.customModeService.checkFriend(userGame, customUser);
         }
-        userGame.getSocket().emit("invite", customUserList);
+        this.sendEventToUser(
+          userGame.getUserMatchDto().userId,
+          userGame.getSocket(),
+          { message: "invite", responseData: customUserList }
+        );
+        // userGame.getSocket().emit("invite", customUserList);
       }
     } catch (error) {
+      if (error.message === "full") {
+        return "full";
+      } else if (error.message === "inGame") {
+        return "inGame";
+      }
       throw new HttpException("accpet error", HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -326,13 +360,30 @@ export class GameGateway
       const userList: UserGameDto[] =
         this.matchService.findUsersInSameRoom(gameRoom);
       for (const user of userList) {
-        user.getSocket().emit(message, responseData);
+        this.sendEventToUser(user.getUserMatchDto().userId, user.getSocket(), {
+          message,
+          responseData,
+        });
+        // user.getSocket().emit(message, responseData);
       }
     } catch (error) {
       throw new HttpException(
         "broadCastError",
         HttpStatus.INTERNAL_SERVER_ERROR
       );
+    }
+  }
+
+  sendEventToUser(userId: string, user: Socket, event: any) {
+    if (user && user.connected) {
+      user.emit(event.message, event.responseData);
+    } else {
+      console.log("error?");
+      this.missedQueue.push({
+        userId,
+        message: event.message,
+        responseData: event.responseData,
+      });
     }
   }
 }

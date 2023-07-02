@@ -8,6 +8,7 @@ export class RandomItemPolicy implements ItemPolicy {
     Item.FROZEN,
     Item.KEY_DOWN,
     Item.CLOUD,
+    Item.SUPER,
   ];
 
   public getItems(userId: string): Item {
