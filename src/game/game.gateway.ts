@@ -290,14 +290,13 @@ export class GameGateway
           userGame.getSocket(),
           { message: "invite", responseData: customUserList }
         );
-        return "success";
-        // userGame.getSocket().emit("invite", customUserList);
       }
+      return { message: "success", data: customUserList };
     } catch (error) {
       if (error.message === "full") {
-        return "full";
+        return { message: "full" };
       } else if (error.message === "inGame") {
-        return "inGame";
+        return { message: "inGame" };
       }
       throw new HttpException("accpet error", HttpStatus.INTERNAL_SERVER_ERROR);
     }
