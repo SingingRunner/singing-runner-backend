@@ -4,7 +4,6 @@ import { IsNull, Repository } from "typeorm";
 import { UserNotification } from "./user.notification.entitiy";
 import { User } from "src/user/entity/user.entity";
 import { Subject } from "rxjs";
-import { Interval } from "@nestjs/schedule";
 
 @Injectable()
 export class NotificationService {
@@ -96,5 +95,9 @@ export class NotificationService {
       notification = this.eventsMap.get(userId)!;
     }
     return notification;
+  }
+
+  public deleteEventsMap(userId: string) {
+    this.eventsMap.delete(userId);
   }
 }
