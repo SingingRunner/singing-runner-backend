@@ -85,12 +85,6 @@ export class UserService {
     if (user === null) {
       throw new Error("게임룸에 등록되지 않은 유저가 있습니다.");
     }
-    if (
-      user.userActive === userActiveStatus.IN_GAME &&
-      userActive === userActiveStatus.LOGOUT
-    ) {
-      return;
-    }
     user.userActive = userActive;
     this.update(user);
   }
