@@ -1,17 +1,29 @@
+import { NotificationService } from "./../notification/notification.service";
 import { ConsoleLogger, Injectable } from "@nestjs/common";
 import { HeartBeat } from "./heartbeat";
 import { UserService } from "src/user/user.service";
 import { userActiveStatus } from "src/user/util/user.enum";
-import { Cron } from "@nestjs/schedule";
+import { Interval } from "@nestjs/schedule";
 
 @Injectable()
 export class HeartBeatimpl implements HeartBeat {
-  constructor(private userService: UserService) {}
+  constructor(
+    private userService: UserService,
+    private notificationService: NotificationService
+  ) {}
   private logger = new ConsoleLogger(HeartBeatimpl.name);
   private heartBeatMap: Map<string, number> = new Map();
 
-  @Cron("* * * * *")
+  @Interval(200000)
   async updateHeartBeatMap() {
+    const { rss, heapTotal, heapUsed, external } = process.memoryUsage();
+    // console.log("Memory usage: ", { rss, heapTotal, heapUsed, external });
+    console.log("Memory usage in hearbeat: ", {
+      rss: this.formatBytes(rss),
+      heapTotal: this.formatBytes(heapTotal),
+      heapUsed: this.formatBytes(heapUsed),
+      external: this.formatBytes(external),
+    });
     const updatedDate: number = Date.now();
     this.logger.debug(JSON.stringify([...this.heartBeatMap]));
     if (this.heartBeatMap.size === 0) {
@@ -22,8 +34,12 @@ export class HeartBeatimpl implements HeartBeat {
       if (lastUpdate < updatedDate - 300000) {
         await this.updateDB(userId);
         this.deleteHeartBeatMap(userId);
+        this.notificationService.deleteEventsMap(userId);
       }
     }
+  }
+  public formatBytes(bytes) {
+    return (bytes / (1024 * 1024)).toFixed(2) + " MB";
   }
 
   public setHeartBeatMap(userId: string, updateAt: number) {
