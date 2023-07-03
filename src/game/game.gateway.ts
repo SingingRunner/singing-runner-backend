@@ -88,6 +88,15 @@ export class GameGateway
     this.matchService.updateUserSocket(userId, user);
   }
 
+  handleDisconnect(@ConnectedSocket() user: Socket) {
+    this.logger.log(`disconnected : ${user.id}`);
+    try {
+      this.matchService.updateUserConnected(user);
+    } catch {
+      return;
+    }
+  }
+
   /**
    * MatchMakingPolicy에 따라 user가 매칭되면 GameRoom에 추가 후
    * 같이 매칭된 user들(same GameRoom) 과 함께 songTitle, Singer 정보를 전송
