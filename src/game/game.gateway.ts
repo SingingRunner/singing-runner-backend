@@ -57,6 +57,7 @@ export class GameGateway
 
   handleConnection(@ConnectedSocket() user: Socket) {
     this.logger.log(`connected : ${user.id}`);
+
     let { userId } = user.handshake.query;
     if (userId === undefined) {
       return;
@@ -64,29 +65,27 @@ export class GameGateway
     if (Array.isArray(userId)) {
       userId = userId.join("");
     }
+
+    user.on("reconnect", () => {
+      if (userId === undefined) {
+        return;
+      }
+      this.matchService.updateUserSocket(userId as string, user);
+      for (const missed of this.missedQueue) {
+        if (missed.userId === userId) {
+          this.sendEventToUser(missed.userId, user, {
+            message: missed.message,
+            responseData: missed.responseData,
+          });
+        }
+      }
+      this.missedQueue = this.missedQueue.filter(
+        (missed) => missed.userId !== userId
+      );
+    });
+
     this.heartBeat.setHeartBeatMap(userId, Date.now());
     this.matchService.updateUserSocket(userId, user);
-
-    for (const missed of this.missedQueue) {
-      if (missed.userId === userId) {
-        this.sendEventToUser(missed.userId, user, {
-          message: missed.message,
-          responseData: missed.responseData,
-        });
-      }
-    }
-    this.missedQueue = this.missedQueue.filter(
-      (missed) => missed.userId !== userId
-    );
-  }
-
-  handleDisconnect(@ConnectedSocket() user: Socket) {
-    this.logger.log(`disconnected : ${user.id}`);
-    try {
-      this.matchService.updateUserConnected(user);
-    } catch {
-      return;
-    }
   }
 
   /**
