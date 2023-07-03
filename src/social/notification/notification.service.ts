@@ -4,6 +4,7 @@ import { IsNull, Repository } from "typeorm";
 import { UserNotification } from "./user.notification.entitiy";
 import { User } from "src/user/entity/user.entity";
 import { Subject } from "rxjs";
+import { Interval } from "@nestjs/schedule";
 
 @Injectable()
 export class NotificationService {
@@ -11,8 +12,9 @@ export class NotificationService {
     @InjectRepository(UserNotification)
     private readonly userNotificationRepository: Repository<UserNotification>
   ) {}
-  private evnetsMap: Map<string, Subject<{ alarm: boolean }>> = new Map();
+  private eventsMap: Map<string, Subject<{ alarm: boolean }>> = new Map();
   private notificationMap: Map<string, boolean> = new Map();
+
   public async addNotification(user: User, sender: User, date: Date) {
     const notification = new UserNotification();
     notification.user = user;
@@ -81,17 +83,17 @@ export class NotificationService {
   }
 
   public getEvent(userId: string): Subject<{ alarm: boolean }> {
-    let notification = this.evnetsMap.get(userId);
+    let notification = this.eventsMap.get(userId);
     if (this.notificationMap.has(userId)) {
-      this.evnetsMap.set(userId, new Subject());
-      this.evnetsMap.get(userId)?.next({
+      this.eventsMap.set(userId, new Subject());
+      this.eventsMap.get(userId)?.next({
         alarm: true,
       });
       this.notificationMap.delete(userId);
     }
     if (notification === undefined) {
-      this.evnetsMap.set(userId, new Subject());
-      notification = this.evnetsMap.get(userId)!;
+      this.eventsMap.set(userId, new Subject());
+      notification = this.eventsMap.get(userId)!;
     }
     return notification;
   }
