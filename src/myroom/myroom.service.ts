@@ -1,5 +1,4 @@
 import { Injectable } from "@nestjs/common";
-import { AuthService } from "src/auth/auth.service";
 import { User } from "src/user/entity/user.entity";
 import { UserService } from "src/user/user.service";
 import { characterEnum } from "src/user/util/character.enum";
@@ -7,10 +6,7 @@ import { userKeynoteStatus } from "src/user/util/user.enum";
 
 @Injectable()
 export class MyroomService {
-  constructor(
-    private authService: AuthService,
-    private userService: UserService
-  ) {}
+  constructor(private userService: UserService) {}
 
   async updateCharacter(
     userId: string,
