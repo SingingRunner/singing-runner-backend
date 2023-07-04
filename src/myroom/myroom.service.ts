@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { User } from "src/user/entity/user.entity";
 import { UserService } from "src/user/user.service";
 import { characterEnum } from "src/user/util/character.enum";
-import { userKeynoteStatus } from "src/user/util/user.enum";
+import { UserKeynoteStatus } from "src/user/util/user.enum";
 
 @Injectable()
 export class MyroomService {
@@ -22,7 +22,7 @@ export class MyroomService {
 
   async updateUserKeynote(
     userId: string,
-    keynote: userKeynoteStatus
+    keynote: UserKeynoteStatus
   ): Promise<User> {
     const user: User | null = await this.userService.findUserById(userId);
     if (!user) {

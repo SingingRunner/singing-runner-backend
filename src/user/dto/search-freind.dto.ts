@@ -1,5 +1,5 @@
 import { Field, Int, ObjectType } from "@nestjs/graphql";
-import { userActiveStatus } from "../util/user.enum";
+import { UserActiveStatus } from "../util/user.enum";
 import { IsNotEmpty } from "@nestjs/class-validator";
 
 @ObjectType()
@@ -22,7 +22,7 @@ export class SearchFriendDto {
 
   @IsNotEmpty()
   @Field(() => Int)
-  userActive: userActiveStatus;
+  userActive: UserActiveStatus;
 
   @IsNotEmpty()
   @Field(() => String)

@@ -2,7 +2,7 @@ import { NotificationService } from "./../notification/notification.service";
 import { ConsoleLogger, Injectable } from "@nestjs/common";
 import { HeartBeat } from "./heartbeat";
 import { UserService } from "src/user/user.service";
-import { userActiveStatus } from "src/user/util/user.enum";
+import { UserActiveStatus } from "src/user/util/user.enum";
 import { Interval } from "@nestjs/schedule";
 
 @Injectable()
@@ -51,7 +51,7 @@ export class HeartBeatimpl implements HeartBeat {
   }
 
   public async updateDB(userId: string) {
-    await this.userService.updateUserActive(userId, userActiveStatus.LOGOUT);
+    await this.userService.updateUserActive(userId, UserActiveStatus.LOGOUT);
   }
 
   private getHeratbeatMap(userId: string) {

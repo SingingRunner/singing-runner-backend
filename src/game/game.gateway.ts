@@ -1,3 +1,4 @@
+import { AcceptDataDto } from "./match/dto/accept-data.dto";
 import { UserMatchDto } from "./../user/dto/user.match.dto";
 import {
   ConnectedSocket,
@@ -17,7 +18,7 @@ import { UserGameDto } from "src/user/dto/user.game.dto";
 import { UserScoreDto } from "./rank/dto/user-score.dto";
 import { GameTerminatedDto } from "./rank/game-terminated.dto";
 import { CustomModeService } from "./custom-mode/custom.mode.service";
-import { userActiveStatus } from "src/user/util/user.enum";
+import { UserActiveStatus } from "src/user/util/user.enum";
 import { GameReplayService } from "./replay/game.replay.service";
 import { CustomSongDto } from "./util/custom-song.dto";
 import { CustomUserInfoDto } from "./util/custom-user.info.dto";
@@ -28,7 +29,8 @@ import {
   Inject,
 } from "@nestjs/common";
 import { HeartBeat } from "src/social/heartbeat/heartbeat";
-import { GameRoomStatus } from "./util/game.enum";
+import { GameRoomStatus, Message } from "./util/game.enum";
+import { MatchInfoDto } from "./match/dto/match-info.dto";
 
 /**
  * webSocket 통신을 담당하는 Handler
@@ -95,70 +97,54 @@ export class GameGateway
    * MatchMakingPolicy에 따라 user가 매칭되면 GameRoom에 추가 후
    * 같이 매칭된 user들(same GameRoom) 과 함께 songTitle, Singer 정보를 전송
    */
-  @SubscribeMessage("match_making")
-  async matchMakingData(@ConnectedSocket() user: Socket, @MessageBody() data) {
-    try {
-      const message = "match_making";
-      this.gameService.updateUserActive(
-        data.UserMatchDto.userId,
-        userActiveStatus.IN_GAME
-      );
-      if (!data.accept) {
-        this.matchService.matchCancel(data.UserMatchDto.userId);
-        this.gameService.updateUserActive(
-          data.UserMatchDto.userId,
-          userActiveStatus.CONNECT
-        );
-        return;
-      }
-      if (!(await this.matchService.isMatchMade(user, data.UserMatchDto))) {
-        return;
-      }
-      const gameRoom: GameRoom = this.matchService.findRoomByUserId(
-        data.UserMatchDto.userId
-      );
-      const responseData = this.matchService.getSongInfo(gameRoom);
-      this.broadCast(user, data.UserMatchDto.userId, message, responseData);
-      return;
-    } catch (error) {
-      throw new HttpException(
-        "matchmaking Error",
-        HttpStatus.INTERNAL_SERVER_ERROR
-      );
+  @SubscribeMessage(Message.MATCH_MAKING)
+  async matchMakingData(
+    @ConnectedSocket() user: Socket,
+    @MessageBody() matchInfoDto: MatchInfoDto
+  ) {
+    if (!(await this.matchService.handleMatchRequest(user, matchInfoDto))) {
+      return Message.MATCH_MAKING;
     }
+
+    this.broadCast(
+      user,
+      matchInfoDto.UserMatchDto.userId,
+      Message.MATCH_MAKING,
+      this.matchService.getSongInfo(matchInfoDto.UserMatchDto.userId)
+    );
+    return Message.MATCH_MAKING;
   }
 
   /**
    * 같은 Room user가 전부 accpet시 게임시작
    * 한명이라도 거절시 Room 제거, 수락한 user는 readyQueue 에 우선순위가 높게 push
    */
-  @SubscribeMessage("accept")
-  matchAcceptData(@ConnectedSocket() user: Socket, @MessageBody() data) {
-    const message = "accept";
-    try {
-      if (data.accept) {
-        if (!this.matchService.acceptAllUsers(data.userId)) {
-          return;
-        }
-        this.broadCast(user, data.userId, message, true);
-        return;
-      }
-      this.gameService.updateUserActive(data.userId, userActiveStatus.CONNECT);
-      this.matchService.matchDeny(data.userId);
-      this.broadCast(user, data.userId, message, false);
-      this.matchService.deleteRoom(data.userId);
-    } catch (error) {
-      throw new HttpException("accept Error", HttpStatus.INTERNAL_SERVER_ERROR);
+  @SubscribeMessage(Message.ACCEPT)
+  matchAcceptData(
+    @ConnectedSocket() user: Socket,
+    @MessageBody() acceptDataDto: AcceptDataDto
+  ) {
+    if (!acceptDataDto.accept) {
+      this.matchService.matchDeny(acceptDataDto.userId);
+      this.broadCast(user, acceptDataDto.userId, Message.ACCEPT, false);
+      this.matchService.deleteRoom(acceptDataDto.userId);
     }
+
+    if (this.matchService.acceptAllUsers(acceptDataDto.userId)) {
+      this.broadCast(user, acceptDataDto.userId, Message.ACCEPT, true);
+      return Message.ACCEPT;
+    }
+
+    return Message.ACCEPT;
   }
 
-  @SubscribeMessage("loading")
+  @SubscribeMessage(Message.LOADING)
   loadSongData(@ConnectedSocket() user: Socket, @MessageBody() data) {
     const loadData = this.gameService.loadData(data.userId);
-    user.emit("loading", loadData);
+    user.emit(Message.LOADING, loadData);
   }
 
-  @SubscribeMessage("game_ready")
+  @SubscribeMessage(Message.GAME_READY)
   gameReadyData(@ConnectedSocket() user: Socket, @MessageBody() data) {
     this.heartBeat.setHeartBeatMap(data.userId, Date.now());
     try {
@@ -167,9 +153,9 @@ export class GameGateway
           data.userId
         );
         for (const userId of userIdList) {
-          this.gameService.updateUserActive(userId, userActiveStatus.IN_GAME);
+          this.gameService.updateUserActive(userId, UserActiveStatus.IN_GAME);
         }
-        this.broadCast(user, data.userId, "game_ready", userIdList);
+        this.broadCast(user, data.userId, Message.GAME_READY, userIdList);
       }
     } catch (error) {
       throw new HttpException(
@@ -179,41 +165,40 @@ export class GameGateway
     }
   }
 
-  @SubscribeMessage("use_item")
+  @SubscribeMessage(Message.USE_ITEM)
   useItemData(@ConnectedSocket() user: Socket, @MessageBody() data) {
-    this.broadCast(user, data.userId, "use_item", data);
+    this.broadCast(user, data.userId, Message.USE_ITEM, data);
   }
 
-  @SubscribeMessage("get_item")
+  @SubscribeMessage(Message.GET_ITEM)
   getItemData(@ConnectedSocket() user: Socket, @MessageBody() userId: string) {
     const item = this.gameService.getItem(userId);
-    user.emit("get_item", item);
+    user.emit(Message.GET_ITEM, item);
   }
 
-  @SubscribeMessage("game_mode")
+  @SubscribeMessage(Message.GAME_MODE)
   gameMode(@ConnectedSocket() user: Socket, @MessageBody() data) {
     const gameRoom: GameRoom = this.matchService.findRoomByUserId(data.userId);
     gameRoom.setGameMode(
       gameRoom.getGameMode() === "아이템" ? "일반" : "아이템"
     );
-    this.broadCast(user, data.userId, "game_mode", data.gameMode);
+    this.broadCast(user, data.userId, Message.GAME_MODE, data.gameMode);
   }
 
-  @SubscribeMessage("escape_item")
+  @SubscribeMessage(Message.ESCAPE_ITEM)
   escapeFrozenData(@ConnectedSocket() user: Socket, @MessageBody() data) {
-    const message = "escape_item";
-    this.broadCast(user, data.userId, message, data);
+    this.broadCast(user, data.userId, Message.ESCAPE_ITEM, data);
   }
 
-  @SubscribeMessage("score")
+  @SubscribeMessage(Message.SCORE)
   scoreData(
     @ConnectedSocket() user: Socket,
     @MessageBody() userScoreDto: UserScoreDto
   ) {
-    this.broadCast(user, userScoreDto.userId, "score", userScoreDto);
+    this.broadCast(user, userScoreDto.userId, Message.SCORE, userScoreDto);
   }
 
-  @SubscribeMessage("game_terminated")
+  @SubscribeMessage(Message.GAME_TERMINATED)
   async gameTerminated(
     @ConnectedSocket() user: Socket,
     @MessageBody() userScoreDto: UserScoreDto
@@ -239,23 +224,22 @@ export class GameGateway
       for (const userGame of userList) {
         await this.gameService.updateUserActive(
           userGame.getUserMatchDto().userId,
-          userActiveStatus.CONNECT
+          UserActiveStatus.CONNECT
         );
         for (const gameTerminated of gameTerminatedList) {
           await this.gameService.setGameTerminatedDto(userGame, gameTerminated);
         }
         this.gameService.putEvent(
           gameRoom,
-          "game_terminated",
+          Message.GAME_TERMINATED,
           JSON.stringify(gameTerminatedList),
           user
         );
         this.sendEventToUser(
           userGame.getUserMatchDto().userId,
           userGame.getSocket(),
-          { message: "game_terminated", responseData: gameTerminatedList }
+          { message: Message.GAME_TERMINATED, responseData: gameTerminatedList }
         );
-        // userGame.getSocket().emit("game_terminated", gameTerminatedList);
       }
     } catch (error) {
       console.log(error);
@@ -266,7 +250,7 @@ export class GameGateway
     }
   }
 
-  @SubscribeMessage("invite")
+  @SubscribeMessage(Message.INVITE)
   async accpetInvite(@ConnectedSocket() user: Socket, @MessageBody() data) {
     try {
       await this.customModeService.acceptInvite(
@@ -287,7 +271,7 @@ export class GameGateway
         this.sendEventToUser(
           userGame.getUserMatchDto().userId,
           userGame.getSocket(),
-          { message: "invite", responseData: customUserList }
+          { message: Message.INVITE, responseData: customUserList }
         );
       }
       return { message: "success", data: customUserList };
@@ -301,7 +285,7 @@ export class GameGateway
     }
   }
 
-  @SubscribeMessage("create_custom")
+  @SubscribeMessage(Message.CREATE_CUSTOM)
   async createCustomRoom(
     @ConnectedSocket() user: Socket,
     @MessageBody() userMatchDto: UserMatchDto
@@ -311,7 +295,7 @@ export class GameGateway
       const gameRoom: GameRoom = this.matchService.findRoomByUserId(
         userMatchDto.userId
       );
-      user.emit("create_custom", gameRoom.getRoomId());
+      user.emit(Message.CREATE_CUSTOM, gameRoom.getRoomId());
     } catch (error) {
       throw new HttpException(
         "create_custom",
@@ -320,43 +304,44 @@ export class GameGateway
     }
   }
 
-  @SubscribeMessage("set_song")
+  @SubscribeMessage(Message.SET_SONG)
   async setGameSong(@ConnectedSocket() user: Socket, @MessageBody() data) {
     const gameSong: CustomSongDto = await this.customModeService.setCustomSong(
       data.userId,
       data.songId
     );
-    this.broadCast(user, data.userId, "set_song", gameSong);
+    this.broadCast(user, data.userId, Message.SET_SONG, gameSong);
   }
 
-  @SubscribeMessage("leave_room")
+  @SubscribeMessage(Message.LEAVE_ROOM)
   async leaveRoom(
     @ConnectedSocket() user: Socket,
     @MessageBody() userId: string
   ) {
     const userMatchDto: UserMatchDto =
       await this.customModeService.getUserMatchDtobyId(userId);
-    this.broadCast(user, userId, "leave_room", userMatchDto.nickname);
+    this.broadCast(user, userId, Message.LEAVE_ROOM, userMatchDto.nickname);
     this.customModeService.leaveRoom(userMatchDto);
+    return Message.LEAVE_ROOM;
   }
 
-  @SubscribeMessage("custom_start")
+  @SubscribeMessage(Message.CUSTOM_START)
   startCustom(@ConnectedSocket() user: Socket, @MessageBody() data) {
     const gameRoom: GameRoom = this.matchService.findRoomByUserId(data.userId);
     gameRoom.setRoomStatus(GameRoomStatus.IN_GAME);
-    this.broadCast(user, data.userId, "custom_start", true);
+    this.broadCast(user, data.userId, Message.CUSTOM_START, true);
   }
 
-  @SubscribeMessage("load_replay")
+  @SubscribeMessage(Message.LOAD_REPLAY)
   async loadReplay(
     @ConnectedSocket() user: Socket,
     @MessageBody() replayId: number
   ) {
     const replayData = await this.gameReplayService.loadData(replayId);
-    user.emit("load_replay", replayData);
+    user.emit(Message.LOAD_REPLAY, replayData);
   }
 
-  @SubscribeMessage("start_replay")
+  @SubscribeMessage(Message.START_REPLAY)
   startReplay(@ConnectedSocket() user: Socket, @MessageBody() data) {
     this.gameReplayService.replayGame(user, data[0], data[1]);
   }
@@ -377,7 +362,6 @@ export class GameGateway
           message,
           responseData,
         });
-        // user.getSocket().emit(message, responseData);
       }
     } catch (error) {
       throw new HttpException(
@@ -391,7 +375,6 @@ export class GameGateway
     if (user && user.connected) {
       user.emit(event.message, event.responseData);
     } else {
-      // console.log("error?");
       this.missedQueue.push({
         userId,
         message: event.message,

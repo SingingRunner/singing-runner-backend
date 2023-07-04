@@ -1,6 +1,7 @@
 import { IsString, IsBoolean } from "class-validator";
 import { Song } from "../entities/song.entity";
 import { Field, Int, ObjectType } from "@nestjs/graphql";
+import { MatchCompleteSongDto } from "./match-complete-song.dto";
 
 @ObjectType()
 export class GameSongDto {
@@ -87,4 +88,8 @@ export class GameSongDto {
 
   @IsString()
   vocalFemaleDown: string;
+
+  public getMatchSong() {
+    return new MatchCompleteSongDto(this.songTitle, this.singer);
+  }
 }
