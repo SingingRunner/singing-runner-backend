@@ -97,6 +97,7 @@ export class MatchService {
     for (const userInfo of userList) {
       this.joinQueueWithOutDenyUser(userInfo, userId);
     }
+    this.updateUserActive(userId, UserActiveStatus.CONNECT);
   }
 
   public updateUserConnected(userSocket: Socket) {

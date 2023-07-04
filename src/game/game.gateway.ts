@@ -123,21 +123,17 @@ export class GameGateway
     @ConnectedSocket() user: Socket,
     @MessageBody() acceptDataDto: AcceptDataDto
   ) {
-    //
-    if (acceptDataDto.accept) {
-      if (!this.matchService.acceptAllUsers(acceptDataDto.userId)) {
-        return;
-      }
-      this.broadCast(user, acceptDataDto.userId, Message.ACCEPT, true);
+    if (!acceptDataDto.accept) {
+      this.matchService.matchDeny(acceptDataDto.userId);
+      this.broadCast(user, acceptDataDto.userId, Message.ACCEPT, false);
+      this.matchService.deleteRoom(acceptDataDto.userId);
     }
 
-    this.gameService.updateUserActive(
-      acceptDataDto.userId,
-      UserActiveStatus.CONNECT
-    );
-    this.matchService.matchDeny(acceptDataDto.userId);
-    this.broadCast(user, acceptDataDto.userId, Message.ACCEPT, false);
-    this.matchService.deleteRoom(acceptDataDto.userId);
+    if (this.matchService.acceptAllUsers(acceptDataDto.userId)) {
+      this.broadCast(user, acceptDataDto.userId, Message.ACCEPT, true);
+      return;
+    }
+
     return;
   }
 
