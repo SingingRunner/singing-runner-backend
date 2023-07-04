@@ -7,6 +7,7 @@ import { GameRoomHandler } from "../room/game.room.handler";
 import { MatchMakingPolicy } from "./match.making.policy";
 import { UserMatchDto } from "src/user/dto/user.match.dto";
 import { UserGameDto } from "src/user/dto/user.game.dto";
+import { MatchCompleteSongDto } from "src/song/dto/match-complete-song.dto";
 
 @Injectable()
 export class MatchService {
@@ -95,10 +96,9 @@ export class MatchService {
     return this.gameRoomHandler.findUsersInRoom(gameRoom);
   }
 
-  public getSongInfo(gameRoom: GameRoom) {
-    const songTitle: string = gameRoom.getGameSongDto().songTitle;
-    const singer: string = gameRoom.getGameSongDto().singer;
-    return { songTitle, singer };
+  public getSongInfo(userId: string): MatchCompleteSongDto {
+    const gameRoom: GameRoom = this.findRoomByUserId(userId);
+    return gameRoom.getMatchSong();
   }
 
   public deleteRoom(userId: string) {

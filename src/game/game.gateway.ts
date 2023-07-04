@@ -112,15 +112,12 @@ export class GameGateway
     if (!(await this.matchService.isMatchMade(user, data.UserMatchDto))) {
       return;
     }
-    const gameRoom: GameRoom = this.matchService.findRoomByUserId(
-      data.UserMatchDto.userId
-    );
-    const responseData = this.matchService.getSongInfo(gameRoom);
+
     this.broadCast(
       user,
       data.UserMatchDto.userId,
       Message.MATCH_MAKING,
-      responseData
+      this.matchService.getSongInfo(data.userId)
     );
     return;
   }
