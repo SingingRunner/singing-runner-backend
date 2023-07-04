@@ -29,6 +29,7 @@ import {
 import { HeartBeat } from "src/social/heartbeat/heartbeat";
 import { GameRoomStatus, Message } from "./util/game.enum";
 import { MatchInfoDto } from "./match/dto/match-info.dto";
+import { TimeoutManager } from "./timeout/timeout";
 
 /**
  * webSocket 통신을 담당하는 Handler
@@ -48,7 +49,8 @@ export class GameGateway
     private customModeService: CustomModeService,
     private gameReplayService: GameReplayService,
     @Inject("HeartBeat")
-    private heartBeat: HeartBeat
+    private heartBeat: HeartBeat,
+    private timeOutManager: TimeoutManager
   ) {}
 
   afterInit(server: any) {

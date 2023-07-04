@@ -5,7 +5,6 @@ import { UserGameDto } from "src/user/dto/user.game.dto";
 import { GameRoomStatus } from "../util/game.enum";
 import { SongService } from "src/song/song.service";
 import { SocketValidator } from "./socket.validator";
-import { Interval } from "@nestjs/schedule";
 
 @Injectable()
 export class GameRoomHandler {

@@ -49,7 +49,6 @@ export class GameService {
 
   public isGameReady(userId: string): boolean {
     const gameRoom: GameRoom = this.findRoomByUserId(userId);
-
     this.gameRoomHandler.increaseAcceptCount(userId);
     if (this.gameRoomHandler.isGameRoomReady(gameRoom)) {
       gameRoom.setStartTime(new Date().getTime());
