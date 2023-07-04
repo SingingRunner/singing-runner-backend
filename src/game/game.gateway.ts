@@ -212,7 +212,7 @@ export class GameGateway
     const gameRoom: GameRoom = this.matchService.findRoomByUserId(
       userScoreDto.userId
     );
-    // this.gameService.resetItem(); 시연용 item policy
+    this.gameService.resetItem(); //시연용 item policy
     const gameTerminatedList = await this.gameService.gameTerminatedHandler(
       userList,
       gameRoom
