@@ -112,6 +112,7 @@ export class GameReplayService {
           characterList: characterList,
           userVocal: gameReplay.userVocal,
           replayKeynote: gameReplay.keynote,
+          userCharacter: gameReplay.userCharacter,
         };
       }
     }
