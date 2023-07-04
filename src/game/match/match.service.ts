@@ -17,31 +17,52 @@ export class MatchService {
     private matchMakingPolicy: MatchMakingPolicy
   ) {}
 
-  public async matchMaking(userGameDto): Promise<boolean> {
+  public async handleMatchRequest(user: Socket, data): Promise<boolean> {
+    if (this.isMatchRejected(data)) {
+      this.cancleMatch(data.UserMatchDto.userId);
+      return false;
+    }
+
+    if (await this.isMatchSuccessful(user, data.UserMatchDto)) {
+      return true;
+    }
+
+    return false;
+  }
+
+  private isMatchRejected(data): boolean {
+    return !data.accept;
+  }
+
+  private async isMatchSuccessful(
+    user: Socket,
+    userMatchDto: UserMatchDto
+  ): Promise<boolean> {
+    const userGameDto: UserGameDto = new UserGameDto(user, userMatchDto);
+
+    if (this.matchMakingPolicy.isQueueReady(userGameDto)) {
+      return await this.matchMaking(userGameDto);
+    }
+
+    this.matchMakingPolicy.joinQueue(userGameDto);
+    return false;
+  }
+
+  private async matchMaking(userGameDto): Promise<boolean> {
     const userList: Array<UserGameDto> =
       this.matchMakingPolicy.getAvailableUsers(userGameDto);
     userList.push(userGameDto);
+
     const gameRoom: GameRoom = await this.gameRoomHandler.createRoom();
     gameRoom.setGameMode("랭크");
+
     for (const user of userList) {
       this.gameRoomHandler.joinRoom(gameRoom, user);
     }
     return true;
   }
 
-  public async isMatchMade(
-    user: Socket,
-    userMatchDto: UserMatchDto
-  ): Promise<boolean> {
-    const userGameDto: UserGameDto = new UserGameDto(user, userMatchDto);
-    if (this.matchMakingPolicy.isQueueReady(userGameDto)) {
-      return await this.matchMaking(userGameDto);
-    }
-    this.matchMakingPolicy.joinQueue(userGameDto);
-    return false;
-  }
-
-  public matchCancel(userId: string) {
+  private cancleMatch(userId: string) {
     this.matchMakingPolicy.leaveQueue(userId);
   }
 
@@ -64,6 +85,7 @@ export class MatchService {
       this.joinQueueWithOutDenyUser(userInfo, userId);
     }
   }
+
   public updateUserConnected(userSocket: Socket) {
     const gameRoom: GameRoom =
       this.gameRoomHandler.findRoomBySocket(userSocket);
@@ -74,6 +96,7 @@ export class MatchService {
       }
     }
   }
+
   public findRoomBySocket(user: Socket): GameRoom {
     return this.gameRoomHandler.findRoomBySocket(user);
   }
@@ -89,9 +112,11 @@ export class MatchService {
     }
     return gameRoom;
   }
+
   public updateUserSocket(userId: string, userSocket: Socket) {
     this.gameRoomHandler.updateUserSocket(userId, userSocket);
   }
+
   public findUsersInSameRoom(gameRoom: GameRoom): UserGameDto[] {
     return this.gameRoomHandler.findUsersInRoom(gameRoom);
   }

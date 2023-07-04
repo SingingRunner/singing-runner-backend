@@ -97,19 +97,7 @@ export class GameGateway
    */
   @SubscribeMessage(Message.MATCH_MAKING)
   async matchMakingData(@ConnectedSocket() user: Socket, @MessageBody() data) {
-    this.gameService.updateUserActive(
-      data.UserMatchDto.userId,
-      userActiveStatus.IN_GAME
-    );
-    if (!data.accept) {
-      this.matchService.matchCancel(data.UserMatchDto.userId);
-      this.gameService.updateUserActive(
-        data.UserMatchDto.userId,
-        userActiveStatus.CONNECT
-      );
-      return;
-    }
-    if (!(await this.matchService.isMatchMade(user, data.UserMatchDto))) {
+    if (!(await this.matchService.handleMatchRequest(user, data))) {
       return;
     }
 
@@ -119,7 +107,6 @@ export class GameGateway
       Message.MATCH_MAKING,
       this.matchService.getSongInfo(data.userId)
     );
-    return;
   }
 
   /**
