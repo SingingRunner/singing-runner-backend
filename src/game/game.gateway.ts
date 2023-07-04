@@ -68,17 +68,17 @@ export class GameGateway
       userId = userId.join("");
     }
 
-    for (const missed of this.missedQueue) {
-      if (missed.userId === userId) {
-        this.sendEventToUser(missed.userId, user, {
-          message: missed.message,
-          responseData: missed.responseData,
-        });
-      }
-    }
-    this.missedQueue = this.missedQueue.filter(
-      (missed) => missed.userId !== userId
-    );
+    // for (const missed of this.missedQueue) {
+    //   if (missed.userId === userId) {
+    //     this.sendEventToUser(missed.userId, user, {
+    //       message: missed.message,
+    //       responseData: missed.responseData,
+    //     });
+    //   }
+    // }
+    // this.missedQueue = this.missedQueue.filter(
+    //   (missed) => missed.userId !== userId
+    // );
 
     this.heartBeat.setHeartBeatMap(userId, Date.now());
     this.matchService.updateUserSocket(userId, user);
@@ -372,14 +372,14 @@ export class GameGateway
   }
 
   sendEventToUser(userId: string, user: Socket, event: any) {
-    if (user && user.connected) {
-      user.emit(event.message, event.responseData);
-    } else {
-      this.missedQueue.push({
-        userId,
-        message: event.message,
-        responseData: event.responseData,
-      });
-    }
+    // if (user && user.connected) {
+    user.emit(event.message, event.responseData);
+    // } else {
+    //   this.missedQueue.push({
+    //     userId,
+    //     message: event.message,
+    //     responseData: event.responseData,
+    //   });
+    // }
   }
 }
