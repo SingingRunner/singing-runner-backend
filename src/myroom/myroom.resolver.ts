@@ -6,7 +6,7 @@ import { MyroomService } from "./myroom.service";
 import { characterEnum } from "src/user/util/character.enum";
 import { UserCharacterResponseDto } from "src/user/dto/user.character.response.dto";
 import { UserKeynoteResponseDto } from "src/user/dto/user.keynote.response.dto";
-import { userKeynoteStatus } from "src/user/util/user.enum";
+import { UserKeynoteStatus } from "src/user/util/user.enum";
 import { GameReplayService } from "src/game/replay/game.replay.service";
 import { ReplayWithSongInfo } from "src/game/replay/dto/replay-with-song-info.dto";
 import { ReplayIsPublicResponseDto } from "src/game/replay/dto/replay-ispublic-response.dto";
@@ -56,8 +56,8 @@ export class MyroomResolver {
   @Mutation(() => UserKeynoteResponseDto)
   async updateUserKeynote(
     @Args("userId") userId: string,
-    @Args("keynote", { type: () => userKeynoteStatus })
-    keynote: userKeynoteStatus
+    @Args("keynote", { type: () => UserKeynoteStatus })
+    keynote: UserKeynoteStatus
   ): Promise<UserKeynoteResponseDto> {
     const updatedUser = await this.myroomService.updateUserKeynote(
       userId,

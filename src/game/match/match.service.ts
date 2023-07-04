@@ -1,47 +1,87 @@
+import { UserActiveStatus } from "src/user/util/user.enum";
 import { GameRoom } from "./../room/game.room";
-
 import { HttpException, HttpStatus, Inject, Injectable } from "@nestjs/common";
 import { Socket } from "socket.io";
-
 import { GameRoomHandler } from "../room/game.room.handler";
 import { MatchMakingPolicy } from "./match.making.policy";
 import { UserMatchDto } from "src/user/dto/user.match.dto";
 import { UserGameDto } from "src/user/dto/user.game.dto";
+import { MatchCompleteSongDto } from "src/song/dto/match-complete-song.dto";
+import { UserService } from "src/user/user.service";
 
 @Injectable()
 export class MatchService {
   constructor(
     private gameRoomHandler: GameRoomHandler,
+    private userService: UserService,
     @Inject("MatchMakingPolicy")
     private matchMakingPolicy: MatchMakingPolicy
   ) {}
 
-  public async matchMaking(userGameDto): Promise<boolean> {
-    const userList: Array<UserGameDto> =
-      this.matchMakingPolicy.getAvailableUsers(userGameDto);
-    userList.push(userGameDto);
-    const gameRoom: GameRoom = await this.gameRoomHandler.createRoom();
-    gameRoom.setGameMode("랭크");
-    for (const user of userList) {
-      this.gameRoomHandler.joinRoom(gameRoom, user);
+  public async handleMatchRequest(user: Socket, data): Promise<boolean> {
+    this.updateUserActive(data.UserMatchDto.userId, UserActiveStatus.IN_GAME);
+
+    if (this.isMatchRejected(data)) {
+      this.cancleMatch(data.UserMatchDto.userId);
+      this.updateUserActive(data.UserMatchDto.userId, UserActiveStatus.CONNECT);
+      return false;
     }
-    return true;
+
+    if (await this.isMatchSuccessful(user, data.UserMatchDto)) {
+      return true;
+    }
+
+    return false;
   }
 
-  public async isMatchMade(
+  private isMatchRejected(data): boolean {
+    return !data.accept;
+  }
+
+  private cancleMatch(userId: string) {
+    this.matchMakingPolicy.leaveQueue(userId);
+  }
+
+  private async isMatchSuccessful(
     user: Socket,
     userMatchDto: UserMatchDto
   ): Promise<boolean> {
     const userGameDto: UserGameDto = new UserGameDto(user, userMatchDto);
+
     if (this.matchMakingPolicy.isQueueReady(userGameDto)) {
-      return await this.matchMaking(userGameDto);
+      await this.matchMaking(userGameDto);
+      return true;
     }
+
     this.matchMakingPolicy.joinQueue(userGameDto);
     return false;
   }
 
-  public matchCancel(userId: string) {
-    this.matchMakingPolicy.leaveQueue(userId);
+  private async matchMaking(userGameDto) {
+    const userList: UserGameDto[] =
+      this.matchMakingPolicy.getAvailableUsers(userGameDto);
+    userList.push(userGameDto);
+
+    const gameRoom: GameRoom = await this.createRankRoom();
+
+    this.joinUsersToGameRoom(gameRoom, userList);
+  }
+
+  private async createRankRoom() {
+    const gameRoom: GameRoom = await this.gameRoomHandler.createRoom();
+    gameRoom.setGameMode("랭크");
+    return gameRoom;
+  }
+
+  private joinUsersToGameRoom(gameRoom: GameRoom, userList: UserGameDto[]) {
+    for (const user of userList) {
+      this.gameRoomHandler.joinRoom(gameRoom, user);
+    }
+  }
+
+  public getSongInfo(userId: string): MatchCompleteSongDto {
+    const gameRoom: GameRoom = this.findRoomByUserId(userId);
+    return gameRoom.getMatchSong();
   }
 
   public acceptAllUsers(userId: string): boolean {
@@ -62,7 +102,9 @@ export class MatchService {
     for (const userInfo of userList) {
       this.joinQueueWithOutDenyUser(userInfo, userId);
     }
+    this.updateUserActive(userId, UserActiveStatus.CONNECT);
   }
+
   public updateUserConnected(userSocket: Socket) {
     const gameRoom: GameRoom =
       this.gameRoomHandler.findRoomBySocket(userSocket);
@@ -73,6 +115,7 @@ export class MatchService {
       }
     }
   }
+
   public findRoomBySocket(user: Socket): GameRoom {
     return this.gameRoomHandler.findRoomBySocket(user);
   }
@@ -88,17 +131,13 @@ export class MatchService {
     }
     return gameRoom;
   }
+
   public updateUserSocket(userId: string, userSocket: Socket) {
     this.gameRoomHandler.updateUserSocket(userId, userSocket);
   }
+
   public findUsersInSameRoom(gameRoom: GameRoom): UserGameDto[] {
     return this.gameRoomHandler.findUsersInRoom(gameRoom);
-  }
-
-  public getSongInfo(gameRoom: GameRoom) {
-    const songTitle: string = gameRoom.getGameSongDto().songTitle;
-    const singer: string = gameRoom.getGameSongDto().singer;
-    return { songTitle, singer };
   }
 
   public deleteRoom(userId: string) {
@@ -110,5 +149,9 @@ export class MatchService {
       return;
     }
     this.matchMakingPolicy.joinQueueAtFront(userInfo);
+  }
+
+  private updateUserActive(userId: string, userActiveStatus: UserActiveStatus) {
+    this.userService.updateUserActive(userId, userActiveStatus);
   }
 }

@@ -1,6 +1,7 @@
 import { GameSongDto } from "src/song/dto/game-song.dto";
 import { GameRoomStatus } from "../util/game.enum";
 import { GameEventDto } from "../event/dto/game.event.dto";
+import { MatchCompleteSongDto } from "src/song/dto/match-complete-song.dto";
 
 export class GameRoom {
   private roomId: number;
@@ -47,6 +48,10 @@ export class GameRoom {
 
   public getGameSongDto(): GameSongDto {
     return this.gameSongDto;
+  }
+
+  public getMatchSong(): MatchCompleteSongDto {
+    return this.gameSongDto.getMatchSong();
   }
 
   public setGameSongDto(song: GameSongDto) {

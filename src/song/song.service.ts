@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { Like, Repository } from "typeorm";
+import { FindOptionsOrder, Like, Repository } from "typeorm";
 import { Song } from "./entities/song.entity";
 import { InjectRepository } from "@nestjs/typeorm";
 import { GameSongDto } from "./dto/game-song.dto";
@@ -40,9 +40,10 @@ export class SongService {
     const take = 10;
     const skip = (page - 1) * take;
 
-    const order = {};
-
-    order[filter] = "ASC";
+    const order: FindOptionsOrder<Song> = {
+      [filter]: "ASC",
+      songId: "ASC",
+    };
 
     const searchResult: Song[] = await this.songRepository.find({
       where: [

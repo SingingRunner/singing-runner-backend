@@ -16,14 +16,13 @@ import { Payload } from "./security/payload.interface";
 import { JwtService } from "@nestjs/jwt";
 import { characterEnum } from "../user/util/character.enum";
 import { Response } from "express";
-import { userActiveStatus } from "src/user/util/user.enum";
+import { UserActiveStatus } from "src/user/util/user.enum";
 import { HeartBeat } from "src/social/heartbeat/heartbeat";
 import { KakaoUserResponseDto } from "src/user/dto/kakao-user-response.dto";
 import { KakaoUserRegisterDto } from "src/user/dto/kakao-user-register.dto";
 import { Context } from "@nestjs/graphql";
 import { GoogleUserResponseDto } from "src/user/dto/google-user-response.dto";
 import { GoogleUserRegisterDto } from "src/user/dto/google-user-register.dto";
-import { Any, IsNull, Not } from "typeorm";
 
 @Injectable()
 export class AuthService {
@@ -152,7 +151,7 @@ export class AuthService {
     // 로그인 성공 시, 유저 userActive를 'Connect'(1)로 변경
     await this.userService.setUserActiveStatus(
       userFind,
-      userActiveStatus.CONNECT
+      UserActiveStatus.CONNECT
     );
 
     const payload: Payload = {
@@ -197,6 +196,12 @@ export class AuthService {
       );
     }
 
+    //로그인 성공 시 HeartbeatMap 에 저장
+    this.heartBeat.setHeartBeatMap(user.userId, Date.now());
+
+    // 로그인 성공 시, 유저 userActive를 'Connect'(1)로 변경
+    await this.userService.setUserActiveStatus(user, UserActiveStatus.CONNECT);
+
     return user;
   }
 
@@ -212,6 +217,12 @@ export class AuthService {
         "구글 계정에 해당하는 사용자를 찾을 수 없습니다."
       );
     }
+
+    //로그인 성공 시 HeartbeatMap 에 저장
+    this.heartBeat.setHeartBeatMap(user.userId, Date.now());
+
+    // 로그인 성공 시, 유저 userActive를 'Connect'(1)로 변경
+    await this.userService.setUserActiveStatus(user, UserActiveStatus.CONNECT);
 
     return user;
   }
@@ -275,7 +286,7 @@ export class AuthService {
   async logout(user: User, @Context() context: any): Promise<string> {
     try {
       user.refreshToken = null;
-      await this.userService.setUserActiveStatus(user, userActiveStatus.LOGOUT);
+      await this.userService.setUserActiveStatus(user, UserActiveStatus.LOGOUT);
       this.heartBeat.deleteHeartBeatMap(user.userId);
 
       // refreshToken 쿠키 만료기간 과거로 변경
