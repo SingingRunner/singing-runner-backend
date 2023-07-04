@@ -1,3 +1,4 @@
+import { UserActiveStatus } from "src/user/util/user.enum";
 import { AcceptDataDto } from "./match/dto/accept-data.dto";
 import { UserMatchDto } from "./../user/dto/user.match.dto";
 import {
@@ -16,9 +17,7 @@ import { GameService } from "./game.service";
 import { GameRoom } from "./room/game.room";
 import { UserGameDto } from "src/user/dto/user.game.dto";
 import { UserScoreDto } from "./rank/dto/user-score.dto";
-import { GameTerminatedDto } from "./rank/game-terminated.dto";
 import { CustomModeService } from "./custom-mode/custom.mode.service";
-import { UserActiveStatus } from "src/user/util/user.enum";
 import { GameReplayService } from "./replay/game.replay.service";
 import { CustomSongDto } from "./util/custom-song.dto";
 import { CustomUserInfoDto } from "./util/custom-user.info.dto";
@@ -128,6 +127,7 @@ export class GameGateway
       this.matchService.matchDeny(acceptDataDto.userId);
       this.broadCast(user, acceptDataDto.userId, Message.ACCEPT, false);
       this.matchService.deleteRoom(acceptDataDto.userId);
+      return Message.ACCEPT;
     }
 
     if (this.matchService.acceptAllUsers(acceptDataDto.userId)) {
@@ -194,50 +194,45 @@ export class GameGateway
     @MessageBody() userScoreDto: UserScoreDto
   ) {
     this.heartBeat.setHeartBeatMap(userScoreDto.userId, Date.now());
-    try {
-      if (!this.gameService.allUsersTerminated(userScoreDto)) {
-        return;
-      }
-      this.gameService.resetItem();
-      const gameTerminatedList: GameTerminatedDto[] =
-        await this.gameService.calculateRank(userScoreDto.userId);
-      const gameRoom: GameRoom = this.matchService.findRoomByUserId(
-        userScoreDto.userId
-      );
-      const userList: UserGameDto[] =
-        this.matchService.findUsersInSameRoom(gameRoom);
-
-      for (const gameTerminated of gameTerminatedList) {
-        await this.gameService.setGameTerminatedCharacter(gameTerminated);
-      }
-
-      for (const userGame of userList) {
-        await this.gameService.updateUserActive(
-          userGame.getUserMatchDto().userId,
-          UserActiveStatus.CONNECT
-        );
-        for (const gameTerminated of gameTerminatedList) {
-          await this.gameService.setGameTerminatedDto(userGame, gameTerminated);
-        }
-        this.gameService.putEvent(
-          gameRoom,
-          Message.GAME_TERMINATED,
-          JSON.stringify(gameTerminatedList),
-          user
-        );
-        this.sendEventToUser(
-          userGame.getUserMatchDto().userId,
-          userGame.getSocket(),
-          { message: Message.GAME_TERMINATED, responseData: gameTerminatedList }
-        );
-      }
-    } catch (error) {
-      console.log(error);
-      throw new HttpException(
-        "gameterminiated",
-        HttpStatus.INTERNAL_SERVER_ERROR
-      );
+    if (!this.gameService.allUsersTerminated(userScoreDto)) {
+      return;
     }
+
+    const userList: UserGameDto[] = this.gameService.getUsersInGameRoomByUserId(
+      userScoreDto.userId
+    );
+
+    const gameRoom: GameRoom = this.matchService.findRoomByUserId(
+      userScoreDto.userId
+    );
+    // this.gameService.resetItem(); 시연용 item policy
+    const gameTerminatedList = await this.gameService.gameTerminatedHandler(
+      userList,
+      gameRoom
+    );
+
+    userList.forEach(async (userGame) => {
+      await this.gameService.updateUserAndSetTerminatedDto(
+        userGame,
+        gameTerminatedList
+      );
+
+      this.gameService.putEvent(
+        gameRoom,
+        Message.GAME_TERMINATED,
+        JSON.stringify(gameTerminatedList),
+        user
+      );
+
+      this.sendEventToUser(
+        userGame.getUserMatchDto().userId,
+        userGame.getSocket(),
+        {
+          message: Message.GAME_TERMINATED,
+          responseData: gameTerminatedList,
+        }
+      );
+    });
   }
 
   @SubscribeMessage(Message.INVITE)

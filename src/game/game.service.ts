@@ -79,6 +79,7 @@ export class GameService {
 
     return usersSocket;
   }
+
   public getUserInfoBySocket(user: Socket) {
     const gameRoom = this.gameRoomHandler.findRoomBySocket(user);
     const UserGameDtoList: UserGameDto[] =
@@ -95,6 +96,7 @@ export class GameService {
   public resetItem() {
     this.itemPolicy.useItemAll(Item.NULL);
   }
+
   public exitWhileInGame(user: Socket) {
     const gameRoom = this.gameRoomHandler.findRoomBySocket(user);
     if (gameRoom === null || gameRoom === undefined) {
@@ -143,10 +145,37 @@ export class GameService {
     return false;
   }
 
-  public async calculateRank(userId: string): Promise<GameTerminatedDto[]> {
+  public getUsersInGameRoomByUserId(userId: string): UserGameDto[] {
     const gameRoom: GameRoom = this.findRoomByUserId(userId);
-    const userList: UserGameDto[] =
-      this.gameRoomHandler.findUsersInRoom(gameRoom);
+    return this.gameRoomHandler.findUsersInRoom(gameRoom);
+  }
+
+  public async gameTerminatedHandler(
+    userList: UserGameDto[],
+    gameRoom: GameRoom
+  ): Promise<GameTerminatedDto[]> {
+    const gameTerminatedList: GameTerminatedDto[] = await this.calculateRank(
+      userList,
+      gameRoom
+    );
+
+    const userUpdatePromises = userList.map((userGame) => [
+      // this.updateUserAndSetTerminatedDto(userGame, gameTerminatedList),
+      this.updateUserActive(
+        userGame.getUserMatchDto().userId,
+        UserActiveStatus.CONNECT
+      ),
+      this.setTerminatedUserNickname(userGame, gameTerminatedList),
+    ]);
+
+    await Promise.all(userUpdatePromises);
+    return gameTerminatedList;
+  }
+
+  private async calculateRank(
+    userList: UserGameDto[],
+    gameRoom: GameRoom
+  ): Promise<GameTerminatedDto[]> {
     const gameTerminatedList = this.rankHandler.calculateRank(
       gameRoom,
       userList
@@ -156,24 +185,51 @@ export class GameService {
   }
 
   private async updateMmr(gameTerminiatedDtoList: GameTerminatedDto[]) {
-    for (const gameTerminatedDto of gameTerminiatedDtoList) {
-      await this.userService.updateMmr(
+    const updatePromises = gameTerminiatedDtoList.map((gameTerminatedDto) =>
+      this.userService.updateMmr(
         gameTerminatedDto.getUserId(),
         gameTerminatedDto.getMmrDiff()
-      );
-    }
+      )
+    );
+
+    await Promise.all(updatePromises);
   }
 
-  public async setGameTerminatedCharacter(
+  public async updateUserAndSetTerminatedDto(
+    userGame: UserGameDto,
+    gameTerminatedList: GameTerminatedDto[]
+  ) {
+    const setGamePromises = gameTerminatedList.map((gameTerminated) =>
+      this.setGameTerminatedDto(userGame, gameTerminated)
+    );
+
+    await Promise.all(setGamePromises);
+  }
+
+  public async setGameTerminatedDto(
+    userGame: UserGameDto,
     gameTerminatedDto: GameTerminatedDto
   ) {
-    const user: User | null = await this.userService.findUserById(
-      gameTerminatedDto.getUserId()
-    );
+    const [friendList, user] = await Promise.all([
+      this.getFriendList(userGame.getUserMatchDto().userId),
+      this.userService.findUserById(gameTerminatedDto.getUserId()),
+    ]);
+
     if (user === null) {
       throw new HttpException("없는 유저", HttpStatus.BAD_REQUEST);
     }
+
     gameTerminatedDto.setCharacter(user.character);
+
+    if (friendList === null) {
+      return;
+    }
+
+    const isFriend = friendList.some(
+      (friend) => friend.userId === gameTerminatedDto.getUserId()
+    );
+
+    gameTerminatedDto.setIsFriend(isFriend);
   }
 
   private findRoomByUserId(userId: string): GameRoom {
@@ -188,45 +244,15 @@ export class GameService {
     return gameRoom;
   }
 
-  public async setGameTerminatedDto(
-    userGame: UserGameDto,
-    gameTerminatedDto: GameTerminatedDto
-  ) {
-    this.setTerminatedUserNickname(
-      userGame.getUserMatchDto().userId,
-      gameTerminatedDto
-    );
-    const userMatchDto = userGame.getUserMatchDto();
-    const friendList: User[] = await this.getFriendList(userMatchDto.userId);
-
-    if (friendList === null) {
-      return;
-    }
-    for (const friend of friendList) {
-      if (friend.userId === gameTerminatedDto.getUserId()) {
-        gameTerminatedDto.setIsFriend(true);
-
-        return;
-      }
-      gameTerminatedDto.setIsFriend(false);
-    }
-  }
-
   private setTerminatedUserNickname(
-    userId: string,
-    gameTerminatedDto: GameTerminatedDto
+    userGame: UserGameDto,
+    gameTerminatedList: GameTerminatedDto[]
   ) {
-    const gameRoom: GameRoom = this.findRoomByUserId(userId);
-    const userList: UserGameDto[] =
-      this.gameRoomHandler.findUsersInRoom(gameRoom);
-    for (const userGameDto of userList) {
-      if (
-        userGameDto.getUserMatchDto().userId === gameTerminatedDto.getUserId()
-      ) {
-        gameTerminatedDto.setNickname(userGameDto.getUserMatchDto().nickname);
-        return;
+    gameTerminatedList.find((userTerminated) => {
+      if (userTerminated.getUserId() === userGame.getUserMatchDto().userId) {
+        userTerminated.setNickname(userGame.getUserMatchDto().nickname);
       }
-    }
+    });
   }
 
   public async updateUserActive(userId: string, userActive: UserActiveStatus) {
