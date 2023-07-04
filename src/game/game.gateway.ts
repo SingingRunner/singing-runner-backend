@@ -1,3 +1,4 @@
+import { AcceptDataDto } from "./match/dto/accept-data.dto";
 import { UserMatchDto } from "./../user/dto/user.match.dto";
 import {
   ConnectedSocket,
@@ -29,6 +30,7 @@ import {
 } from "@nestjs/common";
 import { HeartBeat } from "src/social/heartbeat/heartbeat";
 import { GameRoomStatus, Message } from "./util/game.enum";
+import { MatchInfoDto } from "./match/dto/match-info.dto";
 
 /**
  * webSocket 통신을 담당하는 Handler
@@ -96,16 +98,19 @@ export class GameGateway
    * 같이 매칭된 user들(same GameRoom) 과 함께 songTitle, Singer 정보를 전송
    */
   @SubscribeMessage(Message.MATCH_MAKING)
-  async matchMakingData(@ConnectedSocket() user: Socket, @MessageBody() data) {
-    if (!(await this.matchService.handleMatchRequest(user, data))) {
+  async matchMakingData(
+    @ConnectedSocket() user: Socket,
+    @MessageBody() matchInfoDto: MatchInfoDto
+  ) {
+    if (!(await this.matchService.handleMatchRequest(user, matchInfoDto))) {
       return;
     }
 
     this.broadCast(
       user,
-      data.UserMatchDto.userId,
+      matchInfoDto.userMatchDto.userId,
       Message.MATCH_MAKING,
-      this.matchService.getSongInfo(data.userId)
+      this.matchService.getSongInfo(matchInfoDto.userMatchDto.userId)
     );
   }
 
@@ -114,22 +119,26 @@ export class GameGateway
    * 한명이라도 거절시 Room 제거, 수락한 user는 readyQueue 에 우선순위가 높게 push
    */
   @SubscribeMessage(Message.ACCEPT)
-  matchAcceptData(@ConnectedSocket() user: Socket, @MessageBody() data) {
-    try {
-      if (data.accept) {
-        if (!this.matchService.acceptAllUsers(data.userId)) {
-          return;
-        }
-        this.broadCast(user, data.userId, Message.ACCEPT, true);
+  matchAcceptData(
+    @ConnectedSocket() user: Socket,
+    @MessageBody() acceptDataDto: AcceptDataDto
+  ) {
+    //
+    if (acceptDataDto.accept) {
+      if (!this.matchService.acceptAllUsers(acceptDataDto.userId)) {
         return;
       }
-      this.gameService.updateUserActive(data.userId, UserActiveStatus.CONNECT);
-      this.matchService.matchDeny(data.userId);
-      this.broadCast(user, data.userId, Message.ACCEPT, false);
-      this.matchService.deleteRoom(data.userId);
-    } catch (error) {
-      throw new HttpException("accept Error", HttpStatus.INTERNAL_SERVER_ERROR);
+      this.broadCast(user, acceptDataDto.userId, Message.ACCEPT, true);
     }
+
+    this.gameService.updateUserActive(
+      acceptDataDto.userId,
+      UserActiveStatus.CONNECT
+    );
+    this.matchService.matchDeny(acceptDataDto.userId);
+    this.broadCast(user, acceptDataDto.userId, Message.ACCEPT, false);
+    this.matchService.deleteRoom(acceptDataDto.userId);
+    return;
   }
 
   @SubscribeMessage(Message.LOADING)
@@ -316,6 +325,7 @@ export class GameGateway
       await this.customModeService.getUserMatchDtobyId(userId);
     this.broadCast(user, userId, Message.LEAVE_ROOM, userMatchDto.nickname);
     this.customModeService.leaveRoom(userMatchDto);
+    return;
   }
 
   @SubscribeMessage(Message.CUSTOM_START)
