@@ -79,6 +79,11 @@ export class MatchService {
     }
   }
 
+  public getSongInfo(userId: string): MatchCompleteSongDto {
+    const gameRoom: GameRoom = this.findRoomByUserId(userId);
+    return gameRoom.getMatchSong();
+  }
+
   public acceptAllUsers(userId: string): boolean {
     const gameRoom: GameRoom = this.findRoomByUserId(userId);
     this.gameRoomHandler.increaseAcceptCount(userId);
@@ -133,11 +138,6 @@ export class MatchService {
 
   public findUsersInSameRoom(gameRoom: GameRoom): UserGameDto[] {
     return this.gameRoomHandler.findUsersInRoom(gameRoom);
-  }
-
-  public getSongInfo(userId: string): MatchCompleteSongDto {
-    const gameRoom: GameRoom = this.findRoomByUserId(userId);
-    return gameRoom.getMatchSong();
   }
 
   public deleteRoom(userId: string) {

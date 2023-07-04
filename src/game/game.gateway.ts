@@ -103,15 +103,16 @@ export class GameGateway
     @MessageBody() matchInfoDto: MatchInfoDto
   ) {
     if (!(await this.matchService.handleMatchRequest(user, matchInfoDto))) {
-      return;
+      return Message.MATCH_MAKING;
     }
 
     this.broadCast(
       user,
-      matchInfoDto.userMatchDto.userId,
+      matchInfoDto.UserMatchDto.userId,
       Message.MATCH_MAKING,
-      this.matchService.getSongInfo(matchInfoDto.userMatchDto.userId)
+      this.matchService.getSongInfo(matchInfoDto.UserMatchDto.userId)
     );
+    return Message.MATCH_MAKING;
   }
 
   /**
@@ -131,10 +132,10 @@ export class GameGateway
 
     if (this.matchService.acceptAllUsers(acceptDataDto.userId)) {
       this.broadCast(user, acceptDataDto.userId, Message.ACCEPT, true);
-      return;
+      return Message.ACCEPT;
     }
 
-    return;
+    return Message.ACCEPT;
   }
 
   @SubscribeMessage(Message.LOADING)
@@ -321,7 +322,7 @@ export class GameGateway
       await this.customModeService.getUserMatchDtobyId(userId);
     this.broadCast(user, userId, Message.LEAVE_ROOM, userMatchDto.nickname);
     this.customModeService.leaveRoom(userMatchDto);
-    return;
+    return Message.LEAVE_ROOM;
   }
 
   @SubscribeMessage(Message.CUSTOM_START)
