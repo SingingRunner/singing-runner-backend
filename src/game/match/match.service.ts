@@ -1,25 +1,29 @@
+import { UserActiveStatus } from "src/user/util/user.enum";
 import { GameRoom } from "./../room/game.room";
-
 import { HttpException, HttpStatus, Inject, Injectable } from "@nestjs/common";
 import { Socket } from "socket.io";
-
 import { GameRoomHandler } from "../room/game.room.handler";
 import { MatchMakingPolicy } from "./match.making.policy";
 import { UserMatchDto } from "src/user/dto/user.match.dto";
 import { UserGameDto } from "src/user/dto/user.game.dto";
 import { MatchCompleteSongDto } from "src/song/dto/match-complete-song.dto";
+import { UserService } from "src/user/user.service";
 
 @Injectable()
 export class MatchService {
   constructor(
     private gameRoomHandler: GameRoomHandler,
+    private userService: UserService,
     @Inject("MatchMakingPolicy")
     private matchMakingPolicy: MatchMakingPolicy
   ) {}
 
   public async handleMatchRequest(user: Socket, data): Promise<boolean> {
+    this.updateUserActive(data.UserMatchDto.userId, UserActiveStatus.IN_GAME);
+
     if (this.isMatchRejected(data)) {
       this.cancleMatch(data.UserMatchDto.userId);
+      this.updateUserActive(data.UserMatchDto.userId, UserActiveStatus.CONNECT);
       return false;
     }
 
@@ -34,6 +38,10 @@ export class MatchService {
     return !data.accept;
   }
 
+  private cancleMatch(userId: string) {
+    this.matchMakingPolicy.leaveQueue(userId);
+  }
+
   private async isMatchSuccessful(
     user: Socket,
     userMatchDto: UserMatchDto
@@ -41,29 +49,34 @@ export class MatchService {
     const userGameDto: UserGameDto = new UserGameDto(user, userMatchDto);
 
     if (this.matchMakingPolicy.isQueueReady(userGameDto)) {
-      return await this.matchMaking(userGameDto);
+      await this.matchMaking(userGameDto);
+      return true;
     }
 
     this.matchMakingPolicy.joinQueue(userGameDto);
     return false;
   }
 
-  private async matchMaking(userGameDto): Promise<boolean> {
-    const userList: Array<UserGameDto> =
+  private async matchMaking(userGameDto) {
+    const userList: UserGameDto[] =
       this.matchMakingPolicy.getAvailableUsers(userGameDto);
     userList.push(userGameDto);
 
+    const gameRoom: GameRoom = await this.createRankRoom();
+
+    this.joinUsersToGameRoom(gameRoom, userList);
+  }
+
+  private async createRankRoom() {
     const gameRoom: GameRoom = await this.gameRoomHandler.createRoom();
     gameRoom.setGameMode("랭크");
+    return gameRoom;
+  }
 
+  private joinUsersToGameRoom(gameRoom: GameRoom, userList: UserGameDto[]) {
     for (const user of userList) {
       this.gameRoomHandler.joinRoom(gameRoom, user);
     }
-    return true;
-  }
-
-  private cancleMatch(userId: string) {
-    this.matchMakingPolicy.leaveQueue(userId);
   }
 
   public acceptAllUsers(userId: string): boolean {
@@ -135,5 +148,9 @@ export class MatchService {
       return;
     }
     this.matchMakingPolicy.joinQueueAtFront(userInfo);
+  }
+
+  private updateUserActive(userId: string, userActiveStatus: UserActiveStatus) {
+    this.userService.updateUserActive(userId, userActiveStatus);
   }
 }
