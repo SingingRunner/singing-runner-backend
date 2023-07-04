@@ -47,7 +47,8 @@ export class SongService {
 
     const searchResult: Song[] = await this.songRepository.find({
       where: [
-        { songTitle: Like(`%${keyword}%`), singer: Like(`%${keyword}%`) },
+        { songTitle: Like(`%${keyword}%`) },
+        { singer: Like(`%${keyword}%`) },
       ],
       take: take,
       skip: skip,
