@@ -17,7 +17,7 @@ import { UserGameDto } from "src/user/dto/user.game.dto";
 import { UserScoreDto } from "./rank/dto/user-score.dto";
 import { GameTerminatedDto } from "./rank/game-terminated.dto";
 import { CustomModeService } from "./custom-mode/custom.mode.service";
-import { userActiveStatus } from "src/user/util/user.enum";
+import { UserActiveStatus } from "src/user/util/user.enum";
 import { GameReplayService } from "./replay/game.replay.service";
 import { CustomSongDto } from "./util/custom-song.dto";
 import { CustomUserInfoDto } from "./util/custom-user.info.dto";
@@ -123,7 +123,7 @@ export class GameGateway
         this.broadCast(user, data.userId, Message.ACCEPT, true);
         return;
       }
-      this.gameService.updateUserActive(data.userId, userActiveStatus.CONNECT);
+      this.gameService.updateUserActive(data.userId, UserActiveStatus.CONNECT);
       this.matchService.matchDeny(data.userId);
       this.broadCast(user, data.userId, Message.ACCEPT, false);
       this.matchService.deleteRoom(data.userId);
@@ -147,7 +147,7 @@ export class GameGateway
           data.userId
         );
         for (const userId of userIdList) {
-          this.gameService.updateUserActive(userId, userActiveStatus.IN_GAME);
+          this.gameService.updateUserActive(userId, UserActiveStatus.IN_GAME);
         }
         this.broadCast(user, data.userId, Message.GAME_READY, userIdList);
       }
@@ -218,7 +218,7 @@ export class GameGateway
       for (const userGame of userList) {
         await this.gameService.updateUserActive(
           userGame.getUserMatchDto().userId,
-          userActiveStatus.CONNECT
+          UserActiveStatus.CONNECT
         );
         for (const gameTerminated of gameTerminatedList) {
           await this.gameService.setGameTerminatedDto(userGame, gameTerminated);

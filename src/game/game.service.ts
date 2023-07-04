@@ -14,7 +14,7 @@ import { RankHandler } from "./rank/rank.hanlder";
 import { GameTerminatedDto } from "./rank/game-terminated.dto";
 import { GameReplayService } from "./replay/game.replay.service";
 import { User } from "src/user/entity/user.entity";
-import { userActiveStatus } from "src/user/util/user.enum";
+import { UserActiveStatus } from "src/user/util/user.enum";
 import { UserInfoDto } from "./util/user-info.dto";
 import { Item } from "./item/item.enum";
 
@@ -92,7 +92,7 @@ export class GameService {
       return false;
     }
     const users = this.gameRoomHandler.findUsersInRoom(gameRoom);
-    if (users[0].getUserMatchDto().userActive === userActiveStatus.IN_GAME) {
+    if (users[0].getUserMatchDto().userActive === UserActiveStatus.IN_GAME) {
       return true;
     }
 
@@ -221,7 +221,7 @@ export class GameService {
     }
   }
 
-  public async updateUserActive(userId: string, userActive: userActiveStatus) {
+  public async updateUserActive(userId: string, userActive: UserActiveStatus) {
     await this.userService.updateUserActive(userId, userActive);
   }
 

@@ -1,5 +1,5 @@
 import { Field, Int, ObjectType } from "@nestjs/graphql";
-import { userActiveStatus } from "../util/user.enum";
+import { UserActiveStatus } from "../util/user.enum";
 import { characterEnum } from "../util/character.enum";
 
 @ObjectType()
@@ -7,7 +7,7 @@ export class FriendDto {
   constructor(
     userId: string,
     nickname: string,
-    userActive: userActiveStatus,
+    userActive: UserActiveStatus,
     character: characterEnum,
     userMmr: number,
     userTier: string

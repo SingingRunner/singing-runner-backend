@@ -4,7 +4,7 @@ import { UserRegisterDto } from "./dto/user.register.dto";
 import { FindOneOptions, Like, Repository } from "typeorm";
 import { User } from "./entity/user.entity";
 import * as bcrypt from "bcrypt";
-import { userActiveStatus } from "./util/user.enum";
+import { UserActiveStatus } from "./util/user.enum";
 import { UserMatchTier } from "src/game/util/game.enum";
 import { KakaoUserRegisterDto } from "./dto/kakao-user-register.dto";
 import { characterEnum } from "./util/character.enum";
@@ -80,7 +80,7 @@ export class UserService {
     return searchResult;
   }
 
-  public async updateUserActive(userId: string, userActive: userActiveStatus) {
+  public async updateUserActive(userId: string, userActive: UserActiveStatus) {
     const user: User | null = await this.findUserById(userId);
     if (user === null) {
       throw new Error("게임룸에 등록되지 않은 유저가 있습니다.");
@@ -118,7 +118,7 @@ export class UserService {
 
   async setUserActiveStatus(
     user: User,
-    userActive: userActiveStatus
+    userActive: UserActiveStatus
   ): Promise<User> {
     user.userActive = userActive;
     return await this.saveUser(user);

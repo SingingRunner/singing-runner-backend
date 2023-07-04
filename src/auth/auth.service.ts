@@ -16,7 +16,7 @@ import { Payload } from "./security/payload.interface";
 import { JwtService } from "@nestjs/jwt";
 import { characterEnum } from "../user/util/character.enum";
 import { Response } from "express";
-import { userActiveStatus } from "src/user/util/user.enum";
+import { UserActiveStatus } from "src/user/util/user.enum";
 import { HeartBeat } from "src/social/heartbeat/heartbeat";
 import { KakaoUserResponseDto } from "src/user/dto/kakao-user-response.dto";
 import { KakaoUserRegisterDto } from "src/user/dto/kakao-user-register.dto";
@@ -151,7 +151,7 @@ export class AuthService {
     // 로그인 성공 시, 유저 userActive를 'Connect'(1)로 변경
     await this.userService.setUserActiveStatus(
       userFind,
-      userActiveStatus.CONNECT
+      UserActiveStatus.CONNECT
     );
 
     const payload: Payload = {
@@ -274,7 +274,7 @@ export class AuthService {
   async logout(user: User, @Context() context: any): Promise<string> {
     try {
       user.refreshToken = null;
-      await this.userService.setUserActiveStatus(user, userActiveStatus.LOGOUT);
+      await this.userService.setUserActiveStatus(user, UserActiveStatus.LOGOUT);
       this.heartBeat.deleteHeartBeatMap(user.userId);
 
       // refreshToken 쿠키 만료기간 과거로 변경
