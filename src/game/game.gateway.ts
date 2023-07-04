@@ -66,23 +66,17 @@ export class GameGateway
       userId = userId.join("");
     }
 
-    user.on("reconnect", () => {
-      if (userId === undefined) {
-        return;
+    for (const missed of this.missedQueue) {
+      if (missed.userId === userId) {
+        this.sendEventToUser(missed.userId, user, {
+          message: missed.message,
+          responseData: missed.responseData,
+        });
       }
-      this.matchService.updateUserSocket(userId as string, user);
-      for (const missed of this.missedQueue) {
-        if (missed.userId === userId) {
-          this.sendEventToUser(missed.userId, user, {
-            message: missed.message,
-            responseData: missed.responseData,
-          });
-        }
-      }
-      this.missedQueue = this.missedQueue.filter(
-        (missed) => missed.userId !== userId
-      );
-    });
+    }
+    this.missedQueue = this.missedQueue.filter(
+      (missed) => missed.userId !== userId
+    );
 
     this.heartBeat.setHeartBeatMap(userId, Date.now());
     this.matchService.updateUserSocket(userId, user);
