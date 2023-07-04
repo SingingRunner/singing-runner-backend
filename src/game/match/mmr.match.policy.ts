@@ -13,7 +13,6 @@ export class MMRMatchPolicy implements MatchMakingPolicy {
     this.tierQueueMap.set(UserMatchTier.DIAMOND, []);
     // this.startQueueMovement(10000);
   }
-
   public joinQueue(userGameDto: UserGameDto) {
     const userTier: UserMatchTier = this.transformMMRtoTier(
       userGameDto.getUserMatchDto().userMmr

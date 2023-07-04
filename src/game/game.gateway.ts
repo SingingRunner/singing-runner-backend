@@ -223,14 +223,12 @@ export class GameGateway
         userGame,
         gameTerminatedList
       );
-
       this.gameService.putEvent(
         gameRoom,
         Message.GAME_TERMINATED,
         JSON.stringify(gameTerminatedList),
         user
       );
-
       this.sendEventToUser(
         userGame.getUserMatchDto().userId,
         userGame.getSocket(),

@@ -96,11 +96,15 @@ export class MatchService {
   }
 
   public matchDeny(userId: string) {
-    const gameRoom: GameRoom = this.findRoomByUserId(userId);
-    const userList: Array<UserGameDto> =
-      this.gameRoomHandler.findUsersInRoom(gameRoom);
-    for (const userInfo of userList) {
-      this.joinQueueWithOutDenyUser(userInfo, userId);
+    try {
+      const gameRoom: GameRoom = this.findRoomByUserId(userId);
+      const userList: Array<UserGameDto> =
+        this.gameRoomHandler.findUsersInRoom(gameRoom);
+      for (const userInfo of userList) {
+        this.joinQueueWithOutDenyUser(userInfo, userId);
+      }
+    } catch (error) {
+      this.matchMakingPolicy.leaveQueue(userId);
     }
     this.updateUserActive(userId, UserActiveStatus.CONNECT);
   }
