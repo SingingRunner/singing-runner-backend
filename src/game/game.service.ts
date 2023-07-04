@@ -46,6 +46,7 @@ export class GameService {
     const gameSong = gameSongdto;
     return { gameSong: gameSong, characterList: characterList };
   }
+
   public isGameReady(userId: string): boolean {
     const gameRoom: GameRoom = this.findRoomByUserId(userId);
 
@@ -56,6 +57,14 @@ export class GameService {
       return true;
     }
     return false;
+  }
+
+  public updateReadyUsersActive(userId: string): string[] {
+    const userIdList: string[] = this.findUsersIdInSameRoom(userId);
+    for (const userId of userIdList) {
+      this.updateUserActive(userId, UserActiveStatus.IN_GAME);
+    }
+    return userIdList;
   }
 
   public findUsersSocketInSameRoom(user): Socket[] {
@@ -106,7 +115,7 @@ export class GameService {
 
   public findUsersIdInSameRoom(userId: string): string[] {
     const gameRoom: GameRoom = this.findRoomByUserId(userId);
-    const userList: Array<UserGameDto> =
+    const userList: UserGameDto[] =
       this.gameRoomHandler.findUsersInRoom(gameRoom);
     const userIdList: string[] = [];
     for (const userInfo of userList) {
@@ -120,7 +129,6 @@ export class GameService {
   }
 
   public allUsersTerminated(userScoreDto: UserScoreDto): boolean {
-    // 50/20/-10
     const gameRoom: GameRoom = this.findRoomByUserId(userScoreDto.userId);
     this.gameRoomHandler.increaseAcceptCount(userScoreDto.userId);
     if (gameRoom.getAcceptCount() === 1) {
@@ -168,7 +176,7 @@ export class GameService {
     gameTerminatedDto.setCharacter(user.character);
   }
 
-  public findRoomByUserId(userId: string): GameRoom {
+  private findRoomByUserId(userId: string): GameRoom {
     const gameRoom: GameRoom | undefined =
       this.gameRoomHandler.findRoomByUserId(userId);
     if (gameRoom === undefined) {

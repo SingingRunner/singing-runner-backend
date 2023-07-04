@@ -147,21 +147,11 @@ export class GameGateway
   @SubscribeMessage(Message.GAME_READY)
   gameReadyData(@ConnectedSocket() user: Socket, @MessageBody() data) {
     this.heartBeat.setHeartBeatMap(data.userId, Date.now());
-    try {
-      if (this.gameService.isGameReady(data.userId)) {
-        const userIdList: string[] = this.gameService.findUsersIdInSameRoom(
-          data.userId
-        );
-        for (const userId of userIdList) {
-          this.gameService.updateUserActive(userId, UserActiveStatus.IN_GAME);
-        }
-        this.broadCast(user, data.userId, Message.GAME_READY, userIdList);
-      }
-    } catch (error) {
-      throw new HttpException(
-        "game_ready 실패",
-        HttpStatus.INTERNAL_SERVER_ERROR
+    if (this.gameService.isGameReady(data.userId)) {
+      const userIdList: string[] = this.gameService.updateReadyUsersActive(
+        data.userId
       );
+      this.broadCast(user, data.userId, Message.GAME_READY, userIdList);
     }
   }
 
