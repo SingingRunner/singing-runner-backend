@@ -141,7 +141,11 @@ export class GameGateway
   @SubscribeMessage(Message.LOADING)
   loadSongData(@ConnectedSocket() user: Socket, @MessageBody() data) {
     const loadData = this.gameService.loadData(data.userId);
-    user.emit(Message.LOADING, loadData);
+    this.sendEventToUser(data.userId, user, {
+      message: Message.LOADING,
+      reponseData: loadData,
+    });
+    // user.emit(Message.LOADING, loadData);
   }
 
   @SubscribeMessage(Message.GAME_READY)
@@ -163,7 +167,11 @@ export class GameGateway
   @SubscribeMessage(Message.GET_ITEM)
   getItemData(@ConnectedSocket() user: Socket, @MessageBody() userId: string) {
     const item = this.gameService.getItem(userId);
-    user.emit(Message.GET_ITEM, item);
+    this.sendEventToUser(userId, user, {
+      message: Message.GET_ITEM,
+      reponseData: item,
+    });
+    // user.emit(Message.GET_ITEM, item);
   }
 
   @SubscribeMessage(Message.GAME_MODE)
