@@ -97,35 +97,28 @@ export class GameGateway
    */
   @SubscribeMessage("match_making")
   async matchMakingData(@ConnectedSocket() user: Socket, @MessageBody() data) {
-    try {
-      const message = "match_making";
+    const message = "match_making";
+    this.gameService.updateUserActive(
+      data.UserMatchDto.userId,
+      userActiveStatus.IN_GAME
+    );
+    if (!data.accept) {
+      this.matchService.matchCancel(data.UserMatchDto.userId);
       this.gameService.updateUserActive(
         data.UserMatchDto.userId,
-        userActiveStatus.IN_GAME
+        userActiveStatus.CONNECT
       );
-      if (!data.accept) {
-        this.matchService.matchCancel(data.UserMatchDto.userId);
-        this.gameService.updateUserActive(
-          data.UserMatchDto.userId,
-          userActiveStatus.CONNECT
-        );
-        return;
-      }
-      if (!(await this.matchService.isMatchMade(user, data.UserMatchDto))) {
-        return;
-      }
-      const gameRoom: GameRoom = this.matchService.findRoomByUserId(
-        data.UserMatchDto.userId
-      );
-      const responseData = this.matchService.getSongInfo(gameRoom);
-      this.broadCast(user, data.UserMatchDto.userId, message, responseData);
       return;
-    } catch (error) {
-      throw new HttpException(
-        "matchmaking Error",
-        HttpStatus.INTERNAL_SERVER_ERROR
-      );
     }
+    if (!(await this.matchService.isMatchMade(user, data.UserMatchDto))) {
+      return;
+    }
+    const gameRoom: GameRoom = this.matchService.findRoomByUserId(
+      data.UserMatchDto.userId
+    );
+    const responseData = this.matchService.getSongInfo(gameRoom);
+    this.broadCast(user, data.UserMatchDto.userId, message, responseData);
+    return;
   }
 
   /**
