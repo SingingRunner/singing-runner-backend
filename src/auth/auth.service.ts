@@ -196,6 +196,12 @@ export class AuthService {
       );
     }
 
+    //로그인 성공 시 HeartbeatMap 에 저장
+    this.heartBeat.setHeartBeatMap(user.userId, Date.now());
+
+    // 로그인 성공 시, 유저 userActive를 'Connect'(1)로 변경
+    await this.userService.setUserActiveStatus(user, userActiveStatus.CONNECT);
+
     return user;
   }
 
@@ -211,6 +217,12 @@ export class AuthService {
         "구글 계정에 해당하는 사용자를 찾을 수 없습니다."
       );
     }
+
+    //로그인 성공 시 HeartbeatMap 에 저장
+    this.heartBeat.setHeartBeatMap(user.userId, Date.now());
+
+    // 로그인 성공 시, 유저 userActive를 'Connect'(1)로 변경
+    await this.userService.setUserActiveStatus(user, userActiveStatus.CONNECT);
 
     return user;
   }
