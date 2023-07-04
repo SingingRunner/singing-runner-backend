@@ -1,4 +1,3 @@
-import { UserActiveStatus } from "src/user/util/user.enum";
 import { AcceptDataDto } from "./match/dto/accept-data.dto";
 import { UserMatchDto } from "./../user/dto/user.match.dto";
 import {
@@ -143,7 +142,7 @@ export class GameGateway
     const loadData = this.gameService.loadData(data.userId);
     this.sendEventToUser(data.userId, user, {
       message: Message.LOADING,
-      reponseData: loadData,
+      responseData: loadData,
     });
     // user.emit(Message.LOADING, loadData);
   }
@@ -169,7 +168,7 @@ export class GameGateway
     const item = this.gameService.getItem(userId);
     this.sendEventToUser(userId, user, {
       message: Message.GET_ITEM,
-      reponseData: item,
+      responseData: item,
     });
     // user.emit(Message.GET_ITEM, item);
   }
@@ -364,10 +363,13 @@ export class GameGateway
     }
   }
 
-  sendEventToUser(userId: string, user: Socket, event: any) {
+  private sendEventToUser(userId: string, user: Socket, event: any) {
+    console.log("sendEventToUser : ", user.connected);
+    console.log("socketMessage : ", event.message);
     if (user && user.connected) {
       user.emit(event.message, event.responseData);
     } else {
+      console.log("disconnect??");
       this.missedQueue.push({
         userId,
         message: event.message,
