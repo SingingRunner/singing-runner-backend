@@ -34,6 +34,20 @@ export class MatchService {
     return false;
   }
 
+  public forcedCacleMatch(gameRoom: GameRoom) {
+    try {
+      const userList: UserGameDto[] = this.findUsersInSameRoom(gameRoom);
+      const filteredUserList = userList.filter(
+        (user) => user.getConnected() === true
+      );
+      filteredUserList.forEach((user) => {
+        this.matchMakingPolicy.joinQueue(user);
+      });
+    } catch (error) {
+      console.log(error.Message);
+    }
+  }
+
   private isMatchRejected(data): boolean {
     return !data.accept;
   }
@@ -86,6 +100,7 @@ export class MatchService {
 
   public acceptAllUsers(userId: string): boolean {
     const gameRoom: GameRoom = this.findRoomByUserId(userId);
+
     this.gameRoomHandler.increaseAcceptCount(userId);
 
     if (this.gameRoomHandler.isGameRoomReady(gameRoom)) {
@@ -96,11 +111,18 @@ export class MatchService {
   }
 
   public matchDeny(userId: string) {
-    const gameRoom: GameRoom = this.findRoomByUserId(userId);
-    const userList: Array<UserGameDto> =
-      this.gameRoomHandler.findUsersInRoom(gameRoom);
-    for (const userInfo of userList) {
-      this.joinQueueWithOutDenyUser(userInfo, userId);
+    try {
+      const gameRoom: GameRoom = this.findRoomByUserId(userId);
+      const userList: Array<UserGameDto> =
+        this.gameRoomHandler.findUsersInRoom(gameRoom);
+      const filteredUserList = userList.filter(
+        (user) => user.getConnected() === true
+      );
+      for (const user of filteredUserList) {
+        this.joinQueueWithOutDenyUser(user, userId);
+      }
+    } catch (error) {
+      this.matchMakingPolicy.leaveQueue(userId);
     }
     this.updateUserActive(userId, UserActiveStatus.CONNECT);
   }
@@ -144,11 +166,11 @@ export class MatchService {
     this.gameRoomHandler.deleteRoom(userId);
   }
 
-  private joinQueueWithOutDenyUser(userInfo: UserGameDto, userId: string) {
-    if (userInfo.getUserMatchDto().userId === userId) {
+  private joinQueueWithOutDenyUser(user: UserGameDto, userId: string) {
+    if (user.getUserMatchDto().userId === userId) {
       return;
     }
-    this.matchMakingPolicy.joinQueueAtFront(userInfo);
+    this.matchMakingPolicy.joinQueueAtFront(user);
   }
 
   private updateUserActive(userId: string, userActiveStatus: UserActiveStatus) {

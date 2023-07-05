@@ -16,7 +16,9 @@ import { CustomModeService } from "./custom-mode/custom.mode.service";
 import { UserModule } from "src/user/user.module";
 import { SocialModule } from "src/social/social.module";
 import { SocketValidator } from "./room/socket.validator";
-import { RandomItemPolicy } from "./item/random.item.policy";
+// import { RandomItemPolicy } from "./item/random.item.policy";
+import { PlayItemPolicy } from "./item/playItemPolicy";
+import { TimeoutManager } from "./timeout/timeout";
 
 @Module({
   imports: [
@@ -38,7 +40,7 @@ import { RandomItemPolicy } from "./item/random.item.policy";
     GameGateway,
     {
       provide: "ItemPolicy",
-      useClass: RandomItemPolicy,
+      useClass: PlayItemPolicy,
     },
     {
       provide: "RankHandler",
@@ -47,6 +49,7 @@ import { RandomItemPolicy } from "./item/random.item.policy";
     SocketValidator,
     GameResolver,
     SocialModule,
+    TimeoutManager,
   ],
   exports: [GameReplayService],
 })

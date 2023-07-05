@@ -22,7 +22,6 @@ export class NotificationService {
     this.getEvent(user.userId).next({
       alarm: true,
     });
-    console.log("get notifi event");
     notification.receivedAt = date;
     notification.deletedAt = null;
     await this.userNotificationRepository.save(notification);

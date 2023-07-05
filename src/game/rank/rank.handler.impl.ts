@@ -49,8 +49,12 @@ export class RankHandlerImpl implements RankHandler {
     const gameTerminatedList: GameTerminatedDto[] = [];
     if (gameRoom.getGameMode() === "랭크") {
       let tie = 0;
-      tie += userScoreList[0].score === userScoreList[1].score ? 2 : 0;
-      tie += userScoreList[1].score === userScoreList[2].score ? 1 : 0;
+      if (userScoreList[1] !== undefined) {
+        tie += userScoreList[0].score === userScoreList[1].score ? 2 : 0;
+      }
+      if (userScoreList[2] !== undefined) {
+        tie += userScoreList[1].score === userScoreList[2].score ? 1 : 0;
+      }
       const score = this.scoreList[tie];
       userScoreList.forEach((userScore, idx) => {
         gameTerminatedList.push(
