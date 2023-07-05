@@ -18,6 +18,7 @@ import { SocialModule } from "src/social/social.module";
 import { SocketValidator } from "./room/socket.validator";
 // import { RandomItemPolicy } from "./item/random.item.policy";
 import { PlayItemPolicy } from "./item/playItemPolicy";
+import { TimeoutManager } from "./timeout/timeout";
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { PlayItemPolicy } from "./item/playItemPolicy";
     SocketValidator,
     GameResolver,
     SocialModule,
+    TimeoutManager,
   ],
   exports: [GameReplayService],
 })

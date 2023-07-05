@@ -124,17 +124,32 @@ export class GameGateway
     @ConnectedSocket() user: Socket,
     @MessageBody() acceptDataDto: AcceptDataDto
   ) {
+    // const gameRoom: GameRoom = this.matchService.findRoomByUserId(
+    //   acceptDataDto.userId
+    // );
     if (!acceptDataDto.accept) {
       this.matchService.matchDeny(acceptDataDto.userId);
       this.broadCast(user, acceptDataDto.userId, Message.ACCEPT, false);
+      // this.timeOutManager.clear(gameRoom);
       this.matchService.deleteRoom(acceptDataDto.userId);
       return Message.ACCEPT;
     }
 
     if (this.matchService.acceptAllUsers(acceptDataDto.userId)) {
+      // this.timeOutManager.clear(gameRoom);
       this.broadCast(user, acceptDataDto.userId, Message.ACCEPT, true);
       return Message.ACCEPT;
     }
+    // this.timeOutManager.set(
+    //   gameRoom,
+    //   () => {
+    //     console.log("timeout accept");
+    //     this.matchService.forcedCacleMatch(gameRoom);
+    //     this.broadCast(user, acceptDataDto.userId, Message.ACCEPT, false);
+    //     this.matchService.deleteRoom(acceptDataDto.userId);
+    //   },
+    //   12000
+    // );
 
     return Message.ACCEPT;
   }
@@ -152,12 +167,32 @@ export class GameGateway
   @SubscribeMessage(Message.GAME_READY)
   gameReadyData(@ConnectedSocket() user: Socket, @MessageBody() data) {
     this.heartBeat.setHeartBeatMap(data.userId, Date.now());
+    const gameRoom: GameRoom = this.matchService.findRoomByUserId(data.userId);
+
     if (this.gameService.isGameReady(data.userId)) {
       const userIdList: string[] = this.gameService.updateReadyUsersActive(
         data.userId
       );
+      console.log("clear");
+      this.timeOutManager.clear(gameRoom);
       this.broadCast(user, data.userId, Message.GAME_READY, userIdList);
+      return;
     }
+
+    this.timeOutManager.set(
+      gameRoom,
+      () => {
+        console.log("timeout ready");
+        gameRoom.resetAcceptCount;
+        this.broadCast(
+          user,
+          data.userId,
+          Message.GAME_READY,
+          this.gameService.findUsersIdInSameRoom(data.userId)
+        );
+      },
+      5000
+    );
   }
 
   @SubscribeMessage(Message.USE_ITEM)
@@ -202,18 +237,36 @@ export class GameGateway
     @ConnectedSocket() user: Socket,
     @MessageBody() userScoreDto: UserScoreDto
   ) {
-    this.heartBeat.setHeartBeatMap(userScoreDto.userId, Date.now());
-    if (!this.gameService.allUsersTerminated(userScoreDto)) {
-      return;
-    }
-
-    const userList: UserGameDto[] = this.gameService.getUsersInGameRoomByUserId(
-      userScoreDto.userId
-    );
-
     const gameRoom: GameRoom = this.matchService.findRoomByUserId(
       userScoreDto.userId
     );
+
+    this.heartBeat.setHeartBeatMap(userScoreDto.userId, Date.now());
+    if (!this.gameService.allUsersTerminated(userScoreDto)) {
+      console.log("terminiate user");
+      this.timeOutManager.set(
+        gameRoom,
+        () => {
+          console.log("timeout gameterminated");
+          gameRoom.resetAcceptCount;
+          this.sendGameTerminated(userScoreDto.userId, gameRoom, user);
+        },
+        6000
+      );
+      return;
+    }
+    this.timeOutManager.clear(gameRoom);
+    this.sendGameTerminated(userScoreDto.userId, gameRoom, user);
+  }
+
+  private async sendGameTerminated(
+    userId: string,
+    gameRoom: GameRoom,
+    user: Socket
+  ) {
+    const userList: UserGameDto[] =
+      this.gameService.getUsersInGameRoomByUserId(userId);
+
     this.gameService.resetItem(); //시연용 item policy
     const gameTerminatedList = await this.gameService.gameTerminatedHandler(
       userList,
@@ -356,20 +409,14 @@ export class GameGateway
         });
       }
     } catch (error) {
-      throw new HttpException(
-        "broadCastError",
-        HttpStatus.INTERNAL_SERVER_ERROR
-      );
+      return;
     }
   }
 
   private sendEventToUser(userId: string, user: Socket, event: any) {
-    console.log("sendEventToUser : ", user.connected);
-    console.log("socketMessage : ", event.message);
     if (user && user.connected) {
       user.emit(event.message, event.responseData);
     } else {
-      console.log("disconnect??");
       this.missedQueue.push({
         userId,
         message: event.message,
