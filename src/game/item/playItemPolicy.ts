@@ -14,6 +14,7 @@ export class PlayItemPolicy implements ItemPolicy {
       Item.SUPER,
       Item.FROZEN,
       Item.KEY_DOWN,
+      Item.KEY_DOWN,
       Item.CLOUD,
     ]);
     //우주꼬맹단
@@ -24,6 +25,7 @@ export class PlayItemPolicy implements ItemPolicy {
       Item.KEY_UP,
       Item.CLOUD,
       Item.FROZEN,
+      Item.FROZEN,
     ]);
     //섭지코지
     this.userItemMap.set("bcd11577-71ec-4b7e-b291-f37a3dc3aa70", [
@@ -32,6 +34,7 @@ export class PlayItemPolicy implements ItemPolicy {
       Item.MUTE,
       Item.SUPER,
       Item.KEY_UP,
+      Item.KEY_DOWN,
       Item.KEY_DOWN,
     ]);
     //오민규리
@@ -73,7 +76,7 @@ export class PlayItemPolicy implements ItemPolicy {
       return Item.NULL;
     }
     this.userCountMap.set(userId, ++count);
-    if (count === 6) {
+    if (count === 7) {
       this.userCountMap.set(userId, 0);
     }
     return item;
