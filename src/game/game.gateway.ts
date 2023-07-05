@@ -16,9 +16,7 @@ import { GameService } from "./game.service";
 import { GameRoom } from "./room/game.room";
 import { UserGameDto } from "src/user/dto/user.game.dto";
 import { UserScoreDto } from "./rank/dto/user-score.dto";
-import { GameTerminatedDto } from "./rank/game-terminated.dto";
 import { CustomModeService } from "./custom-mode/custom.mode.service";
-import { UserActiveStatus } from "src/user/util/user.enum";
 import { GameReplayService } from "./replay/game.replay.service";
 import { CustomSongDto } from "./util/custom-song.dto";
 import { CustomUserInfoDto } from "./util/custom-user.info.dto";
@@ -31,6 +29,7 @@ import {
 import { HeartBeat } from "src/social/heartbeat/heartbeat";
 import { GameRoomStatus, Message } from "./util/game.enum";
 import { MatchInfoDto } from "./match/dto/match-info.dto";
+import { TimeoutManager } from "./timeout/timeout";
 
 /**
  * webSocket 통신을 담당하는 Handler
@@ -50,7 +49,8 @@ export class GameGateway
     private customModeService: CustomModeService,
     private gameReplayService: GameReplayService,
     @Inject("HeartBeat")
-    private heartBeat: HeartBeat
+    private heartBeat: HeartBeat,
+    private timeOutManager: TimeoutManager
   ) {}
 
   afterInit(server: any) {
@@ -124,16 +124,32 @@ export class GameGateway
     @ConnectedSocket() user: Socket,
     @MessageBody() acceptDataDto: AcceptDataDto
   ) {
+    // const gameRoom: GameRoom = this.matchService.findRoomByUserId(
+    //   acceptDataDto.userId
+    // );
     if (!acceptDataDto.accept) {
       this.matchService.matchDeny(acceptDataDto.userId);
       this.broadCast(user, acceptDataDto.userId, Message.ACCEPT, false);
+      // this.timeOutManager.clear(gameRoom);
       this.matchService.deleteRoom(acceptDataDto.userId);
+      return Message.ACCEPT;
     }
 
     if (this.matchService.acceptAllUsers(acceptDataDto.userId)) {
+      // this.timeOutManager.clear(gameRoom);
       this.broadCast(user, acceptDataDto.userId, Message.ACCEPT, true);
       return Message.ACCEPT;
     }
+    // this.timeOutManager.set(
+    //   gameRoom,
+    //   () => {
+    //     console.log("timeout accept");
+    //     this.matchService.forcedCacleMatch(gameRoom);
+    //     this.broadCast(user, acceptDataDto.userId, Message.ACCEPT, false);
+    //     this.matchService.deleteRoom(acceptDataDto.userId);
+    //   },
+    //   12000
+    // );
 
     return Message.ACCEPT;
   }
@@ -141,28 +157,42 @@ export class GameGateway
   @SubscribeMessage(Message.LOADING)
   loadSongData(@ConnectedSocket() user: Socket, @MessageBody() data) {
     const loadData = this.gameService.loadData(data.userId);
-    user.emit(Message.LOADING, loadData);
+    this.sendEventToUser(data.userId, user, {
+      message: Message.LOADING,
+      responseData: loadData,
+    });
+    // user.emit(Message.LOADING, loadData);
   }
 
   @SubscribeMessage(Message.GAME_READY)
   gameReadyData(@ConnectedSocket() user: Socket, @MessageBody() data) {
     this.heartBeat.setHeartBeatMap(data.userId, Date.now());
-    try {
-      if (this.gameService.isGameReady(data.userId)) {
-        const userIdList: string[] = this.gameService.findUsersIdInSameRoom(
-          data.userId
-        );
-        for (const userId of userIdList) {
-          this.gameService.updateUserActive(userId, UserActiveStatus.IN_GAME);
-        }
-        this.broadCast(user, data.userId, Message.GAME_READY, userIdList);
-      }
-    } catch (error) {
-      throw new HttpException(
-        "game_ready 실패",
-        HttpStatus.INTERNAL_SERVER_ERROR
+    const gameRoom: GameRoom = this.matchService.findRoomByUserId(data.userId);
+
+    if (this.gameService.isGameReady(data.userId)) {
+      const userIdList: string[] = this.gameService.updateReadyUsersActive(
+        data.userId
       );
+      console.log("clear");
+      this.timeOutManager.clear(gameRoom);
+      this.broadCast(user, data.userId, Message.GAME_READY, userIdList);
+      return;
     }
+
+    this.timeOutManager.set(
+      gameRoom,
+      () => {
+        console.log("timeout ready");
+        gameRoom.resetAcceptCount;
+        this.broadCast(
+          user,
+          data.userId,
+          Message.GAME_READY,
+          this.gameService.findUsersIdInSameRoom(data.userId)
+        );
+      },
+      5000
+    );
   }
 
   @SubscribeMessage(Message.USE_ITEM)
@@ -173,7 +203,11 @@ export class GameGateway
   @SubscribeMessage(Message.GET_ITEM)
   getItemData(@ConnectedSocket() user: Socket, @MessageBody() userId: string) {
     const item = this.gameService.getItem(userId);
-    user.emit(Message.GET_ITEM, item);
+    this.sendEventToUser(userId, user, {
+      message: Message.GET_ITEM,
+      responseData: item,
+    });
+    // user.emit(Message.GET_ITEM, item);
   }
 
   @SubscribeMessage(Message.GAME_MODE)
@@ -203,51 +237,62 @@ export class GameGateway
     @ConnectedSocket() user: Socket,
     @MessageBody() userScoreDto: UserScoreDto
   ) {
+    const gameRoom: GameRoom = this.matchService.findRoomByUserId(
+      userScoreDto.userId
+    );
+
     this.heartBeat.setHeartBeatMap(userScoreDto.userId, Date.now());
-    try {
-      if (!this.gameService.allUsersTerminated(userScoreDto)) {
-        return;
-      }
-      this.gameService.resetItem();
-      const gameTerminatedList: GameTerminatedDto[] =
-        await this.gameService.calculateRank(userScoreDto.userId);
-      const gameRoom: GameRoom = this.matchService.findRoomByUserId(
-        userScoreDto.userId
+    if (!this.gameService.allUsersTerminated(userScoreDto)) {
+      console.log("terminiate user");
+      this.timeOutManager.set(
+        gameRoom,
+        () => {
+          console.log("timeout gameterminated");
+          gameRoom.resetAcceptCount;
+          this.sendGameTerminated(userScoreDto.userId, gameRoom, user);
+        },
+        6000
       );
-      const userList: UserGameDto[] =
-        this.matchService.findUsersInSameRoom(gameRoom);
-
-      for (const gameTerminated of gameTerminatedList) {
-        await this.gameService.setGameTerminatedCharacter(gameTerminated);
-      }
-
-      for (const userGame of userList) {
-        await this.gameService.updateUserActive(
-          userGame.getUserMatchDto().userId,
-          UserActiveStatus.CONNECT
-        );
-        for (const gameTerminated of gameTerminatedList) {
-          await this.gameService.setGameTerminatedDto(userGame, gameTerminated);
-        }
-        this.gameService.putEvent(
-          gameRoom,
-          Message.GAME_TERMINATED,
-          JSON.stringify(gameTerminatedList),
-          user
-        );
-        this.sendEventToUser(
-          userGame.getUserMatchDto().userId,
-          userGame.getSocket(),
-          { message: Message.GAME_TERMINATED, responseData: gameTerminatedList }
-        );
-      }
-    } catch (error) {
-      console.log(error);
-      throw new HttpException(
-        "gameterminiated",
-        HttpStatus.INTERNAL_SERVER_ERROR
-      );
+      return;
     }
+    this.timeOutManager.clear(gameRoom);
+    this.sendGameTerminated(userScoreDto.userId, gameRoom, user);
+  }
+
+  private async sendGameTerminated(
+    userId: string,
+    gameRoom: GameRoom,
+    user: Socket
+  ) {
+    const userList: UserGameDto[] =
+      this.gameService.getUsersInGameRoomByUserId(userId);
+
+    this.gameService.resetItem(); //시연용 item policy
+    const gameTerminatedList = await this.gameService.gameTerminatedHandler(
+      userList,
+      gameRoom
+    );
+
+    userList.forEach(async (userGame) => {
+      await this.gameService.updateUserAndSetTerminatedDto(
+        userGame,
+        gameTerminatedList
+      );
+      this.gameService.putEvent(
+        gameRoom,
+        Message.GAME_TERMINATED,
+        JSON.stringify(gameTerminatedList),
+        user
+      );
+      this.sendEventToUser(
+        userGame.getUserMatchDto().userId,
+        userGame.getSocket(),
+        {
+          message: Message.GAME_TERMINATED,
+          responseData: gameTerminatedList,
+        }
+      );
+    });
   }
 
   @SubscribeMessage(Message.INVITE)
@@ -364,14 +409,11 @@ export class GameGateway
         });
       }
     } catch (error) {
-      throw new HttpException(
-        "broadCastError",
-        HttpStatus.INTERNAL_SERVER_ERROR
-      );
+      return;
     }
   }
 
-  sendEventToUser(userId: string, user: Socket, event: any) {
+  private sendEventToUser(userId: string, user: Socket, event: any) {
     if (user && user.connected) {
       user.emit(event.message, event.responseData);
     } else {

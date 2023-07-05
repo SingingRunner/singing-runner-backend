@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { Socket } from "socket.io";
 import { GameRoom } from "./game.room";
 import { UserGameDto } from "src/user/dto/user.game.dto";
@@ -32,7 +32,10 @@ export class GameRoomHandler {
       .get(gameRoom)
       ?.filter((userInfo) => userInfo.getUserMatchDto().userId !== userId);
     if (users === undefined) {
-      throw new Error("User not found in the game room");
+      throw new HttpException(
+        "User not found in the game room",
+        HttpStatus.BAD_REQUEST
+      );
     }
     this.roomList.set(gameRoom, users);
     this.userRoomMap.delete(userId);
@@ -58,7 +61,10 @@ export class GameRoomHandler {
   public increaseAcceptCount(userId: string) {
     const gameRoom: GameRoom | undefined = this.findRoomByUserId(userId);
     if (gameRoom === undefined) {
-      throw new Error("not found room by userID");
+      throw new HttpException(
+        "not found room by userID",
+        HttpStatus.BAD_REQUEST
+      );
     }
     gameRoom.increaseAcceptCount();
   }
@@ -66,7 +72,10 @@ export class GameRoomHandler {
   public findUsersInRoom(gameRoom: GameRoom): UserGameDto[] {
     const users = this.roomList.get(gameRoom);
     if (users === undefined) {
-      throw new Error("User not found in the game room");
+      throw new HttpException(
+        "User not found in the game room",
+        HttpStatus.BAD_REQUEST
+      );
     }
     return users;
   }
@@ -105,7 +114,10 @@ export class GameRoomHandler {
   public deleteRoom(userId: string) {
     const gameRoom: GameRoom | undefined = this.findRoomByUserId(userId);
     if (gameRoom === undefined) {
-      throw new Error("not found room by userID");
+      throw new HttpException(
+        "not found room by userID",
+        HttpStatus.BAD_REQUEST
+      );
     }
     const users = this.findUsersInRoom(gameRoom);
     for (const user of users) {

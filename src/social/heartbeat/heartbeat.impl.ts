@@ -16,14 +16,6 @@ export class HeartBeatimpl implements HeartBeat {
 
   @Interval(200000)
   async updateHeartBeatMap() {
-    const { rss, heapTotal, heapUsed, external } = process.memoryUsage();
-    // console.log("Memory usage: ", { rss, heapTotal, heapUsed, external });
-    console.log("Memory usage in hearbeat: ", {
-      rss: this.formatBytes(rss),
-      heapTotal: this.formatBytes(heapTotal),
-      heapUsed: this.formatBytes(heapUsed),
-      external: this.formatBytes(external),
-    });
     const updatedDate: number = Date.now();
     this.logger.debug(JSON.stringify([...this.heartBeatMap]));
     if (this.heartBeatMap.size === 0) {
