@@ -243,11 +243,9 @@ export class GameGateway
 
     this.heartBeat.setHeartBeatMap(userScoreDto.userId, Date.now());
     if (!this.gameService.allUsersTerminated(userScoreDto)) {
-      console.log("terminiate user");
       this.timeOutManager.set(
         gameRoom,
         () => {
-          console.log("timeout gameterminated");
           gameRoom.resetAcceptCount;
           this.sendGameTerminated(userScoreDto.userId, gameRoom, user);
         },
