@@ -167,7 +167,6 @@ export class GameGateway
   @SubscribeMessage(Message.GAME_READY)
   gameReadyData(@ConnectedSocket() user: Socket, @MessageBody() data) {
     this.heartBeat.setHeartBeatMap(data.userId, Date.now());
-    this.gameStartTime = Date.now();
     const gameRoom: GameRoom = this.matchService.findRoomByUserId(data.userId);
 
     if (this.gameService.isGameReady(data.userId)) {
