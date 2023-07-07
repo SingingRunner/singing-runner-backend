@@ -42,8 +42,6 @@ export class GameGateway
   @WebSocketServer() server: Server;
   private logger = new ConsoleLogger(GameGateway.name);
   private missedQueue: any[] = [];
-  private gameStartTime: number;
-  private kozyScore = 30;
   constructor(
     private matchService: MatchService,
     private gameService: GameService,
@@ -230,38 +228,7 @@ export class GameGateway
     @ConnectedSocket() user: Socket,
     @MessageBody() userScoreDto: UserScoreDto
   ) {
-    if (userScoreDto.userId !== "bcd11577-71ec-4b7e-b291-f37a3dc3aa70") {
-      this.playScore(user, userScoreDto);
-      return;
-    }
-
-    this.kozyScore = userScoreDto.score;
     this.broadCast(user, userScoreDto.userId, Message.SCORE, userScoreDto);
-  }
-
-  private playScore(user: Socket, userScoreDto: UserScoreDto) {
-    const now: number = Date.now();
-    if (now - this.gameStartTime < 22000) {
-      userScoreDto.score = this.kozyScore + this.getRandomNumber(10, 20);
-    }
-    if (now - this.gameStartTime >= 22000 && now - this.gameStartTime < 45000) {
-      userScoreDto.score = this.kozyScore + this.getRandomNumber(-6, -1);
-    }
-    if (now - this.gameStartTime >= 45000 && now - this.gameStartTime < 66000) {
-      userScoreDto.score = this.kozyScore + this.getRandomNumber(-15, -10);
-    }
-    if (now - this.gameStartTime >= 66000) {
-      userScoreDto.score = this.kozyScore + this.getRandomNumber(-20, -16);
-    }
-    if (userScoreDto.score > 100) {
-      userScoreDto.score = 100;
-    }
-
-    this.broadCast(user, userScoreDto.userId, Message.SCORE, userScoreDto);
-  }
-
-  private getRandomNumber(min: number, max: number): number {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
   }
 
   @SubscribeMessage(Message.GAME_TERMINATED)
