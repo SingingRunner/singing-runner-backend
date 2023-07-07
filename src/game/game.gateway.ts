@@ -35,7 +35,7 @@ import { TimeoutManager } from "./timeout/timeout";
  * webSocket 통신을 담당하는 Handler
  */
 
-@WebSocketGateway()
+@WebSocketGateway({ pingInterval: 5000, pingTimeout: 10000 })
 export class GameGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
@@ -82,6 +82,7 @@ export class GameGateway
     );
 
     this.heartBeat.setHeartBeatMap(userId, Date.now());
+    this.matchService.socketValidate(userId, user);
     this.matchService.updateUserSocket(userId, user);
   }
 
@@ -175,7 +176,6 @@ export class GameGateway
       const userIdList: string[] = this.gameService.updateReadyUsersActive(
         data.userId
       );
-      console.log("clear");
       this.timeOutManager.clear(gameRoom);
       this.broadCast(user, data.userId, Message.GAME_READY, userIdList);
       return;
@@ -184,7 +184,6 @@ export class GameGateway
     this.timeOutManager.set(
       gameRoom,
       () => {
-        console.log("timeout ready");
         gameRoom.resetAcceptCount;
         this.broadCast(
           user,
@@ -199,6 +198,7 @@ export class GameGateway
 
   @SubscribeMessage(Message.USE_ITEM)
   useItemData(@ConnectedSocket() user: Socket, @MessageBody() data) {
+    console.log(user.id);
     this.broadCast(user, data.userId, Message.USE_ITEM, data);
   }
 
@@ -231,7 +231,6 @@ export class GameGateway
     @ConnectedSocket() user: Socket,
     @MessageBody() userScoreDto: UserScoreDto
   ) {
-    console.log("userId : ", userScoreDto.userId);
     if (userScoreDto.userId !== "bcd11577-71ec-4b7e-b291-f37a3dc3aa70") {
       this.playScore(user, userScoreDto);
       return;
@@ -296,35 +295,40 @@ export class GameGateway
     gameRoom: GameRoom,
     user: Socket
   ) {
-    const userList: UserGameDto[] =
-      this.gameService.getUsersInGameRoomByUserId(userId);
+    try {
+      const userList: UserGameDto[] =
+        this.gameService.getUsersInGameRoomByUserId(userId);
 
-    this.gameService.resetItem(); //시연용 item policy
-    const gameTerminatedList = await this.gameService.gameTerminatedHandler(
-      userList,
-      gameRoom
-    );
+      this.gameService.resetItem(); //시연용 item policy
+      const gameTerminatedList = await this.gameService.gameTerminatedHandler(
+        userList,
+        gameRoom
+      );
 
-    userList.forEach(async (userGame) => {
-      await this.gameService.updateUserAndSetTerminatedDto(
-        userGame,
-        gameTerminatedList
-      );
-      this.gameService.putEvent(
-        gameRoom,
-        Message.GAME_TERMINATED,
-        JSON.stringify(gameTerminatedList),
-        user
-      );
-      this.sendEventToUser(
-        userGame.getUserMatchDto().userId,
-        userGame.getSocket(),
-        {
-          message: Message.GAME_TERMINATED,
-          responseData: gameTerminatedList,
-        }
-      );
-    });
+      for (const userGame of userList) {
+        await this.gameService.updateUserAndSetTerminatedDto(
+          userGame,
+          gameTerminatedList
+        );
+        this.gameService.putEvent(
+          gameRoom,
+          Message.GAME_TERMINATED,
+          JSON.stringify(gameTerminatedList),
+          user
+        );
+        this.sendEventToUser(
+          userGame.getUserMatchDto().userId,
+          userGame.getSocket(),
+          {
+            message: Message.GAME_TERMINATED,
+            responseData: gameTerminatedList,
+          }
+        );
+      }
+    } catch (error) {
+      console.error("Error occurred in sendGameTerminated:", error);
+      // 또는 다른 예외 처리 로직
+    }
   }
 
   @SubscribeMessage(Message.INVITE)

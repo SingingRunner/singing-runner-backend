@@ -80,12 +80,6 @@ export class GameRoomHandler {
     return users;
   }
   public updateUserSocket(userId: string, userSocket: Socket) {
-    if (!this.socketValidator.IsExistingSocket(userId)) {
-      this.socketValidator.setSocket(userId, userSocket);
-      return;
-    }
-    this.socketValidator.deleteSocket(userId);
-    this.socketValidator.setSocket(userId, userSocket);
     const gameRoom: GameRoom | undefined = this.findRoomByUserId(userId);
     if (gameRoom === undefined) {
       return;
@@ -93,10 +87,21 @@ export class GameRoomHandler {
     const userGameDtoList: UserGameDto[] = this.findUsersInRoom(gameRoom);
     for (const userGameDto of userGameDtoList) {
       if (userGameDto.getUserMatchDto().userId === userId) {
+        console.log("reconnect", userId);
+        console.log("reconnect", userSocket.id);
         userGameDto.setSocket(userSocket);
         userGameDto.setConnected(true);
       }
     }
+  }
+
+  public socketValidate(userId: string, userSocket: Socket) {
+    if (!this.socketValidator.IsExistingSocket(userId)) {
+      this.socketValidator.setSocket(userId, userSocket);
+      return;
+    }
+    this.socketValidator.deleteSocket(userId);
+    this.socketValidator.setSocket(userId, userSocket);
   }
 
   public async createRoom(): Promise<GameRoom> {

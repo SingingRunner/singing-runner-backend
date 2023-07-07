@@ -18,6 +18,7 @@ export class SocketValidator {
   }
 
   public IsExistingSocket(userId: string): boolean {
+    console.log(...this.socketMap);
     if (this.socketMap.get(userId) === undefined) {
       return false;
     }
