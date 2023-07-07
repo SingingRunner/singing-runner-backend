@@ -7,7 +7,13 @@ export class TimeoutManager {
 
   public set(gameRoom: GameRoom, callback: () => void, delay: number) {
     this.clear(gameRoom);
-    const timeout = setTimeout(callback, delay);
+    const timeout = setTimeout(() => {
+      try {
+        callback();
+      } catch (error) {
+        console.error("Error occurred in callback:", error);
+      }
+    }, delay);
     this.timeouts.set(gameRoom, timeout);
   }
 

@@ -158,6 +158,10 @@ export class MatchService {
     this.gameRoomHandler.updateUserSocket(userId, userSocket);
   }
 
+  public socketValidate(userId: string, userSocket: Socket) {
+    this.gameRoomHandler.socketValidate(userId, userSocket);
+  }
+
   public findUsersInSameRoom(gameRoom: GameRoom): UserGameDto[] {
     return this.gameRoomHandler.findUsersInRoom(gameRoom);
   }
