@@ -198,7 +198,6 @@ export class GameGateway
 
   @SubscribeMessage(Message.USE_ITEM)
   useItemData(@ConnectedSocket() user: Socket, @MessageBody() data) {
-    console.log(user.id);
     this.broadCast(user, data.userId, Message.USE_ITEM, data);
   }
 
