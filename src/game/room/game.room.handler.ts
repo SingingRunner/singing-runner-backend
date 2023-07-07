@@ -5,6 +5,7 @@ import { UserGameDto } from "src/user/dto/user.game.dto";
 import { GameRoomStatus } from "../util/game.enum";
 import { SongService } from "src/song/song.service";
 import { SocketValidator } from "./socket.validator";
+import { v1 as uuid } from "uuid";
 
 @Injectable()
 export class GameRoomHandler {
@@ -87,8 +88,6 @@ export class GameRoomHandler {
     const userGameDtoList: UserGameDto[] = this.findUsersInRoom(gameRoom);
     for (const userGameDto of userGameDtoList) {
       if (userGameDto.getUserMatchDto().userId === userId) {
-        console.log("reconnect", userId);
-        console.log("reconnect", userSocket.id);
         userGameDto.setSocket(userSocket);
         userGameDto.setConnected(true);
       }
@@ -107,7 +106,7 @@ export class GameRoomHandler {
   public async createRoom(): Promise<GameRoom> {
     const gameSongDto = await this.songService.getRandomSong();
     const gameRoom: GameRoom = new GameRoom(
-      this.roomCount() + 1,
+      uuid(),
       GameRoomStatus.MATCHING,
       0,
       gameSongDto
