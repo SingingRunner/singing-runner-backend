@@ -41,7 +41,7 @@ export class GameGateway
 {
   @WebSocketServer() server: Server;
   private logger = new ConsoleLogger(GameGateway.name);
-  private missedQueue: any[] = [];
+  private missedQueue: Map<string, any[]> = new Map();
   constructor(
     private matchService: MatchService,
     private gameService: GameService,
@@ -67,17 +67,18 @@ export class GameGateway
       userId = userId.join("");
     }
 
-    for (const missed of this.missedQueue) {
-      if (missed.userId === userId) {
-        this.sendEventToUser(missed.userId, user, {
-          message: missed.message,
-          responseData: missed.responseData,
-        });
+    if (this.missedQueue.has(user.id)) {
+      const missedMessages = this.missedQueue.get(user.id);
+      if (missedMessages) {
+        for (const missed of missedMessages) {
+          this.sendEventToUser(missed.userId, user, {
+            message: missed.message,
+            responseData: missed.responseData,
+          });
+        }
       }
     }
-    this.missedQueue = this.missedQueue.filter(
-      (missed) => missed.userId !== userId
-    );
+    this.missedQueue.set(user.id, []);
 
     this.heartBeat.setHeartBeatMap(userId, Date.now());
     this.matchService.socketValidate(userId, user);
@@ -418,7 +419,7 @@ export class GameGateway
     if (user && user.connected) {
       user.emit(event.message, event.responseData);
     } else {
-      this.missedQueue.push({
+      this.missedQueue.get(userId)?.push({
         userId,
         message: event.message,
         responseData: event.responseData,
