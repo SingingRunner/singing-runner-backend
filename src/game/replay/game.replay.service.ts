@@ -203,13 +203,10 @@ export class GameReplayService {
   }
 
   public async getReplayInfo(replayId: number) {
-    console.log(replayId);
     const replay = await this.gameReplayRepository.findOne({
       where: { replayId: replayId },
       relations: ["song"],
     });
-
-    console.log(replay);
 
     if (!replay) {
       throw new Error("해당 리플레이가 존재하지 않습니다.");
@@ -218,7 +215,6 @@ export class GameReplayService {
     const replayInfo = new ReplayInfoDto();
     replayInfo.gameEvent = replay.gameEvent;
     replayInfo.gameSong = new ReplaySongDto(replay.song);
-    console.log(replay);
     replayInfo.replayKeynote = replay.keynote;
     replayInfo.userVocal = replay.userVocal;
     replayInfo.characterList = [
