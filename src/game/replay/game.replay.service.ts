@@ -7,7 +7,8 @@ import { GameSongDto } from "src/song/dto/game-song.dto";
 import * as AWS from "aws-sdk";
 import { CreateReplayInput } from "./dto/create-replay.input";
 import { InjectRepository } from "@nestjs/typeorm";
-import { User } from "src/user/entity/user.entity";
+import { ReplayInfoDto } from "./dto/replay-info.dto";
+import { ReplaySongDto } from "./dto/replay-song.dto";
 
 const s3 = new AWS.S3();
 
@@ -25,9 +26,7 @@ export class GameReplayService {
   constructor(
     private songService: SongService,
     @InjectRepository(GameReplayEntity)
-    private gameReplayRepository: Repository<GameReplayEntity>,
-    @InjectRepository(User)
-    private userRepository: Repository<User>
+    private gameReplayRepository: Repository<GameReplayEntity>
   ) {
     s3.config.update({
       accessKeyId: process.env.AWS_ACCESS_KEY,
@@ -201,6 +200,34 @@ export class GameReplayService {
         singer: song.singer,
       };
     });
+  }
+
+  public async getReplayInfo(replayId: number) {
+    console.log(replayId);
+    const replay = await this.gameReplayRepository.findOne({
+      where: { replayId: replayId },
+      relations: ["song"],
+    });
+
+    console.log(replay);
+
+    if (!replay) {
+      throw new Error("해당 리플레이가 존재하지 않습니다.");
+    }
+
+    const replayInfo = new ReplayInfoDto();
+    replayInfo.gameEvent = replay.gameEvent;
+    replayInfo.gameSong = new ReplaySongDto(replay.song);
+    console.log(replay);
+    replayInfo.replayKeynote = replay.keynote;
+    replayInfo.userVocal = replay.userVocal;
+    replayInfo.characterList = [
+      { userId: replay.userId, character: replay.userCharacter },
+      { userId: replay.player1Id, character: replay.player1Character },
+      { userId: replay.player2Id, character: replay.player2Character },
+    ];
+
+    return replayInfo;
   }
 
   public async updateReplayIsPublic(
