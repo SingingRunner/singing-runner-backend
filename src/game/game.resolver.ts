@@ -5,14 +5,16 @@ import {
   Mutation,
   Resolver,
   ObjectType,
+  Query,
 } from "@nestjs/graphql";
 import { GameService } from "./game.service";
 import { GameReplayService } from "./replay/game.replay.service";
 import { UseGuards } from "@nestjs/common";
 import { GqlAuthAccessGuard } from "src/auth/security/auth.guard";
+import { ReplayInfoDto } from "./replay/dto/replay-info.dto";
 
 @ObjectType()
-class Reply {
+class Replay {
   @Field(() => String)
   message: string;
 
@@ -28,16 +30,29 @@ export class GameResolver {
   ) {}
 
   @UseGuards(GqlAuthAccessGuard)
-  @Mutation(() => Reply)
+  @Mutation(() => Replay)
   async saveReplay(
     @Args({ name: "userVocal", type: () => String })
     userVocal: string,
     @Args({ name: "userId", type: () => String }) userId: string
-  ): Promise<Reply> {
+  ): Promise<Replay> {
     await this.gameService.saveReplay(userId, userVocal);
     return {
       message: "성공적으로 저장되었습니다.",
       code: 200,
     };
+  }
+
+  // @UseGuards(GqlAuthAccessGuard)
+  @Query(() => ReplayInfoDto)
+  async playReplay(@Args("replayId", { type: () => Int }) replayId: number) {
+    console.log(replayId);
+    try {
+      const replay = await this.gameReplayService.getReplayInfo(replayId);
+      console.log(replay);
+      return replay;
+    } catch (error) {
+      console.log(error);
+    }
   }
 }
