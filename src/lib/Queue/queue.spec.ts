@@ -1,4 +1,5 @@
 import { Queue } from "./queue";
+
 describe("Queue ", () => {
   let queue: Queue<number>;
 
@@ -33,4 +34,25 @@ describe("Queue ", () => {
     expect(queue.dequeue()).toBe(0);
     expect(queue.dequeue()).toBe(2);
   });
+
+  it("filter() ", () => {
+    const userQueue = new Queue<TestObject>();
+    userQueue.enqueue(new TestObject("mingyu1", 1));
+    userQueue.enqueue(new TestObject("mingyu2", 1));
+    userQueue.enqueue(new TestObject("mingyu3", 1));
+    userQueue.enqueue(new TestObject("mingyu4", 3));
+
+    const filteredQueue = userQueue.filter((test) => test.number !== 1);
+    expect(filteredQueue.size()).toBe(1);
+    expect(filteredQueue.dequeue()!.name).toBe("mingyu4");
+  });
 });
+
+class TestObject {
+  name: string;
+  number: number;
+  constructor(name: string, number: number) {
+    this.name = name;
+    this.number = number;
+  }
+}
