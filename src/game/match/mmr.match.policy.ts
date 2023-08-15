@@ -40,12 +40,13 @@ export class MMRMatchPolicy implements MatchMakingPolicy {
     );
   }
   public leaveQueue(userId: string) {
-    for (const queue of this.tierQueueMap.values()) {
-      for (const user of queue) {
-        if (user.getUserMatchDto().userId === userId) {
-          queue.remove(user);
-          return;
-        }
+    for (const tier of this.tierQueueMap.keys()) {
+      const queue = this.tierQueueMap.get(tier);
+      if (queue) {
+        const filteredQueue = queue.filter(
+          (user) => user.getUserMatchDto().userId !== userId
+        );
+        this.tierQueueMap.set(tier, filteredQueue);
       }
     }
   }

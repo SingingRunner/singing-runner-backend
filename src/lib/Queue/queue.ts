@@ -40,6 +40,18 @@ export class Queue<T> {
     this.list.delete(value);
   }
 
+  filter(callback: (value: T) => boolean): Queue<T> {
+    const filteredDeque = new Queue<T>();
+    let currentNode = this.list["head"];
+    while (currentNode) {
+      if (callback(currentNode.getValue())) {
+        filteredDeque.enqueue(currentNode.getValue());
+      }
+      currentNode = currentNode.next;
+    }
+    return filteredDeque;
+  }
+
   *[Symbol.iterator](): Iterator<T> {
     let currentNode = this.list["head"];
     while (currentNode) {
