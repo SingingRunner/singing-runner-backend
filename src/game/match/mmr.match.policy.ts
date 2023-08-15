@@ -47,6 +47,7 @@ export class MMRMatchPolicy implements MatchMakingPolicy {
           (user) => user.getUserMatchDto().userId !== userId
         );
         this.tierQueueMap.set(tier, filteredQueue);
+        return;
       }
     }
   }
